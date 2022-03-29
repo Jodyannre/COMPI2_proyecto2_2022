@@ -1,0 +1,91 @@
+
+	digraph {
+		tablaSimbolos [
+		  shape=plaintext
+		  label=<
+			<table border='0' cellborder='1' color='black' cellspacing='0'>
+			  <tr>
+				  <td>Id</td>
+				  <td>Tipo símbolo</td>
+				  <td>Tipo dato</td>
+				  <td>Ámbito</td>
+				  <td>Fila</td>
+				  <td>Columna</td>
+			  </tr>
+	
+<tr>
+<td cellpadding='4'>
+parametros_invalidos
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+28
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+variable1
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+16
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+prueba_tipo
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+19
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+no_mutable
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+24
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+		</table>
+		>];
+	}
+	

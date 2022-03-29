@@ -1,1 +1,1 @@
-# COMPI2_proyecto2_2022
+# Proyecto1 - Compiladores 2 2022

@@ -1,0 +1,40 @@
+
+	digraph {
+		tablaSimbolos [
+		  shape=plaintext
+		  label=<
+			<table border='0' cellborder='1' color='black' cellspacing='0'>
+			  <tr>
+				  <td>No.</td>
+				  <td>Nombre tabla</td>
+				  <td>Nombre de la base de datos</td>
+				  <td>Línea</td>
+			  </tr>
+<tr>
+<td cellpadding='4'>
+1
+</td>
+<td cellpadding='4'>unidades
+</td>
+<td cellpadding='4'>continental_motores
+</td>
+<td cellpadding='4'>3
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+2
+</td>
+<td cellpadding='4'>clientes
+</td>
+<td cellpadding='4'>continental_motores
+</td>
+<td cellpadding='4'>84
+</td>
+</tr>
+
+		</table>
+		>];
+	}
+	

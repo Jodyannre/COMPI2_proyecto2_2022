@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Hojas de estilos para la pagina -->
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+</head>
+
+<body class="body">
+
+    <!-- Menú superior -->
+    <div class="topnav">
+        <a href="#" id="aImport">Abrir</a><input type="file" id="importFile" onchange="showFile()">
+        <a href="#" id="aCreate">Nueva pestaña</a>
+        <a href="#" id="aSave">Guardar</a>
+        <a href="#" id="aCompile">Compilar</a>
+        <a href="#" id="aReportAST">Reporte AST</a>
+        <a href="#" id="aEditor">Editor</a>
+        <a href="#" id="aGrammar">Gramaticas</a>
+    </div>
+
+    <!-- Div que contiene las pestañas de los editores de código -->
+    <div id="tabs" style="width: 1330px;">
+        <ul>
+        </ul>
+    </div>
+
+    <br />
+
+    <!-- Div que contiene las pestañas de Consola-->
+    <div id="tabs2" style="width: 1330px;">
+        <ul>
+        </ul>
+    </div>
+
+
+
+
+
+    <!-- Scripts necesarios para el funcionamiento de operaciones Javascript -->
+    <script src="javascript/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="javascript/jquery-2.0.3.min.js"></script>
+    <script src="javascript/jquery-ui.min.js"></script>
+    <!-- <script src="javascript/fileSaver.js"></script> -->
+
+    <!-- Script de AWS
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script>
+    -->
+    <script type="text/javascript">
+
+        //Al darse click en la opción Abrir se hace trigger a la apertura del fileDilog para elección de un archivo.
+        $("#aImport").click(function (e) {
+            e.preventDefault();
+            $("#importFile").trigger('click');
+        });
+
+
+        $("#aEditor").click(function (e) {
+            document.getElementById('tabs').style.display = "block";
+            document.getElementById('tabs2').style.display = "block";
+        });
+
+        $("#aReportError").click(function (e) {
+            document.getElementById('tabs').style.display = "none";
+            document.getElementById('tabs2').style.display = "none";
+        });
+
+        $("#aReportAST").click(function (e) {
+            document.getElementById('tabs').style.display = "none";
+            document.getElementById('tabs2').style.display = "none";
+        });
+
+
+        //Método para guardar el archivo en el editor seleccionado
+        $("#aSave").click(function (e) {
+            var fileName = prompt("Nombre a dar al archivo", "");
+            if (fileName == undefined) {
+                return;
+            }
+
+            var selectedTab = $("#tabs").tabs('option', 'active');
+
+            var tabUniqueId = $(this).parent().attr('data-tab-id');
+            var resultArray = $.grep(editors, function (n, i) {
+                return n.id === tabUniqueId;
+            }, true);
+
+            var editor = resultArray[selectedTab].instance;
+            var text = editor.getValue();
+            var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            saveAs(blob, fileName);
+        });
+
+        $("#aCompile").click(function (e) {
+            //compilar();
+            getConsola(); //muestra la cadena en la consola
+        });
+
+
+        $("#importFile").css('opacity', '0');
+
+        var editors = [];   //Arreglo que contiene las pestañas (editores)
+        var contTabs = 0;   //Lleva el conteo de las pestañas abiertas
+        var editor3d;
+        var Range = ace.require('ace/range').Range;
+        var debugS = undefined;
+        var debugH = undefined;
+        var debugT = undefined;
+        var init = false;
+
+        $(document).ready(function () {
+
+            // Inicializando pestañas
+            $('#tabs').tabs();
+            $('#tabs2').tabs();
+
+            // Lógica del botón de creación de pestañas
+            $('#aCreate').on('click', function () {
+                contTabs++;
+                addEditor("", "Tab " + contTabs);
+            });
+
+            // Logica del botón de cerrar pestañas
+            $('#tabs').on('click', '.close', function () {
+                var tabUniqueId = $(this).parent().attr('data-tab-id');
+
+                var resultArray = $.grep(editors, function (n, i) {
+                    return n.id === tabUniqueId;
+                }, true);
+
+                var editor = resultArray[0].instance;
+                editor.destroy();
+
+                $('#tabs').find('#panel_nav_' + tabUniqueId).remove();
+                $('#tabs').find('#panel_' + tabUniqueId).remove();
+
+            });
+
+            debugS = undefined;
+            debugH = undefined;
+            debugT = undefined;
+            contTabs = contTabs + 1;
+            addEditor("", "Tab " + contTabs);
+            crearMenu("<textarea id=\"txtConsola\" style=\"width:100%; height:95%;\"></textarea>", "Consola","#tabs2");
+            var te = $('#tabs2');
+            te.tabs('option', 'active', 0);
+        });
+
+        //Lógica al abrir archivo y mostrar su contenido en un nuevo editor.
+        function showFile() {
+            var preview = document.getElementById('show-text');
+            var file = document.querySelector('input[type=file]').files[0];
+            var reader = new FileReader()
+
+            reader.onload = function (event) {
+                contTabs++;
+                addEditor(event.target.result, file.name);
+            }
+            reader.readAsText(file, "new file");
+        }
+
+        //Método para creación de nuevo editor en la página
+        function addEditor(text, tabName) {
+            var tabsElement = $('#tabs');
+            var tabsUlElement = tabsElement.find('ul');
+            var tabUniqueId = new Date().getTime() + Math.floor(Math.random() * 10000);
+            var newTabNavElement = $('<li id="panel_nav_' + tabUniqueId + '"><a href="#panel_' + tabUniqueId + '">' + tabName + '</a></li>');
+            tabsUlElement.append(newTabNavElement);
+
+            // Creación de panel que contendrá el editor
+            var newTabPanelElement = $('<div id="panel_' + tabUniqueId + '" data-tab-id="' + tabUniqueId + '"></div>');
+            tabsElement.append(newTabPanelElement);
+            tabsElement.tabs('refresh');
+
+            //Se da 'focus' a la nueva pestaña creada
+            var tabIndex = $('#tabs ul li').index($('#panel_nav_' + tabUniqueId));
+            tabsElement.tabs('option', 'active', tabIndex);
+
+            //Creación de nuevo editor
+            var newEditorElement = $('<div id="editor_' + tabUniqueId + '">// some code here</div>');
+            newTabPanelElement.append(newEditorElement);
+
+            //Inicialización del nuevo editor en la pestaña
+            var editor = ace.edit('editor_' + tabUniqueId);
+            editor.setTheme("ace/theme/eclipse");
+            editor.getSession().setMode("ace/mode/java");
+
+
+            //Se establece el tamaño del panel
+            newTabPanelElement.width('1330');
+            newTabPanelElement.height('300');
+
+            //Se establece el tamaño del editor
+            newEditorElement.width('1230');
+            newEditorElement.height('300');
+
+            //Se agrega el texto al editor (si fue enviado como parámetro)
+            editor.setValue(text);
+
+            editor.resize();
+            editors.push({ id: tabUniqueId, instance: editor });
+
+            //Se agrega el botón de cerrado de pestaña/editor
+            var closeButton = $('<button class="close">x</button>');
+            newTabPanelElement.prepend(closeButton);
+        }
+
+        //Método para la creación de las pestañas de Consola y Errores
+        function crearMenu(text, tabName,tabContainer) {
+            var tabsElement = $(tabContainer);
+            var tabsUlElement = tabsElement.find('ul');
+
+            var tabUniqueId = new Date().getTime() + Math.floor(Math.random() * 10000);
+            var newTabNavElement = $('<li id="panel_nav_' + tabUniqueId + '"><a href="#panel_' + tabUniqueId + '">' + tabName + '</a></li>');
+
+            tabsUlElement.append(newTabNavElement);
+            var newTabPanelElement = $('<div id="panel_' + tabUniqueId + '" data-tab-id2="' + tabUniqueId + '"></div>');
+            tabsElement.append(newTabPanelElement);
+
+            tabsElement.tabs('refresh');
+            var tabIndex = $('#tabs2 ul li').index($('#panel_nav_' + tabUniqueId));
+
+            tabsElement.tabs('option', 'active', tabIndex);
+
+            var newEditorElement = $('<div id="editor_' + tabUniqueId + '">' + text + '</div>');
+
+            newTabPanelElement.append(newEditorElement);
+
+            newTabPanelElement.width('1330');
+            newTabPanelElement.height('150');
+
+            newEditorElement.width('1230');
+            newEditorElement.height('150');
+        }
+
+        //compila el código en el editor de texto.
+        function compilar() {
+
+            var selectedTab = $("#tabs").tabs('option', 'active');
+
+            var tabUniqueId = $(this).parent().attr('data-tab-id');
+            var resultArray = $.grep(editors, function (n, i) {
+                return n.id === tabUniqueId;
+            }, true);
+
+            var editor = resultArray[selectedTab].instance;
+            var formData = editor.getValue();
+
+            //Crear Json con contenido de la consola
+            var jsonOb = {
+                contenido : formData
+            };
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('PUT', 'parse', true);
+            xhr.onload = function (e) { console.log('Parseo realizado...') };
+            //Indicar que se envia un Json
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            //Enviar json convertido en texto
+            xhr.send(JSON.stringify(jsonOb));
+        }
+        
+        //obtiene la cadena a imprimir en consola
+        function getConsola() {
+            var tabla;
+            //alert("vino")
+            var getCconsola = $.ajax({
+                url: 'http://127.0.0.1:3000/getConsola',
+                type: 'GET',
+                contentType: "application/json;charset=utf-8",
+                success: function (data, textStatus, xhr) {
+                    tabla = data;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error al obtener datos en consola... ');
+                }
+            });
+
+            getCconsola.done(function () {
+                document.getElementById("txtConsola").value = tabla;
+            });
+        }
+
+
+    </script>
+</body>
+
+</html>
