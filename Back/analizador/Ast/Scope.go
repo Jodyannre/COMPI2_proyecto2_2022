@@ -19,6 +19,7 @@ type Scope struct {
 	tablaFunciones       map[string]interface{}
 	tablaStructs         map[string]interface{}
 	tablaSimbolosReporte *arraylist.List
+	Temporales           *arraylist.List
 	Errores              *arraylist.List
 	Consola              string
 	Global               bool
@@ -419,8 +420,12 @@ func (s *Scope) UpdateScopeGlobal() {
 			scope_global.Errores.Add(elemento)
 		}
 		for i := 0; i < s.tablaSimbolosReporte.Len(); i++ {
-			elemento := s.tablaSimbolosReporte.Clone().GetValue(i)
+			elemento := s.tablaSimbolosReporte.GetValue(i)
 			scope_global.tablaSimbolosReporte.Add(elemento)
+		}
+		for i := 0; i < s.Temporales.Len(); i++ {
+			elemento := s.Temporales.GetValue(i)
+			scope_global.Temporales.Add(elemento)
 		}
 	}
 

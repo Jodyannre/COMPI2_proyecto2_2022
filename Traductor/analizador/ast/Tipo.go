@@ -1,8 +1,4 @@
-package Ast
-
-var P, H int = 0, 0
-var Label, Temporal int = 1, 1
-var Temporales string = ""
+package ast
 
 type TipoDato int
 
@@ -91,6 +87,11 @@ var ValorTipoDato = [100]string{
 	"VEC_ELEMENTOS",
 	"VEC_WITH_CAPACITY",
 	"POW",
+}
+
+type Key struct {
+	Padre  string
+	Nombre string
 }
 
 const (
@@ -193,20 +194,9 @@ const (
 	RANGE_EXPRESION
 	RANGE_RANGO
 	CLONE
-	ARITMETICA
-	RELACIONAL
-	LOGICA
 )
 
 type TipoRetornado struct {
 	Tipo  TipoDato
 	Valor interface{}
-}
-
-type O3D struct {
-	Lt         string
-	Lf         string
-	Valor      TipoRetornado
-	Codigo     string
-	Referencia string
 }

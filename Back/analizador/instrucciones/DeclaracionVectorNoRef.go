@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-type DeclaracionVector struct {
+type DeclaracionVectorNoRef struct {
 	Id            string
 	Tipo          Ast.TipoDato
 	TipoVector    Ast.TipoRetornado
@@ -19,9 +19,9 @@ type DeclaracionVector struct {
 	ScopeOriginal *Ast.Scope
 }
 
-func NewDeclaracionVector(id string, tipoVector Ast.TipoRetornado, valor interface{}, mutable, publico bool,
-	fila int, columna int) DeclaracionVector {
-	nd := DeclaracionVector{
+func NewDeclaracionVectorNoRef(id string, tipoVector Ast.TipoRetornado, valor interface{}, mutable, publico bool,
+	fila int, columna int) DeclaracionVectorNoRef {
+	nd := DeclaracionVectorNoRef{
 		Id:         id,
 		Tipo:       Ast.DECLARACION,
 		TipoVector: tipoVector,
@@ -34,7 +34,11 @@ func NewDeclaracionVector(id string, tipoVector Ast.TipoRetornado, valor interfa
 	return nd
 }
 
-func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
+func (d DeclaracionVectorNoRef) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
+	return Ast.INSTRUCCION, Ast.DECLARACION
+}
+
+func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	//Verificar que no exista
 	var existe bool
 	var valor Ast.TipoRetornado
@@ -119,8 +123,10 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 	//Crear el símbolo y agregarlo al scope
 	if esIndefinido {
+		//Clonar la lista para evitar la referencia
+		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
+		nVector := nmVector.(expresiones.Vector)
 		//Actualizar la mutabilidad de la instancia
-		nVector := valor.Valor.(expresiones.Vector)
 		nVector.TipoVector = d.TipoVector
 		nVector.Mutable = d.Mutable
 		nSimbolo := Ast.Simbolo{
@@ -136,8 +142,10 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 		scope.Add(nSimbolo)
 	} else {
+		//Clonar la lista para evitar la referencia
+		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
+		nVector := nmVector.(expresiones.Vector)
 		//Actualizar la mutabilidad de la instancia
-		nVector := valor.Valor.(expresiones.Vector)
 		nVector.Mutable = d.Mutable
 		nSimbolo := Ast.Simbolo{
 			Identificador: d.Id,
@@ -155,13 +163,9 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 	return Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
 }
 
-func (op DeclaracionVector) GetFila() int {
+func (op DeclaracionVectorNoRef) GetFila() int {
 	return op.Fila
 }
-func (op DeclaracionVector) GetColumna() int {
+func (op DeclaracionVectorNoRef) GetColumna() int {
 	return op.Columna
-}
-
-func (d DeclaracionVector) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
-	return Ast.INSTRUCCION, Ast.DECLARACION
 }

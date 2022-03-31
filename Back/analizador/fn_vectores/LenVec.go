@@ -26,7 +26,7 @@ func NewLenVec(id interface{}, tipo Ast.TipoDato, fila, columna int) LenVec {
 
 func (p LenVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var simbolo Ast.Simbolo
-	var vector expresiones.Vector
+	var vector interface{}
 	var id string
 	//Primero verificar que sea un identificador el id
 	_, tipoParticular := p.Identificador.(Ast.Abstracto).GetTipo()
@@ -66,8 +66,8 @@ func (p LenVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Conseguir el simbolo y el vector
 	simbolo = scope.GetSimbolo(id)
 	//Verificar que sea un vector
-	if simbolo.Tipo != Ast.VECTOR {
-		msg := "Semantic error, expected Vector, found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
+	if simbolo.Tipo != Ast.VECTOR && simbolo.Tipo != Ast.ARRAY {
+		msg := "Semantic error, expected (Vector|Array), found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
 			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
 		nError := errores.NewError(p.Fila, p.Columna, msg)
 		nError.Tipo = Ast.ERROR_SEMANTICO
@@ -79,12 +79,20 @@ func (p LenVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			Valor: nError,
 		}
 	}
-	vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
-
-	return Ast.TipoRetornado{
-		Tipo:  Ast.I64,
-		Valor: vector.Size,
+	if simbolo.Tipo == Ast.VECTOR {
+		vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
+		return Ast.TipoRetornado{
+			Tipo:  Ast.I64,
+			Valor: vector.(expresiones.Vector).Size,
+		}
+	} else {
+		vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Array)
+		return Ast.TipoRetornado{
+			Tipo:  Ast.I64,
+			Valor: vector.(expresiones.Array).Size,
+		}
 	}
+
 }
 
 func (v LenVec) GetTipo() (Ast.TipoDato, Ast.TipoDato) {

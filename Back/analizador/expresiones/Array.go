@@ -80,15 +80,6 @@ func GetTipoArray(array Array) Ast.TipoDato {
 }
 */
 
-func EsArray(tipo Ast.TipoDato) Ast.TipoDato {
-	switch tipo {
-	case Ast.ARRAY, Ast.ARRAY_ELEMENTOS, Ast.ARRAY_FAC:
-		return Ast.ARRAY
-	default:
-		return tipo
-	}
-}
-
 func (a Array) Clonar(scope *Ast.Scope) interface{} {
 	var nElemento interface{}
 	nElementos := arraylist.New()

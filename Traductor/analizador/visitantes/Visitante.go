@@ -1,9 +1,9 @@
 package visitantes
 
 import (
-	"Back/analizador/Ast"
-	"Back/analizador/errores"
-	"Back/parser"
+	"Traductor/analizador/ast"
+	"Traductor/analizador/errores"
+	"Traductor/parser"
 	"fmt"
 	"strconv"
 
@@ -14,7 +14,7 @@ type Visitador struct {
 	*parser.BaseNparserListener
 	Consola       string
 	Errores       arraylist.List
-	EntornoGlobal Ast.Scope
+	EntornoGlobal ast.Scope
 }
 
 func NewVisitor() *Visitador {
@@ -26,16 +26,16 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	instrucciones := ctx.GetLista()
 	//Verificar que no existan errores sintácticos o semánticos
 	if v.Errores.Len() > 0 {
-		EntornoGlobal := Ast.NewScope("global", nil)
+		EntornoGlobal := ast.NewScope("global", nil)
 		EntornoGlobal.Global = true
 		for i := 0; i < v.Errores.Len(); i++ {
 			err := v.Errores.GetValue(i).(errores.CustomSyntaxError)
 			nError := errores.NewError(err.Fila, err.Columna, err.Msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
+			nError.Tipo = ast.ERROR_SEMANTICO
 			nError.Ambito = EntornoGlobal.GetTipoScope()
 			EntornoGlobal.Errores.Add(nError)
 		}
-		EntornoGlobal.GenerarTablaErrores()
+		//EntornoGlobal.GenerarTablaErrores()
 		return
 	}
 
@@ -48,11 +48,11 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	*/
 
 	//Creando el scope global
-	EntornoGlobal := Ast.NewScope("global", nil)
+	EntornoGlobal := ast.NewScope("global", nil)
 	EntornoGlobal.Global = true
 	//Variables para las declaraciones
 	var actual interface{}
-	var tipoParticular, tipoGeneral Ast.TipoDato
+	var tipoParticular, tipoGeneral ast.TipoDato
 	var metodoMain interface{}
 	var mainEncontrado bool = false
 	var contadorMain int = 0
@@ -65,16 +65,16 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	for i := 0; i < instrucciones.Len(); i++ {
 		actual = instrucciones.GetValue(i)
 		if actual != nil {
-			tipoGeneral, tipoParticular = actual.(Ast.Abstracto).GetTipo()
+			tipoGeneral, tipoParticular = actual.(ast.Abstracto).GetTipo()
 		} else {
 			continue
 		}
-		if tipoParticular == Ast.DECLARACION {
+		if tipoParticular == ast.DECLARACION {
 			//Declarar variables globales
-			actual.(Ast.Instruccion).Run(&EntornoGlobal)
-		} else if tipoGeneral == Ast.EXPRESION {
+			actual.(ast.Instruccion).Run(&EntornoGlobal)
+		} else if tipoGeneral == ast.EXPRESION {
 			//Verificar que sea el main
-			if tipoParticular == Ast.FUNCION_MAIN {
+			if tipoParticular == ast.FUNCION_MAIN {
 				mainEncontrado = true
 				contadorMain++
 				posicionMain = i
@@ -91,7 +91,7 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 			". -- Line: " + strconv.Itoa(fila) +
 			" Column: " + strconv.Itoa(columna)
 		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
+		nError.Tipo = ast.ERROR_SEMANTICO
 		nError.Ambito = EntornoGlobal.GetTipoScope()
 		EntornoGlobal.Errores.Add(nError)
 		EntornoGlobal.Consola += msg + "\n"
@@ -105,7 +105,7 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 			". -- Line: " + strconv.Itoa(fila) +
 			" Column: " + strconv.Itoa(columna)
 		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
+		nError.Tipo = ast.ERROR_SEMANTICO
 		nError.Ambito = EntornoGlobal.GetTipoScope()
 		EntornoGlobal.Errores.Add(nError)
 		EntornoGlobal.Consola += msg + "\n"
@@ -115,7 +115,7 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 		metodoMain = instrucciones.GetValue(posicionMain)
 
 		//Ejetuar el método main
-		metodoMain.(Ast.Expresion).GetValue(&EntornoGlobal)
+		metodoMain.(ast.Expresion).GetValue(&EntornoGlobal)
 
 	}
 
@@ -124,12 +124,10 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	for i := 0; i < EntornoGlobal.Errores.Len(); i++ {
 		v.Errores.Add(EntornoGlobal.Errores.GetValue(i))
 	}
-	EntornoGlobal.GenerarTablaSimbolos()
-	EntornoGlobal.GenerarTablaErrores()
-	EntornoGlobal.GenerarTablaBD()
-	EntornoGlobal.GenerarTablaTablas()
-	fmt.Println(Ast.P)
-
+	//EntornoGlobal.GenerarTablaSimbolos()
+	//EntornoGlobal.GenerarTablaErrores()
+	//EntornoGlobal.GenerarTablaBD()
+	//EntornoGlobal.GenerarTablaTablas()
 }
 
 func (v *Visitador) GetConsola() string {

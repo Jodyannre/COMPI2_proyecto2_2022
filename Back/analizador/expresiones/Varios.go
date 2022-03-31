@@ -2,6 +2,8 @@ package expresiones
 
 import (
 	"Back/analizador/Ast"
+	"fmt"
+	"strconv"
 
 	"github.com/colegno/arraylist"
 )
@@ -173,4 +175,44 @@ func EsVAS(tipo Ast.TipoDato) bool {
 		return false
 
 	}
+}
+
+func EsArray(tipo Ast.TipoDato) Ast.TipoDato {
+	switch tipo {
+	case Ast.ARRAY, Ast.ARRAY_ELEMENTOS, Ast.ARRAY_FAC:
+		return Ast.ARRAY
+	default:
+		return tipo
+	}
+}
+
+func Primitivo_To_String(valor interface{}, tipo Ast.TipoDato) string {
+	var salida string = ""
+	switch tipo {
+	case Ast.I64, Ast.USIZE:
+		salida = strconv.Itoa(valor.(int))
+	case Ast.F64:
+		salida = fmt.Sprintf("%f", valor.(float64))
+	case Ast.STR, Ast.STRING:
+		primera := true
+		tmp := valor.(string)
+		runes := []rune(tmp)
+		salida = ""
+		for i := 0; i < len(runes); i++ {
+			if primera {
+				salida += strconv.Itoa(int(runes[i]))
+				primera = false
+			} else {
+				salida += "," + strconv.Itoa(int(runes[i]))
+			}
+
+		}
+	case Ast.CHAR:
+		tmp := valor.(string)
+		char := int(tmp[0])
+		salida = strconv.Itoa(char)
+	case Ast.BOOLEAN:
+		salida = strconv.FormatBool(valor.(bool))
+	}
+	return salida
 }

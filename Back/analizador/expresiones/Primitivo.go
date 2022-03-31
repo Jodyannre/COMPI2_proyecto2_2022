@@ -12,9 +12,21 @@ type Primitivo struct {
 }
 
 func (p Primitivo) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
-	return Ast.TipoRetornado{
+	valor := Ast.TipoRetornado{
 		Tipo:  p.Tipo,
 		Valor: p.Valor,
+	}
+	obj := Ast.O3D{
+		Lt:         "",
+		Lf:         "",
+		Valor:      valor,
+		Codigo:     "",
+		Referencia: Primitivo_To_String(p.Valor, p.Tipo),
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.PRIMITIVO,
+		Valor: obj,
 	}
 }
 

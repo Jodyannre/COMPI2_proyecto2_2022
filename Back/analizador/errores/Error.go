@@ -2,6 +2,7 @@ package errores
 
 import (
 	"Back/analizador/Ast"
+	"strconv"
 	"time"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
@@ -70,4 +71,49 @@ func (op CustomSyntaxError) GetDescripcion() string {
 }
 func (op CustomSyntaxError) GetFecha() string {
 	return op.Fecha
+}
+
+func GenerarError(tipoError int, elemento1, elemento2 interface{}, scope *Ast.Scope) Ast.TipoRetornado {
+
+	_, tipoI := elemento1.(Ast.Abstracto).GetTipo()
+	_, tipoD := elemento2.(Ast.Abstracto).GetTipo()
+	fila := elemento1.(Ast.Abstracto).GetFila()
+	columna := elemento1.(Ast.Abstracto).GetColumna()
+
+	switch tipoError {
+	/*Error de tipos entre operaciones*/
+	case 1:
+
+		msg := "Semantic error, can't operate " + Ast.ValorTipoDato[tipoI] +
+			" type with " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+		nError := NewError(fila, columna, msg)
+		nError.Tipo = Ast.ERROR_SEMANTICO
+		nError.Ambito = scope.GetTipoScope()
+		scope.Errores.Add(nError)
+		scope.Consola += msg + "\n"
+		return Ast.TipoRetornado{
+			Tipo:  Ast.ERROR,
+			Valor: nError,
+		}
+	/*Error en tipos de suma*/
+	case 2:
+		msg := "Semantic error, can't add " + Ast.ValorTipoDato[tipoI] +
+			" type to " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+		nError := NewError(fila, columna, msg)
+		nError.Tipo = Ast.ERROR_SEMANTICO
+		nError.Ambito = scope.GetTipoScope()
+		scope.Errores.Add(nError)
+		scope.Consola += msg + "\n"
+		return Ast.TipoRetornado{
+			Tipo:  Ast.ERROR,
+			Valor: nError,
+		}
+
+	}
+
+	return Ast.TipoRetornado{}
 }

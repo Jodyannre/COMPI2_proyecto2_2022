@@ -206,6 +206,14 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
 	}
+	//Actualizar la mutabilidad de la instancia
+	nArray := valor.Valor.(expresiones.Array)
+	nArray.Mutable = d.Mutable
+	nValor := Ast.TipoRetornado{
+		Tipo:  Ast.ARRAY,
+		Valor: nArray,
+	}
+	nSimbolo.Valor = nValor
 	scope.Add(nSimbolo)
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,

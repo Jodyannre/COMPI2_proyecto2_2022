@@ -107,51 +107,67 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		}
 	}
 
-	if tipo_izq.Tipo > 7 || tipo_der.Tipo > 7 {
+	if tipo_izq.Valor.(Ast.O3D).Valor.Tipo > 7 || tipo_der.Valor.(Ast.O3D).Valor.Tipo > 7 {
 		//Error, no se pueden operar porque no es ningún valor operable
-		msg := "Semantic error, can't operate " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-			" type with " + Ast.ValorTipoDato[tipo_der.Tipo] +
-			" type. -- Line: " + strconv.Itoa(op.Fila) +
-			" Column: " + strconv.Itoa(op.Columna)
-		nError := errores.NewError(op.Fila, op.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = entorno.GetTipoScope()
-		entorno.Errores.Add(nError)
-		entorno.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		return errores.GenerarError(1, op.operando_izq, op.operando_der, entorno)
 	}
 
 	switch op.operador {
 	case "+":
-		result_dominante = suma_dominante[tipo_izq.Tipo][tipo_der.Tipo]
+		result_dominante = suma_dominante[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
 
 		if result_dominante == Ast.I64 || result_dominante == Ast.USIZE {
-			return Ast.TipoRetornado{
+			//Get los valores
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+
+			//Get el resultado de la operación
+			valor := Ast.TipoRetornado{
 				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) + tipo_der.Valor.(int),
+				Valor: valorIzq.(int) + valorDer.(int),
+			}
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
+
+			return Ast.TipoRetornado{
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
 			}
 		} else if result_dominante == Ast.F64 {
+			//Get los valores
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+			var valIzq, valDer float64
 
+			//Parseo por si viene algún int
 			if tipo_izq.Tipo == Ast.I64 {
-				tipo_izq = Ast.TipoRetornado{
-					Valor: float64(tipo_izq.Valor.(int)),
-					Tipo:  Ast.F64,
-				}
+				valIzq = float64(valorIzq.(int))
+			} else {
+				valIzq = valorIzq.(float64)
 			}
 			if tipo_der.Tipo == Ast.I64 {
-				tipo_der = Ast.TipoRetornado{
-					Valor: float64(tipo_der.Valor.(int)),
-					Tipo:  Ast.F64,
-				}
+				valDer = float64(valorDer.(int))
+			} else {
+				valDer = valorDer.(float64)
 			}
 
-			return Ast.TipoRetornado{
+			//Get el valor
+			valor := Ast.TipoRetornado{
 				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(float64) + tipo_der.Valor.(float64),
+				Valor: valIzq + valDer,
 			}
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
+
+			return Ast.TipoRetornado{
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
+			}
+			/////////////////////////////////////////// SUMA DE STRINGS PENDIENTE ///////////////////////
 		} else if result_dominante == Ast.STRING || result_dominante == Ast.STRING_OWNED {
 			cadena_izq := fmt.Sprintf("%v", tipo_izq.Valor)
 			cadena_der := fmt.Sprintf("%v", tipo_der.Valor)
@@ -160,25 +176,8 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				Valor: cadena_izq + cadena_der,
 			}
 		} else if result_dominante == Ast.NULL {
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  result_dominante,
-					Valor: nil,
-				}
-			*/
-			msg := "Semantic error, can't add " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type to " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			return errores.GenerarError(1, op.operando_izq, op.operando_der, entorno)
+
 		}
 
 	case "-", "!":

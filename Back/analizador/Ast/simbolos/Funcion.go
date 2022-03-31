@@ -433,6 +433,13 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 				//Ejecutar declaración
 				nuevaDeclaracion.ScopeOriginal = scopeOrigen
 				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
+			} else if tipoParametro.Tipo == Ast.VECTOR {
+				nuevaDeclaracion := instrucciones.NewDeclaracionVector(resultadoParametro.Valor.(string), tipoParametro.Valor.(Ast.TipoRetornado), parametroIN,
+					parametro.(Parametro).Mutable, false, parametro.(Ast.Abstracto).GetFila(),
+					parametro.(Ast.Abstracto).GetColumna())
+				//Ejecutar declaración
+				nuevaDeclaracion.ScopeOriginal = scopeOrigen
+				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 			} else {
 				nuevaDeclaracion := instrucciones.NewDeclaracionTotal(resultadoParametro.Valor.(string), parametroIN, tipoParametro,
 					parametro.(Parametro).Mutable, false, parametro.(Ast.Abstracto).GetFila(),
@@ -454,6 +461,13 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 				nuevaDeclaracion.ScopeOriginal = scopeOrigen
 				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 
+			} else if tipoParametro.Tipo == Ast.VECTOR {
+				nuevaDeclaracion := instrucciones.NewDeclaracionVectorNoRef(resultadoParametro.Valor.(string), tipoParametro.Valor.(Ast.TipoRetornado), parametroIN,
+					parametro.(Parametro).Mutable, false, parametro.(Ast.Abstracto).GetFila(),
+					parametro.(Ast.Abstracto).GetColumna())
+				//Ejecutar declaración
+				nuevaDeclaracion.ScopeOriginal = scopeOrigen
+				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 			} else {
 				nuevaDeclaracion := instrucciones.NewDeclaracionNoRef(resultadoParametro.Valor.(string), parametroIN, tipoParametro,
 					parametro.(Parametro).Mutable, false, parametro.(Ast.Abstracto).GetFila(),

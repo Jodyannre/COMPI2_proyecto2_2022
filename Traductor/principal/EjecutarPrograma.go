@@ -1,10 +1,12 @@
 package principal
 
 import (
-	"Back/analizador/Ast"
-	"Back/analizador/errores"
-	"Back/analizador/visitantes"
-	"Back/parser"
+	"Traductor/analizador/ast"
+	"Traductor/analizador/errores"
+	"Traductor/analizador/visitantes"
+
+	//"Traductor/analizador/visitantes"
+	"Traductor/parser"
 	"fmt"
 	"strconv"
 
@@ -12,9 +14,13 @@ import (
 )
 
 func EjecutarPrograma(codigo string) string {
-	var input string = `Ejecutando....
-	`
+	var input string = `
 
+	struct Prueba{
+		nombre: String,
+		edad: i64
+	}
+	`
 	input = codigo
 
 	//Obteniendo el input
@@ -57,7 +63,7 @@ func EjecutarPrograma(codigo string) string {
 	//Recorrer el array de errores léxicos
 	for i := 0; i < len(errores_lexicos.Errores); i++ {
 		//fmt.Printf("Error #"+strconv.Itoa(i)+" %v \n", errores_lexicos.errores[i])
-		errores_lexicos.Errores[i].Tipo = Ast.ERROR_LEXICO
+		errores_lexicos.Errores[i].Tipo = ast.ERROR_LEXICO
 		nvisitor.Errores.Add(errores_lexicos.Errores[i])
 		//Actualizar la consola
 		nvisitor.UpdateConsola("Lexical error, " + errores_lexicos.Errores[i].Msg + " -- Line: " +
@@ -68,7 +74,7 @@ func EjecutarPrograma(codigo string) string {
 	//Recorrer el array de errores sintácticos
 	for i := 0; i < len(errores_sintacticos.Errores); i++ {
 		//fmt.Printf("Error #"+strconv.Itoa(i)+" %v \n", errores_sintacticos.errores[i])
-		errores_sintacticos.Errores[i].Tipo = Ast.ERROR_SINTACTICO
+		errores_sintacticos.Errores[i].Tipo = ast.ERROR_SINTACTICO
 		nvisitor.Errores.Add(errores_sintacticos.Errores[i])
 		//Actualizar la consola
 		nvisitor.UpdateConsola("Syntax error , " + errores_sintacticos.Errores[i].Msg + " -- Line: " +

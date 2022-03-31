@@ -129,7 +129,7 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 		//Recorrer la lista e ir creando los elementos que se van a recorrer
 
-		for i := limInf; i <= limSup; i++ {
+		for i := limInf; i < limSup; i++ {
 			numero = int(i)
 			nElemento = Ast.TipoRetornado{
 				Tipo:  Ast.I64,

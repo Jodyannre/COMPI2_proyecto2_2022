@@ -210,6 +210,10 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 
 	//Clonar la lista para evitar la referencia
 	nArray := valor.Valor.(Ast.Clones).Clonar(scope)
+	//Actualizar la mutabilidad de la instancia
+	mnArray := nArray.(expresiones.Array)
+	mnArray.Mutable = d.Mutable
+	nArray = mnArray
 	nSimbolo.Valor = Ast.TipoRetornado{
 		Tipo:  valor.Tipo,
 		Valor: nArray,

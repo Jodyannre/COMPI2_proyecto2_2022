@@ -1,22 +1,21 @@
-package Ast
+package ast
 
 import (
 	"reflect"
 )
 
 type Simbolo struct {
-	Identificador      string
-	Valor              interface{}
-	Fila               int
-	Columna            int
-	Tipo               TipoDato
-	TipoEspecial       TipoRetornado
-	Mutable            bool
-	Publico            bool
-	Entorno            *Scope
-	Referencia         bool
-	Referencia_puntero *Simbolo
-	Direccion          int
+	Identificador string
+	Valor         interface{}
+	Fila          int
+	Columna       int
+	Tipo          TipoDato
+	TipoEspecial  TipoRetornado
+	Mutable       bool
+	Publico       bool
+	Entorno       *Scope
+	Referencia    bool
+	Direccion     int
 }
 
 type SimboloReporte struct {
@@ -31,17 +30,16 @@ type SimboloReporte struct {
 func NewSimbolo(identificador string, valor interface{}, fila int, columna int,
 	tipo TipoDato, mutable bool, publico bool) Simbolo {
 	simbolo := Simbolo{
-		Identificador:      identificador,
-		Valor:              valor,
-		Fila:               fila,
-		Columna:            columna,
-		Tipo:               tipo,
-		Mutable:            mutable,
-		Publico:            publico,
-		Referencia:         false,
-		Referencia_puntero: nil,
-		Entorno:            nil,
-		TipoEspecial:       TipoRetornado{Valor: true, Tipo: INDEFINIDO},
+		Identificador: identificador,
+		Valor:         valor,
+		Fila:          fila,
+		Columna:       columna,
+		Tipo:          tipo,
+		Mutable:       mutable,
+		Publico:       publico,
+		Referencia:    false,
+		Entorno:       nil,
+		TipoEspecial:  TipoRetornado{Valor: true, Tipo: INDEFINIDO},
 	}
 	return simbolo
 }

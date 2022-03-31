@@ -77,6 +77,8 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		} else if tipoGeneral == Ast.EXPRESION {
 			respuesta = actual.(Ast.Expresion).GetValue(&newScope)
 
+			println(Ast.Temporales)
+
 			if Ast.EsTransferencia(respuesta.(Ast.TipoRetornado).Tipo) {
 				//Variables para el msg del error
 				valor := actual.(Ast.Abstracto)
