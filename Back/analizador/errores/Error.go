@@ -73,47 +73,86 @@ func (op CustomSyntaxError) GetFecha() string {
 	return op.Fecha
 }
 
-func GenerarError(tipoError int, elemento1, elemento2 interface{}, scope *Ast.Scope) Ast.TipoRetornado {
+func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador string, scope *Ast.Scope) Ast.TipoRetornado {
 
 	_, tipoI := elemento1.(Ast.Abstracto).GetTipo()
 	_, tipoD := elemento2.(Ast.Abstracto).GetTipo()
 	fila := elemento1.(Ast.Abstracto).GetFila()
 	columna := elemento1.(Ast.Abstracto).GetColumna()
+	var msg = ""
 
 	switch tipoError {
-	/*Error de tipos entre operaciones*/
+	/*Errores en operaciones*/
 	case 1:
-
-		msg := "Semantic error, can't operate " + Ast.ValorTipoDato[tipoI] +
+		/*Error de tipos entre operaciones*/
+		msg = "Semantic error, can't operate " + Ast.ValorTipoDato[tipoI] +
 			" type with " + Ast.ValorTipoDato[tipoD] +
 			" type. -- Line: " + strconv.Itoa(fila) +
 			" Column: " + strconv.Itoa(columna)
-		nError := NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	/*Error en tipos de suma*/
+		/*Error en tipos de suma*/
 	case 2:
-		msg := "Semantic error, can't add " + Ast.ValorTipoDato[tipoI] +
+		msg = "Semantic error, can't add " + Ast.ValorTipoDato[tipoI] +
 			" type to " + Ast.ValorTipoDato[tipoD] +
 			" type. -- Line: " + strconv.Itoa(fila) +
 			" Column: " + strconv.Itoa(columna)
-		nError := NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-
+	case 3:
+		/*Error unario con usize*/
+		msg = "Semantic error, can't apply unary operator `-` to type `usize`." +
+			" -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 4:
+		/*Error de unario con un no booleano*/
+		msg = "Semantic error, can't operate (!) with a " + Ast.ValorTipoDato[tipoI] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 5:
+		/*Error overflow negativo en resta de usize*/
+		msg = "Semantic error, attempt to subtract with overflow." +
+			" -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 6:
+		/*Error en tipos de resta */
+		msg = "Semantic error, can't subtract " + Ast.ValorTipoDato[tipoI] +
+			" type to " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 7:
+		/*Error en tipos de multiplicación*/
+		msg = "Semantic error, can't multiply " + Ast.ValorTipoDato[tipoI] +
+			" type to " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 8:
+		/*Error en tipos de división*/
+		msg = "Semantic error, can't divide " + Ast.ValorTipoDato[tipoI] +
+			" type by " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 9:
+		/*Error de tipos en operación lógica*/
+		msg = "Semantic error, can't logically operate " + Ast.ValorTipoDato[tipoI] +
+			" type with " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 10:
+		msg = "Semantic error, can't compare a " + Ast.ValorTipoDato[tipoI] +
+			" using " + operador +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 11:
+		msg = "Semantic error, can't compare " + Ast.ValorTipoDato[tipoI] +
+			" with " + Ast.ValorTipoDato[tipoD] +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
 	}
 
-	return Ast.TipoRetornado{}
+	nError := NewError(fila, columna, msg)
+	nError.Tipo = Ast.ERROR_SEMANTICO
+	nError.Ambito = scope.GetTipoScope()
+	scope.Errores.Add(nError)
+	scope.Consola += msg + "\n"
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ERROR,
+		Valor: nError,
+	}
 }

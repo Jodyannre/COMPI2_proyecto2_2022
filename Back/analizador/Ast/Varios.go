@@ -90,7 +90,11 @@ func ActualizarCodigoAritmetica(op1 TipoRetornado, op2 TipoRetornado, operador s
 		}
 		//Crear el nuevo código con las referencias de los anteriores
 		referencia = GetTemp()
-		codigo += referencia + " = " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " ;"
+		if operador == "/" || operador == "%" {
+			codigo += MathError(codIzq.Referencia, codDer.Referencia, referencia, operador)
+		} else {
+			codigo += referencia + " = " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " ;"
+		}
 
 	} else {
 		codIzq = op1.Valor.(O3D)
@@ -111,4 +115,114 @@ func ActualizarCodigoAritmetica(op1 TipoRetornado, op2 TipoRetornado, operador s
 	}
 
 	return obj
+}
+
+/* Actualizar el código actual con los que se van retornando de las operaciones anteriores.
+-->Retonar un objeto O3D<--*/
+func ActualizarCodigoRelacional(op1 TipoRetornado, op2 TipoRetornado, operador string,
+	unario bool) O3D {
+	var codigo, lt, lf string = "", "", ""
+	var codIzq, codDer O3D
+
+	codIzq = op1.Valor.(O3D)
+	codDer = op2.Valor.(O3D)
+
+	if op1.Tipo != PRIMITIVO {
+		codigo += codIzq.Codigo + "\n"
+	}
+	if op2.Tipo != PRIMITIVO {
+		codigo += codDer.Codigo + "\n"
+	}
+
+	//Get labels
+	lt = GetLabel()
+	lf = GetLabel()
+
+	codigo += "if " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " goto " + lt + ";\n"
+	codigo += "goto " + lf + ";\n"
+
+	//Crear el nuevo objeto 3D
+	obj := O3D{
+		Lt:         lt,
+		Lf:         lf,
+		Valor:      TipoRetornado{},
+		Codigo:     codigo,
+		Referencia: "",
+	}
+
+	return obj
+}
+
+/* Actualizar el código actual con los que se van retornando de las operaciones anteriores.
+-->Retonar un objeto O3D<--*/
+func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador string,
+	unario bool) O3D {
+	var codigo, lt, lf string = "", "", ""
+	var codIzq, codDer O3D
+
+	codIzq = op1.Valor.(O3D)
+	codDer = op2.Valor.(O3D)
+
+	if !unario {
+		if operador == "&&" {
+			/*AND*/
+			codigo += codIzq.Codigo
+			codigo += codIzq.Lt + ":\n"
+			codigo += codDer.Codigo
+			/*Actualizar los labels*/
+			lt += codDer.Lt
+			lf += codIzq.Lt + ":\n"
+			lf += codDer.Lt
+		} else {
+			/*OR*/
+			codigo += codIzq.Codigo
+			codigo += codIzq.Lf + ":\n"
+			codigo += codDer.Codigo
+			/*Actualizar los labels*/
+			lt += codIzq.Lt + ":\n"
+			lt += codDer.Lt
+			lf += codDer.Lf
+		}
+
+	} else {
+		/*NOT*/
+		codigo = codIzq.Codigo
+		lt = codIzq.Lf
+		lf = codIzq.Lt
+	}
+
+	//Crear el nuevo objeto 3D
+	obj := O3D{
+		Lt:         lt,
+		Lf:         lf,
+		Valor:      TipoRetornado{},
+		Codigo:     codigo,
+		Referencia: "",
+	}
+
+	return obj
+}
+
+func MathError(refIzq, refDer, refActual, operador string) string {
+	lT := GetLabel()
+	lF := GetLabel()
+	//ident := "    "
+	p := "%"
+	c := "c"
+	salida := "if (" + refDer + " != 0) goto " + lT + ";\n"
+	salida += "Printf(\"" + p + c + "\",  77);\n"
+	salida += "Printf(\"" + p + c + "\",  97);\n"
+	salida += "Printf(\"" + p + c + "\", 116);\n"
+	salida += "Printf(\"" + p + c + "\", 104);\n"
+	salida += "Printf(\"" + p + c + "\",  69);\n"
+	salida += "Printf(\"" + p + c + "\", 114);\n"
+	salida += "Printf(\"" + p + c + "\", 114);\n"
+	salida += "Printf(\"" + p + c + "\", 111);\n"
+	salida += "Printf(\"" + p + c + "\", 114);\n"
+	salida += refActual + " = 0;\n"
+	salida += "goto " + lF + ";\n"
+	salida += lT + ":\n"
+	salida += refActual + " = " + refIzq + " " + operador + " " + refDer + ";\n"
+	salida += lF + ":"
+	return salida
 }

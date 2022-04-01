@@ -199,8 +199,10 @@ const (
 )
 
 type TipoRetornado struct {
-	Tipo  TipoDato
-	Valor interface{}
+	Tipo    TipoDato
+	Valor   interface{}
+	Fila    int
+	Columna int
 }
 
 type O3D struct {
@@ -209,4 +211,14 @@ type O3D struct {
 	Valor      TipoRetornado
 	Codigo     string
 	Referencia string
+}
+
+func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {
+	return t.Tipo, t.Tipo
+}
+func (t TipoRetornado) GetFila() int {
+	return t.Fila
+}
+func (t TipoRetornado) GetColumna() int {
+	return t.Columna
 }

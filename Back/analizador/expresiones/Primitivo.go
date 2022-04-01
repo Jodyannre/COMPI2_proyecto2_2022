@@ -2,6 +2,7 @@ package expresiones
 
 import (
 	"Back/analizador/Ast"
+	"strings"
 )
 
 type Primitivo struct {
@@ -22,6 +23,26 @@ func (p Primitivo) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		Valor:      valor,
 		Codigo:     "",
 		Referencia: Primitivo_To_String(p.Valor, p.Tipo),
+	}
+
+	//Verificar que sea un string o un str
+	if EsCadena(p.Tipo) {
+		temp := Ast.GetTemp()
+		cadenaAscii := obj.Referencia
+		arrayAscii := strings.Split(cadenaAscii, ",")
+		codigo := ""
+		//Inicializar la cadena con el valor inicial del H guardado en el temporal
+		codigo += temp + " = " + "heap[H];\n"
+
+		for _, valor := range arrayAscii {
+			codigo += "heap[H] = " + valor + ";\n"
+			codigo += "H = H + 1;\n"
+		}
+		//Agregar caracter para saber que la cadena ha terminado
+		codigo += "heap[H] = 0;\n"
+		codigo += "H = H + 1;\n"
+		obj.Codigo = codigo
+		obj.Referencia = temp
 	}
 
 	return Ast.TipoRetornado{

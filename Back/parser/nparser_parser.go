@@ -406,7 +406,7 @@ var parserATN = []uint16{
 	720, 718, 3, 2, 2, 2, 720, 721, 3, 2, 2, 2, 721, 53, 3, 2, 2, 2, 722, 720,
 	3, 2, 2, 2, 723, 724, 8, 28, 1, 2, 724, 725, 9, 4, 2, 2, 725, 726, 5, 54,
 	28, 34, 726, 727, 8, 28, 1, 2, 727, 783, 3, 2, 2, 2, 728, 729, 7, 81, 2,
-	2, 729, 730, 5, 54, 28, 2, 730, 731, 7, 82, 2, 2, 731, 732, 8, 28, 1, 2,
+	2, 729, 730, 5, 50, 26, 2, 730, 731, 7, 82, 2, 2, 731, 732, 8, 28, 1, 2,
 	732, 783, 3, 2, 2, 2, 733, 734, 7, 81, 2, 2, 734, 735, 5, 54, 28, 2, 735,
 	736, 7, 13, 2, 2, 736, 737, 5, 56, 29, 2, 737, 738, 7, 82, 2, 2, 738, 739,
 	8, 28, 1, 2, 739, 783, 3, 2, 2, 2, 740, 741, 5, 110, 56, 2, 741, 742, 8,
@@ -9480,6 +9480,9 @@ type IExpresionContext interface {
 	// Get_expresion returns the _expresion rule contexts.
 	Get_expresion() IExpresionContext
 
+	// Get_expresion_logica returns the _expresion_logica rule contexts.
+	Get_expresion_logica() IExpresion_logicaContext
+
 	// Get_tipo_dato returns the _tipo_dato rule contexts.
 	Get_tipo_dato() ITipo_datoContext
 
@@ -9533,6 +9536,9 @@ type IExpresionContext interface {
 
 	// Set_expresion sets the _expresion rule contexts.
 	Set_expresion(IExpresionContext)
+
+	// Set_expresion_logica sets the _expresion_logica rule contexts.
+	Set_expresion_logica(IExpresion_logicaContext)
 
 	// Set_tipo_dato sets the _tipo_dato rule contexts.
 	Set_tipo_dato(ITipo_datoContext)
@@ -9590,6 +9596,7 @@ type ExpresionContext struct {
 	op                      antlr.Token
 	_expresion              IExpresionContext
 	_PAR_IZQ                antlr.Token
+	_expresion_logica       IExpresion_logicaContext
 	_tipo_dato              ITipo_datoContext
 	_llamada_funcion        ILlamada_funcionContext
 	_metodos_iniciar_vector IMetodos_iniciar_vectorContext
@@ -9702,6 +9709,10 @@ func (s *ExpresionContext) GetObj() IExpresionContext { return s.obj }
 
 func (s *ExpresionContext) Get_expresion() IExpresionContext { return s._expresion }
 
+func (s *ExpresionContext) Get_expresion_logica() IExpresion_logicaContext {
+	return s._expresion_logica
+}
+
 func (s *ExpresionContext) Get_tipo_dato() ITipo_datoContext { return s._tipo_dato }
 
 func (s *ExpresionContext) Get_llamada_funcion() ILlamada_funcionContext { return s._llamada_funcion }
@@ -9741,6 +9752,8 @@ func (s *ExpresionContext) SetOp_izq(v IExpresionContext) { s.op_izq = v }
 func (s *ExpresionContext) SetObj(v IExpresionContext) { s.obj = v }
 
 func (s *ExpresionContext) Set_expresion(v IExpresionContext) { s._expresion = v }
+
+func (s *ExpresionContext) Set_expresion_logica(v IExpresion_logicaContext) { s._expresion_logica = v }
 
 func (s *ExpresionContext) Set_tipo_dato(v ITipo_datoContext) { s._tipo_dato = v }
 
@@ -9803,6 +9816,16 @@ func (s *ExpresionContext) NOT() antlr.TerminalNode {
 
 func (s *ExpresionContext) PAR_IZQ() antlr.TerminalNode {
 	return s.GetToken(NparserPAR_IZQ, 0)
+}
+
+func (s *ExpresionContext) Expresion_logica() IExpresion_logicaContext {
+	var t = s.GetTypedRuleContext(reflect.TypeOf((*IExpresion_logicaContext)(nil)).Elem(), 0)
+
+	if t == nil {
+		return nil
+	}
+
+	return t.(IExpresion_logicaContext)
 }
 
 func (s *ExpresionContext) PAR_DER() antlr.TerminalNode {
@@ -10127,16 +10150,16 @@ func (p *Nparser) expresion(_p int) (localctx IExpresionContext) {
 		{
 			p.SetState(727)
 
-			var _x = p.expresion(0)
+			var _x = p.expresion_logica(0)
 
-			localctx.(*ExpresionContext)._expresion = _x
+			localctx.(*ExpresionContext)._expresion_logica = _x
 		}
 		{
 			p.SetState(728)
 			p.Match(NparserPAR_DER)
 		}
 
-		localctx.(*ExpresionContext).ex = localctx.(*ExpresionContext).Get_expresion().GetEx()
+		localctx.(*ExpresionContext).ex = localctx.(*ExpresionContext).Get_expresion_logica().GetEx()
 
 	case 3:
 		{

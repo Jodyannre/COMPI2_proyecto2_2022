@@ -78,6 +78,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			respuesta = actual.(Ast.Expresion).GetValue(&newScope)
 
 			println(Ast.Temporales)
+			println(respuesta.(Ast.TipoRetornado).Valor.(Ast.O3D).Codigo)
 
 			if Ast.EsTransferencia(respuesta.(Ast.TipoRetornado).Tipo) {
 				//Variables para el msg del error

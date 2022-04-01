@@ -735,9 +735,9 @@ expresion returns[Ast.Expresion ex]
             columna := $op.pos
             $ex = expresiones.NewOperation($op_izq.ex,$op.text,$op_der.ex,false,fila,columna)
         }
-    |   PAR_IZQ expresion PAR_DER
+    |   PAR_IZQ expresion_logica PAR_DER
         {
-            $ex = $expresion.ex
+            $ex = $expresion_logica.ex
         }
     |   PAR_IZQ expresion AS tipo_dato PAR_DER
         {

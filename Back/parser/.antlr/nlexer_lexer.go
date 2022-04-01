@@ -1,4 +1,4 @@
-// Code generated from c:\Users\Joddie\Documents\GitHub\COMPI2_proyecto1_2022\Entrega\Back\parser\Nlexer.g4 by ANTLR 4.8. DO NOT EDIT.
+// Code generated from c:\Users\Joddie\Documents\GitHub\COMPI2_proyecto2_2022\Back\parser\Nlexer.g4 by ANTLR 4.8. DO NOT EDIT.
 
 package parser
 

@@ -216,3 +216,12 @@ func Primitivo_To_String(valor interface{}, tipo Ast.TipoDato) string {
 	}
 	return salida
 }
+
+func EsCadena(tipo Ast.TipoDato) bool {
+
+	if tipo == Ast.STR || tipo == Ast.STRING {
+		return true
+	} else {
+		return false
+	}
+}

@@ -23,6 +23,8 @@ type Scope struct {
 	Errores              *arraylist.List
 	Consola              string
 	Global               bool
+	Posicion             int
+	P                    int
 }
 
 func (scope *Scope) GetTablaModulos() map[string]interface{} {
@@ -39,6 +41,7 @@ func NewScope(name string, prev *Scope) Scope {
 	nuevo.tablaStructs = make(map[string]interface{})
 	nuevo.tablaSimbolosReporte = arraylist.New()
 	nuevo.Global = false
+	nuevo.P = 0
 	return nuevo
 }
 

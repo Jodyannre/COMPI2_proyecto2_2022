@@ -5,7 +5,6 @@ import (
 	"Back/analizador/errores"
 	"fmt"
 	"math"
-	"strconv"
 )
 
 var suma_dominante = [7][7]Ast.TipoDato{
@@ -89,27 +88,35 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 
 	if op.unario {
 		tipo_izq = op.operando_izq.GetValue(entorno)
+		tipo_der = tipo_izq
 	} else {
 		tipo_izq = op.operando_izq.GetValue(entorno)
 		tipo_der = op.operando_der.GetValue(entorno)
 	}
 	//Verificar primero si no hay error
 	if op.unario {
-		if tipo_izq.Tipo == Ast.ERROR {
+		if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.ERROR {
 			return tipo_izq
 		}
 	} else {
-		if tipo_izq.Tipo == Ast.ERROR {
+		if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.ERROR {
 			return tipo_izq
 		}
-		if tipo_der.Tipo == Ast.ERROR {
+		if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.ERROR {
 			return tipo_der
 		}
 	}
 
 	if tipo_izq.Valor.(Ast.O3D).Valor.Tipo > 7 || tipo_der.Valor.(Ast.O3D).Valor.Tipo > 7 {
+		////////////////////////////ERROR////////////////////////////////
 		//Error, no se pueden operar porque no es ningún valor operable
-		return errores.GenerarError(1, op.operando_izq, op.operando_der, entorno)
+		vI := tipo_izq.Valor.(Ast.O3D).Valor
+		vD := tipo_der.Valor.(Ast.O3D).Valor
+		vI.Fila = op.Fila
+		vI.Columna = op.Columna
+		vD.Fila = op.Fila
+		vD.Columna = op.Columna
+		return errores.GenerarError(1, vI, vD, "", entorno)
 	}
 
 	switch op.operador {
@@ -140,21 +147,22 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
 			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
 			var valIzq, valDer float64
+			var valor Ast.TipoRetornado
 
 			//Parseo por si viene algún int
-			if tipo_izq.Tipo == Ast.I64 {
+			if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
 				valIzq = float64(valorIzq.(int))
 			} else {
 				valIzq = valorIzq.(float64)
 			}
-			if tipo_der.Tipo == Ast.I64 {
+			if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
 				valDer = float64(valorDer.(int))
 			} else {
 				valDer = valorDer.(float64)
 			}
 
 			//Get el valor
-			valor := Ast.TipoRetornado{
+			valor = Ast.TipoRetornado{
 				Tipo:  result_dominante,
 				Valor: valIzq + valDer,
 			}
@@ -176,461 +184,397 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				Valor: cadena_izq + cadena_der,
 			}
 		} else if result_dominante == Ast.NULL {
-			return errores.GenerarError(1, op.operando_izq, op.operando_der, entorno)
+			//////////////////////////ERROR////////////////////////////////
+			//Error los tipo no se pueden operar
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(2, vI, vD, "", entorno)
 
 		}
 
 	case "-", "!":
+		valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+		var valor Ast.TipoRetornado
+		var valIzq, valDer float64
+
 		if op.unario {
 			//Es una operación unaria
-			if tipo_izq.Tipo == Ast.F64 && op.operador == "-" {
-				//Es un F64
-				return Ast.TipoRetornado{
-					Tipo:  Ast.F64,
-					Valor: tipo_izq.Valor.(float64) * -1,
+			if op.operador == "-" {
+
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.F64 {
+					//Es un F64
+					valor.Tipo = Ast.F64
+					valor.Valor = valorIzq.(float64) * -1
 				}
-			} else if tipo_izq.Tipo == Ast.I64 {
-				//Es un int
-				if op.operador == "-" {
-					return Ast.TipoRetornado{
-						Tipo:  Ast.I64,
-						Valor: tipo_izq.Valor.(int) * -1,
-					}
-				} else {
-					var valorFinal = tipo_izq.Valor.(int)
-					//Verificar la regla del bitwise
-					if valorFinal >= 0 {
-						valorFinal++
-					} else {
-						valorFinal++
-					}
-					return Ast.TipoRetornado{
-						Tipo:  Ast.I64,
-						Valor: valorFinal * -1,
-					}
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					//Es un I64
+					valor.Tipo = Ast.I64
+					valor.Valor = valorIzq.(int) * -1
 				}
 
-			} else if tipo_izq.Tipo == Ast.BOOLEAN && op.operador == "!" {
+				//Actualizar el código y conseguir el obj O3D
+				obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_izq, op.operador, true)
+				obj.Valor = valor
+
 				return Ast.TipoRetornado{
-					Tipo:  Ast.BOOLEAN,
-					Valor: !tipo_izq.Valor.(bool),
+					Tipo:  Ast.ARITMETICA,
+					Valor: obj,
 				}
 
-			} else if tipo_izq.Tipo == Ast.USIZE && op.operador == "-" {
+				////////////////////////PENDIENTE LOGICA///////////////////////////////
+			} else if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.BOOLEAN && op.operador == "!" {
+				valorIzq = tipo_izq.Valor.(Ast.O3D).Valor.Valor
+				valor.Valor = !valorIzq.(bool)
+				valor.Tipo = Ast.BOOLEAN
+
+				//Actualizar el código y conseguir el obj O3D
+				obj := Ast.ActualizarCodigoLogica(tipo_izq, tipo_izq, op.operador, true)
+				obj.Valor = valor
+				return Ast.TipoRetornado{
+					Tipo:  Ast.LOGICA,
+					Valor: obj,
+				}
+				////////////////////////PENDIENTE LOGICA///////////////////////////////
+			} else if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.USIZE && op.operador == "-" {
 				//Error, no se puede aplicar el menos a un usize
-				msg := "Semantic error, can't apply unary operator `-` to type `usize`." +
-					" -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				vI := tipo_izq.Valor.(Ast.O3D).Valor
+				vI.Fila = op.Fila
+				vI.Columna = op.Columna
+				return errores.GenerarError(3, vI, vI, "", entorno)
 			} else {
-				//Tipo no operable
-				msg := "Semantic error, can't operate (!) with a " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-					" type. -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				//Error, tipo no operable
+				vI := tipo_izq.Valor.(Ast.O3D).Valor
+				vI.Fila = op.Fila
+				vI.Columna = op.Columna
+				return errores.GenerarError(4, vI, vI, "", entorno)
 			}
 
 		}
 
-		result_dominante = resta_dominante[tipo_izq.Tipo][tipo_der.Tipo]
+		//Calcular resultado de la resta dominante
+		valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+		result_dominante = resta_dominante[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
 
-		if result_dominante == Ast.I64 {
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) - tipo_der.Valor.(int),
-			}
-		} else if result_dominante == Ast.USIZE {
-			preValor := tipo_izq.Valor.(int) - tipo_der.Valor.(int)
-			if preValor < 0 {
-				//Error, el usize no puede ser negativo
-				msg := "Semantic error, attempt to subtract with overflow." +
-					" -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
+		if result_dominante != Ast.NULL {
+
+			if result_dominante == Ast.I64 {
+
+				valor.Tipo = result_dominante
+				valor.Valor = valorIzq.(int) - valorDer.(int)
+			} else if result_dominante == Ast.USIZE {
+
+				preValor := valorIzq.(int) - valorDer.(int)
+				if preValor < 0 {
+					///////////////////////////////ERROR/////////////////////////////////////
+					//Error, el usize no puede ser negativo
+					return errores.GenerarError(5, op, op, "", entorno)
 				}
-			}
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) - tipo_der.Valor.(int),
-			}
+				valor.Tipo = result_dominante
+				valor.Valor = valorIzq.(int) - valorDer.(int)
+			} else if result_dominante == Ast.F64 {
 
-		} else if result_dominante == Ast.F64 {
-
-			if tipo_izq.Tipo == Ast.I64 {
-				tipo_izq = Ast.TipoRetornado{
-					Valor: float64(tipo_izq.Valor.(int)),
-					Tipo:  Ast.F64,
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valIzq = float64(valorIzq.(int))
+				} else {
+					valIzq = valorIzq.(float64)
 				}
-			}
-			if tipo_der.Tipo == Ast.I64 {
-				tipo_der = Ast.TipoRetornado{
-					Valor: float64(tipo_der.Valor.(int)),
-					Tipo:  Ast.F64,
+				if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valDer = float64(valorDer.(int))
+				} else {
+					valDer = valorDer.(float64)
 				}
+				valor.Tipo = result_dominante
+				valor.Valor = valIzq - valDer
 			}
 
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
 			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(float64) - tipo_der.Valor.(float64),
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
 			}
+
 		} else if result_dominante == Ast.NULL {
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  result_dominante,
-					Valor: nil,
-				}
-			*/
-			msg := "Semantic error, can't subtract " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type to " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////////////ERROR/////////////////////////////////////
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(6, vI, vD, "", entorno)
 		}
 
 	case "*":
-		result_dominante = mul_div_dominante[tipo_izq.Tipo][tipo_der.Tipo]
-		if result_dominante == Ast.I64 || result_dominante == Ast.USIZE {
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) * tipo_der.Valor.(int),
-			}
-		} else if result_dominante == Ast.F64 {
-			if tipo_izq.Tipo == Ast.I64 {
-				tipo_izq = Ast.TipoRetornado{
-					Valor: float64(tipo_izq.Valor.(int)),
-					Tipo:  Ast.F64,
+		result_dominante = mul_div_dominante[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
+
+		if result_dominante != Ast.NULL {
+			//Get los valores
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+			var valIzq, valDer float64
+			var valor Ast.TipoRetornado
+
+			if result_dominante == Ast.I64 || result_dominante == Ast.USIZE {
+				valor.Tipo = result_dominante
+				valor.Valor = valorIzq.(int) * valorDer.(int)
+			} else if result_dominante == Ast.F64 {
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valIzq = float64(valorIzq.(int))
+				} else {
+					valIzq = valorIzq.(float64)
 				}
-			}
-			if tipo_der.Tipo == Ast.I64 {
-				tipo_der = Ast.TipoRetornado{
-					Valor: float64(tipo_der.Valor.(int)),
-					Tipo:  Ast.F64,
+				if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valDer = float64(valorDer.(int))
+				} else {
+					valDer = valorDer.(float64)
 				}
+				valor.Tipo = result_dominante
+				valor.Valor = valIzq * valDer
 			}
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
 			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(float64) * tipo_der.Valor.(float64),
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
 			}
 
 		} else if result_dominante == Ast.NULL {
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  result_dominante,
-					Valor: nil,
-				}
-			*/
-			msg := "Semantic error, can't multiply " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type to " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			//////////////////////////////////ERROR///////////////////////////////////////
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(7, vI, vD, "", entorno)
 
 		}
 	case "/":
-		result_dominante = mul_div_dominante[tipo_izq.Tipo][tipo_der.Tipo]
-		if result_dominante == Ast.I64 {
-			if tipo_der.Valor.(int) == 0 {
-				//Error, no se puede dividir dentro de 0
-				msg := "Semantic error, can't be divided by zero." +
-					" -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
+		result_dominante = mul_div_dominante[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
+
+		if result_dominante != Ast.NULL {
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+			var valor Ast.TipoRetornado
+			var valIzq, valDer float64
+
+			if result_dominante == Ast.I64 {
+				if tipo_der.Valor.(Ast.O3D).Valor.Valor.(int) == 0 {
+					valor.Valor = 0
+				} else {
+					valor.Valor = valorIzq.(int) / valorDer.(int)
+				}
+				valor.Tipo = result_dominante
+
+			} else if result_dominante == Ast.USIZE {
+				if tipo_der.Valor.(Ast.O3D).Valor.Valor.(int) == 0 {
+					valor.Valor = 0
+				} else {
+					valor.Valor = valorIzq.(int) / valorDer.(int)
+				}
+				valor.Tipo = result_dominante
+
+			} else if result_dominante == Ast.F64 {
+
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valIzq = float64(valorIzq.(int))
+				} else {
+					valIzq = valorIzq.(float64)
+				}
+				if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valDer = float64(valorDer.(int))
+				} else {
+					valDer = valorDer.(float64)
+				}
+
+				if valDer == 0 {
+					valor.Valor = 0
+				} else {
+					valor.Valor = valIzq / valDer
 				}
 			}
+
+			valor.Tipo = result_dominante
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
 			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) / tipo_der.Valor.(int),
-			}
-
-		} else if result_dominante == Ast.USIZE {
-			if tipo_der.Valor.(int) == 0 {
-				//Error, no se puede dividir dentro de 0
-				msg := "Semantic error, can't be divided by zero." +
-					" -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
-			}
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: int(math.Trunc(float64(tipo_izq.Valor.(int)) / float64(tipo_der.Valor.(int)))),
-			}
-
-		} else if result_dominante == Ast.F64 {
-
-			if tipo_izq.Tipo == Ast.I64 {
-				tipo_izq = Ast.TipoRetornado{
-					Valor: float64(tipo_izq.Valor.(int)),
-					Tipo:  Ast.F64,
-				}
-			}
-			if tipo_der.Tipo == Ast.I64 {
-				tipo_der = Ast.TipoRetornado{
-					Valor: float64(tipo_der.Valor.(int)),
-					Tipo:  Ast.F64,
-				}
-			}
-
-			if tipo_der.Valor.(float64) == 0 {
-				//Error, no se puede dividir dentro de 0
-				msg := "Semantic error, can't be divided by zero." +
-					" -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
-			}
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(float64) / tipo_der.Valor.(float64),
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
 			}
 
 		} else if result_dominante == Ast.NULL {
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  result_dominante,
-					Valor: nil,
-				}
-			*/
-			msg := "Semantic error, can't divide " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type by " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			//////////////////////////////////////ERROR//////////////////////////////////////
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(8, vI, vD, "", entorno)
 
 		}
 	case "%":
-		result_dominante = mul_div_dominante[tipo_izq.Tipo][tipo_der.Tipo]
-		if result_dominante == Ast.I64 || result_dominante == Ast.USIZE {
-			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: tipo_izq.Valor.(int) % tipo_der.Valor.(int),
-			}
+		result_dominante = mul_div_dominante[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
+		if result_dominante != Ast.NULL {
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+			var valor Ast.TipoRetornado
+			var valIzq, valDer float64
 
-		} else if result_dominante == Ast.F64 {
-			if tipo_izq.Tipo == Ast.I64 {
-				tipo_izq = Ast.TipoRetornado{
-					Valor: float64(tipo_izq.Valor.(int)),
-					Tipo:  Ast.F64,
+			if result_dominante == Ast.I64 || result_dominante == Ast.USIZE {
+				if tipo_der.Valor.(Ast.O3D).Valor.Valor.(int) == 0 {
+					valor.Valor = 0
+				} else {
+					valor.Valor = valorIzq.(int) % valorDer.(int)
 				}
-			}
-			if tipo_der.Tipo == Ast.I64 {
-				tipo_der = Ast.TipoRetornado{
-					Valor: float64(tipo_der.Valor.(int)),
-					Tipo:  Ast.F64,
+
+			} else if result_dominante == Ast.F64 {
+
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valIzq = float64(valorIzq.(int))
+				} else {
+					valIzq = valorIzq.(float64)
 				}
+				if tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.I64 {
+					valDer = float64(valorDer.(int))
+				} else {
+					valDer = valorDer.(float64)
+				}
+				if valDer == 0 {
+					valor.Valor = 0
+				} else {
+					valor.Valor = math.Mod(valIzq, valDer)
+				}
+
 			}
+			valor.Tipo = result_dominante
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
 			return Ast.TipoRetornado{
-				Tipo:  result_dominante,
-				Valor: math.Mod(tipo_izq.Valor.(float64), tipo_der.Valor.(float64)),
+				Tipo:  Ast.ARITMETICA,
+				Valor: obj,
 			}
 
 		} else if result_dominante == Ast.NULL {
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  result_dominante,
-					Valor: nil,
-				}
-			*/
-			msg := "Semantic error, can't divide " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type by " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////////////ERROR////////////////////////////////////
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(8, vI, vD, "", entorno)
 
 		}
 	case "&&", "||":
-		if tipo_der.Tipo != Ast.BOOLEAN || tipo_izq.Tipo != Ast.BOOLEAN {
-			msg := "Semantic error, can't logically operate " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-				" type with " + Ast.ValorTipoDato[tipo_der.Tipo] +
-				" type. -- Line: " + strconv.Itoa(op.Fila) +
-				" Column: " + strconv.Itoa(op.Columna)
-			nError := errores.NewError(op.Fila, op.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = entorno.GetTipoScope()
-			entorno.Errores.Add(nError)
-			entorno.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+		valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+		valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+		var valor Ast.TipoRetornado
+		if tipo_der.Valor.(Ast.O3D).Valor.Tipo != Ast.BOOLEAN || tipo_izq.Valor.(Ast.O3D).Valor.Tipo != Ast.BOOLEAN {
+			/////////////////////////////////////ERROR////////////////////////////////////
+			vI := tipo_izq.Valor.(Ast.O3D).Valor
+			vD := tipo_der.Valor.(Ast.O3D).Valor
+			vI.Fila = op.Fila
+			vI.Columna = op.Columna
+			vD.Fila = op.Fila
+			vD.Columna = op.Columna
+			return errores.GenerarError(9, vI, vD, "", entorno)
 
 		}
+
 		if op.operador == "&&" {
-			return Ast.TipoRetornado{
-				Tipo:  Ast.BOOLEAN,
-				Valor: tipo_izq.Valor.(bool) && tipo_der.Valor.(bool),
-			}
+			valor.Valor = valorIzq.(bool) && valorDer.(bool)
 		} else {
-			return Ast.TipoRetornado{
-				Tipo:  Ast.BOOLEAN,
-				Valor: tipo_izq.Valor.(bool) || tipo_der.Valor.(bool),
-			}
+			valor.Valor = valorIzq.(bool) || valorDer.(bool)
+		}
+		valor.Tipo = Ast.BOOLEAN
+		//Actualizar el código y conseguir el obj O3D
+		obj := Ast.ActualizarCodigoLogica(tipo_izq, tipo_der, op.operador, false)
+		obj.Valor = valor
+
+		return Ast.TipoRetornado{
+			Tipo:  Ast.LOGICA,
+			Valor: obj,
 		}
 
 	case ">", "<", ">=", "<=", "==", "!=":
 		var val_der interface{}
 		var val_izq interface{}
-		result_dominante = suma_dominante_comparacion[tipo_izq.Tipo][tipo_der.Tipo]
+		valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+		valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+		var valor Ast.TipoRetornado
+		result_dominante = suma_dominante_comparacion[tipo_izq.Valor.(Ast.O3D).Valor.Tipo][tipo_der.Valor.(Ast.O3D).Valor.Tipo]
 		if result_dominante == Ast.I64 || result_dominante == Ast.F64 ||
 			result_dominante == Ast.USIZE {
 
-			if tipo_izq.Tipo == Ast.F64 || tipo_der.Tipo == Ast.F64 {
+			if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.F64 || tipo_der.Valor.(Ast.O3D).Valor.Tipo == Ast.F64 {
 
-				if tipo_izq.Tipo == Ast.F64 {
-					val_izq = tipo_izq.Valor.(float64)
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.F64 {
+					val_izq = valorIzq.(float64)
 				} else {
-					val_izq = (float64)(tipo_izq.Valor.(int))
+					val_izq = (float64)(valorIzq.(int))
 				}
 
-				if tipo_izq.Tipo == Ast.F64 {
-					val_der = tipo_der.Valor.(float64)
+				if tipo_izq.Valor.(Ast.O3D).Valor.Tipo == Ast.F64 {
+					val_der = valorDer.(float64)
 				} else {
-					val_der = (float64)(tipo_der.Valor.(int))
+					val_der = (float64)(valorDer.(int))
 				}
 				switch op.operador {
 				case ">":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) > val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) > val_der.(float64)
 				case "<":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) < val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) < val_der.(float64)
 				case ">=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) >= val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) >= val_der.(float64)
 				case "<=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) <= val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) <= val_der.(float64)
 				case "==":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) == val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) == val_der.(float64)
 				case "!=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(float64) != val_der.(float64),
-					}
+					valor.Valor = val_izq.(float64) != val_der.(float64)
 				}
 			} else {
-				val_izq = tipo_izq.Valor.(int)
-				val_der = tipo_der.Valor.(int)
+				val_izq = valorIzq.(int)
+				val_der = valorDer.(int)
 				switch op.operador {
 				case ">":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) > val_der.(int),
-					}
+					valor.Valor = val_izq.(int) > val_der.(int)
 				case "<":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) < val_der.(int),
-					}
+					valor.Valor = val_izq.(int) < val_der.(int)
 				case ">=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) >= val_der.(int),
-					}
+					valor.Valor = val_izq.(int) >= val_der.(int)
 				case "<=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) <= val_der.(int),
-					}
+					valor.Valor = val_izq.(int) <= val_der.(int)
 				case "==":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) == val_der.(int),
-					}
+					valor.Valor = val_izq.(int) == val_der.(int)
 				case "!=":
-					return Ast.TipoRetornado{
-						Tipo:  Ast.BOOLEAN,
-						Valor: val_izq.(int) != val_der.(int),
-					}
+					valor.Valor = val_izq.(int) != val_der.(int)
 				}
 			}
+			valor.Tipo = Ast.BOOLEAN
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoRelacional(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
+
+			return Ast.TipoRetornado{
+				Tipo:  Ast.RELACIONAL,
+				Valor: obj,
+			}
+
+			//////////////////////////////////PENDIENTE RELACIONAL CON STRING/////////////////////////////
 		} else if result_dominante == Ast.STR || result_dominante == Ast.STRING || result_dominante == Ast.CHAR {
 			//Es una comparación entre STR
 			val_izq = tipo_izq.Valor.(string)
@@ -674,51 +618,34 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		} else if result_dominante == Ast.BOOLEAN {
 
 			switch op.operador {
+
 			case "==":
-				return Ast.TipoRetornado{
-					Tipo:  Ast.BOOLEAN,
-					Valor: len(val_izq.(string)) == len(val_der.(string)),
-				}
+				valor.Valor = valorIzq.(bool) == valorDer.(bool)
 			case "!=":
-				return Ast.TipoRetornado{
-					Tipo:  Ast.BOOLEAN,
-					Valor: len(val_izq.(string)) != len(val_der.(string)),
-				}
-			default:
-				msg := "Semantic error, can't compare a " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-					" using " + op.operador +
-					" type. -- Line: " + strconv.Itoa(op.Fila) +
-					" Column: " + strconv.Itoa(op.Columna)
-				nError := errores.NewError(op.Fila, op.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = entorno.GetTipoScope()
-				entorno.Errores.Add(nError)
-				entorno.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				valor.Valor = valorIzq.(bool) != valorDer.(bool)
 			}
-			/*
-				return Ast.TipoRetornado{
-					Tipo:  Ast.BOOLEAN,
-					Valor: len(val_izq.(string)) > len(val_der.(string)),
-				}
-			*/
+
+			valor.Tipo = Ast.BOOLEAN
+
+			//Actualizar el código y conseguir el obj O3D
+			obj := Ast.ActualizarCodigoRelacional(tipo_izq, tipo_der, op.operador, false)
+			obj.Valor = valor
+
+			return Ast.TipoRetornado{
+				Tipo:  Ast.RELACIONAL,
+				Valor: obj,
+			}
+
 		}
-		msg := "Semantic error, can't compare " + Ast.ValorTipoDato[tipo_izq.Tipo] +
-			" with " + Ast.ValorTipoDato[tipo_der.Tipo] +
-			" type. -- Line: " + strconv.Itoa(op.Fila) +
-			" Column: " + strconv.Itoa(op.Columna)
-		nError := errores.NewError(op.Fila, op.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = entorno.GetTipoScope()
-		entorno.Errores.Add(nError)
-		entorno.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		/////////////////////////////////////ERROR////////////////////////////////////
+		vI := tipo_izq.Valor.(Ast.O3D).Valor
+		vD := tipo_der.Valor.(Ast.O3D).Valor
+		vI.Fila = op.Fila
+		vI.Columna = op.Columna
+		vD.Fila = op.Fila
+		vD.Columna = op.Columna
+		return errores.GenerarError(11, vI, vD, "", entorno)
 	}
+	/*Nunca debería de llegar hasta aquí*/
 	return Ast.TipoRetornado{Tipo: Ast.NULL, Valor: nil}
 }
