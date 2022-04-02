@@ -1,6 +1,6 @@
 package Ast
 
-var P, H int = 0, 0
+var P, H, PGlobal int = 0, 0, 0
 var Label, Temporal int = 1, 1
 var Temporales string = ""
 
@@ -196,6 +196,8 @@ const (
 	ARITMETICA
 	RELACIONAL
 	LOGICA
+	HEAP
+	STACK
 )
 
 type TipoRetornado struct {

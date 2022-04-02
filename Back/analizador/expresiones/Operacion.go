@@ -116,7 +116,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		vI.Columna = op.Columna
 		vD.Fila = op.Fila
 		vD.Columna = op.Columna
-		return errores.GenerarError(1, vI, vD, "", entorno)
+		return errores.GenerarError(1, vI, vD, "", "", "", entorno)
 	}
 
 	switch op.operador {
@@ -192,7 +192,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(2, vI, vD, "", entorno)
+			return errores.GenerarError(2, vI, vD, "", "", "", entorno)
 
 		}
 
@@ -244,13 +244,13 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				vI := tipo_izq.Valor.(Ast.O3D).Valor
 				vI.Fila = op.Fila
 				vI.Columna = op.Columna
-				return errores.GenerarError(3, vI, vI, "", entorno)
+				return errores.GenerarError(3, vI, vI, "", "", "", entorno)
 			} else {
 				//Error, tipo no operable
 				vI := tipo_izq.Valor.(Ast.O3D).Valor
 				vI.Fila = op.Fila
 				vI.Columna = op.Columna
-				return errores.GenerarError(4, vI, vI, "", entorno)
+				return errores.GenerarError(4, vI, vI, "", "", "", entorno)
 			}
 
 		}
@@ -271,7 +271,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				if preValor < 0 {
 					///////////////////////////////ERROR/////////////////////////////////////
 					//Error, el usize no puede ser negativo
-					return errores.GenerarError(5, op, op, "", entorno)
+					return errores.GenerarError(5, op, op, "", "", "", entorno)
 				}
 				valor.Tipo = result_dominante
 				valor.Valor = valorIzq.(int) - valorDer.(int)
@@ -307,7 +307,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(6, vI, vD, "", entorno)
+			return errores.GenerarError(6, vI, vD, "", "", "", entorno)
 		}
 
 	case "*":
@@ -354,7 +354,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(7, vI, vD, "", entorno)
+			return errores.GenerarError(7, vI, vD, "", "", "", entorno)
 
 		}
 	case "/":
@@ -420,7 +420,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(8, vI, vD, "", entorno)
+			return errores.GenerarError(8, vI, vD, "", "", "", entorno)
 
 		}
 	case "%":
@@ -474,7 +474,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(8, vI, vD, "", entorno)
+			return errores.GenerarError(8, vI, vD, "", "", "", entorno)
 
 		}
 	case "&&", "||":
@@ -489,7 +489,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			vI.Columna = op.Columna
 			vD.Fila = op.Fila
 			vD.Columna = op.Columna
-			return errores.GenerarError(9, vI, vD, "", entorno)
+			return errores.GenerarError(9, vI, vD, "", "", "", entorno)
 
 		}
 
@@ -644,7 +644,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		vI.Columna = op.Columna
 		vD.Fila = op.Fila
 		vD.Columna = op.Columna
-		return errores.GenerarError(11, vI, vD, "", entorno)
+		return errores.GenerarError(11, vI, vD, "", "", "", entorno)
 	}
 	/*Nunca debería de llegar hasta aquí*/
 	return Ast.TipoRetornado{Tipo: Ast.NULL, Valor: nil}

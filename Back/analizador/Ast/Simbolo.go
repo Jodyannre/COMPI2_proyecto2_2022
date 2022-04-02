@@ -17,6 +17,7 @@ type Simbolo struct {
 	Referencia         bool
 	Referencia_puntero *Simbolo
 	Direccion          int
+	TipoDireccion      TipoDato
 }
 
 type SimboloReporte struct {

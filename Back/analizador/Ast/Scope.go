@@ -22,9 +22,10 @@ type Scope struct {
 	Temporales           *arraylist.List
 	Errores              *arraylist.List
 	Consola              string
+	Codigo               string
 	Global               bool
 	Posicion             int
-	P                    int
+	Size                 int
 }
 
 func (scope *Scope) GetTablaModulos() map[string]interface{} {
@@ -41,7 +42,9 @@ func NewScope(name string, prev *Scope) Scope {
 	nuevo.tablaStructs = make(map[string]interface{})
 	nuevo.tablaSimbolosReporte = arraylist.New()
 	nuevo.Global = false
-	nuevo.P = 0
+	nuevo.Size = 0
+	nuevo.Codigo = ""
+	nuevo.Consola = ""
 	return nuevo
 }
 
@@ -418,6 +421,7 @@ func (s *Scope) UpdateScopeGlobal() {
 	}
 	if s != scope_global {
 		scope_global.Consola += s.Consola
+		scope_global.Codigo += s.Codigo
 		for i := 0; i < s.Errores.Len(); i++ {
 			elemento := s.Errores.GetValue(i)
 			scope_global.Errores.Add(elemento)
@@ -426,10 +430,12 @@ func (s *Scope) UpdateScopeGlobal() {
 			elemento := s.tablaSimbolosReporte.GetValue(i)
 			scope_global.tablaSimbolosReporte.Add(elemento)
 		}
-		for i := 0; i < s.Temporales.Len(); i++ {
-			elemento := s.Temporales.GetValue(i)
-			scope_global.Temporales.Add(elemento)
-		}
+		/*
+			for i := 0; i < s.Temporales.Len(); i++ {
+				elemento := s.Temporales.GetValue(i)
+				scope_global.Temporales.Add(elemento)
+			}
+		*/
 	}
 
 }

@@ -61,7 +61,20 @@ func GetTemp() string {
 func GetP() int {
 	newP := P
 	P++
+	PGlobal++
 	return newP
+}
+
+/*Retorna la siguiente dirección del apuntador P (int) para nuevos ámbitos en ejecución*/
+func GetPGlobal() int {
+	newP := PGlobal
+	PGlobal++
+	return newP
+}
+
+/* Reiniciar P cada vez que entra en un nuevo entorno*/
+func ReiniciarP() {
+	P = 0
 }
 
 /* Retorna la siguiente dirección del apuntador H (int)*/
@@ -82,12 +95,19 @@ func ActualizarCodigoAritmetica(op1 TipoRetornado, op2 TipoRetornado, operador s
 		codIzq = op1.Valor.(O3D)
 		codDer = op2.Valor.(O3D)
 		//Recuperar el codigo anterior de las 2 expresiones
-		if op1.Tipo != PRIMITIVO {
-			codigo += codIzq.Codigo + "\n"
-		}
-		if op2.Tipo != PRIMITIVO {
-			codigo += codDer.Codigo + "\n"
-		}
+		/*
+			if op1.Tipo != PRIMITIVO {
+				codigo += codIzq.Codigo + "\n"
+			}
+			if op2.Tipo != PRIMITIVO {
+				codigo += codDer.Codigo + "\n"
+			}
+		*/
+
+		//Agregar el código anterior
+		codigo += codIzq.Codigo + "\n"
+		codigo += codDer.Codigo + "\n"
+
 		//Crear el nuevo código con las referencias de los anteriores
 		referencia = GetTemp()
 		if operador == "/" || operador == "%" {
@@ -127,12 +147,18 @@ func ActualizarCodigoRelacional(op1 TipoRetornado, op2 TipoRetornado, operador s
 	codIzq = op1.Valor.(O3D)
 	codDer = op2.Valor.(O3D)
 
-	if op1.Tipo != PRIMITIVO {
-		codigo += codIzq.Codigo + "\n"
-	}
-	if op2.Tipo != PRIMITIVO {
-		codigo += codDer.Codigo + "\n"
-	}
+	/*
+		if op1.Tipo != PRIMITIVO {
+			codigo += codIzq.Codigo + "\n"
+		}
+		if op2.Tipo != PRIMITIVO {
+			codigo += codDer.Codigo + "\n"
+		}
+	*/
+
+	//Agregar el código anterior
+	codigo += codIzq.Codigo + "\n"
+	codigo += codDer.Codigo + "\n"
 
 	//Get labels
 	lt = GetLabel()

@@ -13,6 +13,7 @@ import (
 type Visitador struct {
 	*parser.BaseNparserListener
 	Consola       string
+	Codigo        string
 	Errores       arraylist.List
 	EntornoGlobal Ast.Scope
 }
@@ -121,6 +122,7 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 
 	EntornoGlobal.UpdateScopeGlobal()
 	v.Consola += EntornoGlobal.Consola
+	v.Codigo += EntornoGlobal.Codigo
 	for i := 0; i < EntornoGlobal.Errores.Len(); i++ {
 		v.Errores.Add(EntornoGlobal.Errores.GetValue(i))
 	}
@@ -139,4 +141,8 @@ func (v *Visitador) GetConsola() string {
 
 func (v *Visitador) UpdateConsola(entrada string) {
 	v.Consola += entrada + "\n"
+}
+
+func (v *Visitador) GetCodigo3D() string {
+	return v.Codigo
 }

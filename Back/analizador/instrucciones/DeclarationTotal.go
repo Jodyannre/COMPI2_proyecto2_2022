@@ -35,23 +35,18 @@ func NewDeclaracionTotal(id string, valor interface{}, tipo Ast.TipoRetornado, m
 func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	//Verificar si es un tipo especial
 	var esEspecial bool = false
+	var cod3D string = ""
+	var obj3DValor, obj3D Ast.O3D
+	var temp string
+	var direccion int
+
 	//Verificar que el id no exista
 
 	existe := scope.Exist_actual(d.Id)
 
 	if existe {
 		//Ya existe y generar error semántico
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		return errores.GenerarError(12, d, d, d.Id, "", "", scope)
 	}
 
 	//Verificar que no es un if expresion
@@ -67,7 +62,9 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	} else {
 		preValor = d.Valor.(Ast.Expresion).GetValue(scope)
 	}
-	valor := preValor.(Ast.TipoRetornado)
+
+	obj3DValor = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+	valor := obj3D.Valor
 
 	//Cambiar valor de i64 a usize si la declaración es usize y el valor que viene es un i64
 	if d.Tipo.Tipo == Ast.USIZE && tipoIn == Ast.I64 {
@@ -84,19 +81,8 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		//No es struct,vector,array, entonces comparar los tipos normalmente
 		if d.Tipo.Tipo != valor.Tipo {
 			//Error de tipos
-			msg := "Semantic error, can't initialize a " + expresiones.Tipo_String(d.Tipo) +
-				" with " + Ast.ValorTipoDato[valor.Tipo] + " value." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
-
+			return errores.GenerarError(13, d, d, d.Id, expresiones.Tipo_String(d.Tipo),
+				Ast.ValorTipoDato[valor.Tipo], scope)
 		}
 
 	} else {
@@ -107,17 +93,8 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 			nTipo := GetTipoEstructura(d.Tipo, scope)
 			errors := ErrorEnTipo(nTipo)
 			if errors.Tipo == Ast.ERROR {
-				msg := "Semantic error, type error." +
-					" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-				nError := errores.NewError(d.Fila, d.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				/*Generar el error*/
+				return errores.GenerarError(14, d, d, "", "", "", scope)
 			}
 			//De lo contrario actualizar el tipo de la declaracion
 			d.Tipo = nTipo
@@ -127,40 +104,12 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		tipoEspecial := GetTipoEspecial(valor.Tipo, valor.Valor, scope)
 		if tipoEspecial.Tipo == Ast.ERROR {
 			//Erro de tipos
-			msg := "Semantic error, type error." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			return errores.GenerarError(14, d, d, "", "", "", scope)
 		}
-
-		//Ejecutare el arrayelementos
-		/*
-			if EsAVelementos(d.Tipo.Tipo) {
-				temp := d.Tipo.Valor.(Ast.Expresion).GetValue(scope)
-				d.Tipo = temp
-			}
-		*/
 
 		if !expresiones.CompararTipos(d.Tipo, tipoEspecial) {
 			//Error, los tipos no son correctos
-			msg := "Semantic error, type error." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			return errores.GenerarError(14, d, d, "", "", "", scope)
 		}
 		esEspecial = true
 	}
@@ -182,7 +131,24 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		nSimbolo.TipoEspecial = d.Tipo
 	}
 
-	//Verificar si es array, vector o struct, para clonarlos
+	//Desde aquí trabajar el C3D
+	//Agregar el código anterior
+	cod3D += obj3DValor.Codigo
+	cod3D += "/******** DECLARACIÓN DE VARIABLE ********/ \n"
+	/*Get el nuevo temporal*/
+	temp = Ast.GetTemp()
+	/*Get la dirección donde se guardara */
+	direccion = scope.Size
+	//Conseguir la dirección del stack donde se va a guardar la nueva variable
+	cod3D += temp + " = " + " P " + strconv.Itoa(direccion) + ";\n"
+	//Se guarda la nueva variable en el stack
+	cod3D += "stack[" + temp + "] = " + obj3DValor.Referencia + ";\n"
+	//Aumentar el puntero
+	scope.Size++
+	cod3D += "/******** FIN DECLARACIÓN DE VARIABLE ********/ \n"
+	//Agregar la dirección al símbolo
+	nSimbolo.Direccion = direccion
+	nSimbolo.TipoDireccion = Ast.STACK
 
 	scope.Add(nSimbolo)
 

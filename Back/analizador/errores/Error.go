@@ -73,7 +73,8 @@ func (op CustomSyntaxError) GetFecha() string {
 	return op.Fecha
 }
 
-func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador string, scope *Ast.Scope) Ast.TipoRetornado {
+func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador string,
+	tipoIString, tipoDString string, scope *Ast.Scope) Ast.TipoRetornado {
 
 	_, tipoI := elemento1.(Ast.Abstracto).GetTipo()
 	_, tipoD := elemento2.(Ast.Abstracto).GetTipo()
@@ -144,6 +145,25 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 			" with " + Ast.ValorTipoDato[tipoD] +
 			" type. -- Line: " + strconv.Itoa(fila) +
 			" Column: " + strconv.Itoa(columna)
+
+	/* Errores en declaraciones*/
+	case 12:
+		msg = "Semantic error, the element \"" + operador + "\" already exist in this scope." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 13:
+		msg = "Semantic error, can't initialize a " + tipoIString +
+			" with " + tipoDString + " value." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 14:
+		msg = "Semantic error, type error." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+		/*Errores en transferencia en lugares incorrectos */
+	case 30:
+		msg = "Semantic error, cannot break outside of a loop." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 31:
+		msg = "Semantic error, MAIN method cannot return a value." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
 	}
 
 	nError := NewError(fila, columna, msg)
