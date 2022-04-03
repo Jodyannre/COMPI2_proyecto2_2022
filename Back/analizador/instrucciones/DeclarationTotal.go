@@ -15,6 +15,7 @@ type DeclaracionTotal struct {
 	Valor         interface{}
 	Fila          int
 	Columna       int
+	Stack         bool
 	ScopeOriginal *Ast.Scope
 }
 
@@ -28,6 +29,7 @@ func NewDeclaracionTotal(id string, valor interface{}, tipo Ast.TipoRetornado, m
 		Tipo:    tipo,
 		Fila:    fila,
 		Columna: columna,
+		Stack:   true,
 	}
 	return nd
 }
@@ -73,6 +75,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 
 	//Revisar si el retorno es un error
 	if valor.Tipo == Ast.ERROR {
+		/////////////////////////////ERROR/////////////////////////////////////
 		return valor
 	}
 
@@ -81,6 +84,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		//No es struct,vector,array, entonces comparar los tipos normalmente
 		if d.Tipo.Tipo != valor.Tipo {
 			//Error de tipos
+			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(13, d, d, d.Id, expresiones.Tipo_String(d.Tipo),
 				Ast.ValorTipoDato[valor.Tipo], scope)
 		}
@@ -94,6 +98,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 			errors := ErrorEnTipo(nTipo)
 			if errors.Tipo == Ast.ERROR {
 				/*Generar el error*/
+				/////////////////////////////ERROR/////////////////////////////////////
 				return errores.GenerarError(14, d, d, "", "", "", scope)
 			}
 			//De lo contrario actualizar el tipo de la declaracion
@@ -104,11 +109,13 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		tipoEspecial := GetTipoEspecial(valor.Tipo, valor.Valor, scope)
 		if tipoEspecial.Tipo == Ast.ERROR {
 			//Erro de tipos
+			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(14, d, d, "", "", "", scope)
 		}
 
 		if !expresiones.CompararTipos(d.Tipo, tipoEspecial) {
 			//Error, los tipos no son correctos
+			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(14, d, d, "", "", "", scope)
 		}
 		esEspecial = true
@@ -132,29 +139,60 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	}
 
 	//Desde aquí trabajar el C3D
-	//Agregar el código anterior
-	cod3D += obj3DValor.Codigo
-	cod3D += "/******** DECLARACIÓN DE VARIABLE ********/ \n"
-	/*Get el nuevo temporal*/
-	temp = Ast.GetTemp()
-	/*Get la dirección donde se guardara */
-	direccion = scope.Size
-	//Conseguir la dirección del stack donde se va a guardar la nueva variable
-	cod3D += temp + " = " + " P " + strconv.Itoa(direccion) + ";\n"
-	//Se guarda la nueva variable en el stack
-	cod3D += "stack[" + temp + "] = " + obj3DValor.Referencia + ";\n"
-	//Aumentar el puntero
-	scope.Size++
-	cod3D += "/******** FIN DECLARACIÓN DE VARIABLE ********/ \n"
-	//Agregar la dirección al símbolo
-	nSimbolo.Direccion = direccion
-	nSimbolo.TipoDireccion = Ast.STACK
+
+	if d.Stack {
+		//Agregar el código anterior
+		cod3D += obj3DValor.Codigo
+		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
+		/*Get el nuevo temporal*/
+		temp = Ast.GetTemp()
+		/*Get la dirección donde se guardara */
+		direccion = scope.Size
+		//Conseguir la dirección del stack donde se va a guardar la nueva variable
+		cod3D += temp + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
+		//Se guarda la nueva variable en el stack
+		cod3D += "stack[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
+		//Aumentar el SP del ambito
+		scope.Size++
+		cod3D += "/***********************************************/\n"
+		//Agregar la dirección al símbolo
+		nSimbolo.Direccion = direccion
+		nSimbolo.TipoDireccion = Ast.STACK
+		//Actualizar el obj3d
+		obj3D.Codigo = cod3D
+		obj3D.Valor = valor
+
+	} else {
+		//Agregar el código anterior
+		cod3D += obj3DValor.Codigo
+		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
+
+		/*Get el nuevo temporal*/
+		temp = Ast.GetTemp()
+		/*Get la dirección donde se guardara */
+		direccion = Ast.GetH()
+		//Conseguir la dirección del stack donde se va a guardar la nueva variable
+		cod3D += temp + " = " + " H;\n"
+		//Se guarda la nueva variable en el stack
+		cod3D += "heap[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
+		//Aumentar H
+		cod3D += "H = H + 1;\n"
+		cod3D += "/***********************************************/\n"
+		//Aumentar el scope
+		scope.Size++
+		//Agregar la dirección al símbolo
+		nSimbolo.Direccion = direccion
+		nSimbolo.TipoDireccion = Ast.HEAP
+		//Actualizar el obj3d
+		obj3D.Codigo = cod3D
+		obj3D.Valor = valor
+	}
 
 	scope.Add(nSimbolo)
 
 	return Ast.TipoRetornado{
-		Valor: true,
-		Tipo:  Ast.EJECUTADO,
+		Valor: obj3D,
+		Tipo:  Ast.DECLARACION,
 	}
 
 }
@@ -168,4 +206,10 @@ func (op DeclaracionTotal) GetColumna() int {
 
 func (d DeclaracionTotal) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 	return Ast.INSTRUCCION, Ast.DECLARACION
+}
+
+func (d DeclaracionTotal) SetHeap() interface{} {
+	Dcopia := d
+	Dcopia.Stack = false
+	return Dcopia
 }

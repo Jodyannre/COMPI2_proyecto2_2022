@@ -14,28 +14,49 @@ type Identificador struct {
 }
 
 func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/*Variables para C3D*/
+	var temp string = Ast.GetTemp()
+	var tempValor string = Ast.GetTemp()
+	var codigo3d string = ""
+	var obj3D Ast.O3D
+
 	//Buscar el símbolo en la tabla de símbolos y retornar el valor
-	//Verificar que el id no exista
-	if scope.Exist(p.Valor) {
-		//Existe el identificar y retornar el valor
-		simbolo := scope.GetSimbolo(p.Valor)
-		return simbolo.Valor.(Ast.TipoRetornado)
-	} else {
+
+	if !scope.Exist(p.Valor) {
 		//No existe el identificador, retornar error semantico
-		msg := "Semantic error, \"" + p.Valor + "\" variable doesn't not exist." +
-			" -- Line: " + strconv.Itoa(p.Fila) +
-			" Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-		//return Ast.TipoRetornado{Valor: nil, Tipo: Ast.NULL}
+		/////////////////////////////ERROR/////////////////////////////////////
+		return errores.GenerarError(20, p, p, p.Valor, "", "", scope)
 	}
+
+	//Existe el identificar y retornar el valor
+	simbolo := scope.GetSimbolo(p.Valor)
+
+	/*Generar codigo 3d*/
+
+	/*Verificar si la variable viene del heap o del stack*/
+
+	if simbolo.TipoDireccion == Ast.STACK {
+		codigo3d = "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
+		codigo3d += tempValor + " = stack[(int)" + temp + "];\n"
+		codigo3d += "/***********************************************/\n"
+	} else {
+		codigo3d = "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d += temp + " = " + strconv.Itoa(simbolo.Direccion) + ";\n"
+		codigo3d += tempValor + " = heap[(int)" + temp + "];\n"
+		codigo3d += "/***********************************************/\n"
+	}
+
+	/*Inicializar el obj3d*/
+	obj3D.Referencia = tempValor
+	obj3D.Valor = simbolo.Valor.(Ast.TipoRetornado)
+	obj3D.Codigo = codigo3d
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.IDENTIFICADOR,
+		Valor: obj3D,
+	}
+
 }
 
 func NewIdentificador(val string, tipo Ast.TipoDato, fila, columna int) Identificador {

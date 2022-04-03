@@ -36,13 +36,18 @@ type Identificadores interface {
 	GetNombre() string
 }
 
+type AbstractoM interface {
+	GetMutable() bool
+}
+
 type AccesosM interface {
 	GetTipoFromAccesoModulo(tipo TipoRetornado, scope *Scope) TipoRetornado
 	GetTipoEstructura(tipo TipoRetornado, scope *Scope) TipoRetornado
 }
 
-type AbstractoM interface {
-	GetMutable() bool
+type AccesosStruct interface {
+	GetStruct(scope *Scope) TipoRetornado
+	GetNombreAtributo() string
 }
 
 type AccesoVectorAbstracto interface {
@@ -53,13 +58,12 @@ type Clones interface {
 	Clonar(scope *Scope) interface{}
 }
 
-type AccesosStruct interface {
-	GetStruct(scope *Scope) TipoRetornado
-	GetNombreAtributo() string
-}
-
 type CrearStruct interface {
 	CrearStructInstancia(plantilla TipoRetornado, atributos *arraylist.List, mutable bool, fila, columna int) interface{}
+}
+
+type DeclaracionLugar interface {
+	SetHeap() interface{}
 }
 
 type Error interface {

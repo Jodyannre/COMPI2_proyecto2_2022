@@ -3,7 +3,6 @@ package instrucciones
 import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
-	"strconv"
 )
 
 type DeclaracionConTipo struct {
@@ -13,6 +12,7 @@ type DeclaracionConTipo struct {
 	Tipo    Ast.TipoRetornado
 	Fila    int
 	Columna int
+	Stack   bool
 }
 
 func NewDeclaracionConTipo(id string, tipo Ast.TipoRetornado, mutable, publico bool,
@@ -24,17 +24,25 @@ func NewDeclaracionConTipo(id string, tipo Ast.TipoRetornado, mutable, publico b
 		Tipo:    tipo,
 		Fila:    fila,
 		Columna: columna,
+		Stack:   true,
 	}
 	return nd
 }
 
 func (d DeclaracionConTipo) Run(scope *Ast.Scope) interface{} {
 	var nSimbolo Ast.Simbolo
+	var obj3D Ast.O3D
+	var direccion int
+	var codigo3d string
 
 	//Verificar que el id no exista
 	existe := scope.Exist_actual(d.Id)
 
-	//No trae ningún valor
+	//Verificar si ya existe
+	if existe {
+		//Ya existe y generar error semántico
+		return errores.GenerarError(12, d, d, d.Id, "", "", scope)
+	}
 
 	//Verificar si el tipo es un acceso a un módulo
 	if d.Tipo.Tipo == Ast.ACCESO_MODULO {
@@ -49,43 +57,50 @@ func (d DeclaracionConTipo) Run(scope *Ast.Scope) interface{} {
 		d.Tipo = nTipo
 	}
 
-	if !existe {
-		//No existe, entonces agregarla
-		//Crear símbolo y agregarlo a la tabla del entorno actual
+	//No existe, entonces agregarla
+	//Crear símbolo y agregarlo a la tabla del entorno actual
 
-		nSimbolo = Ast.Simbolo{
-			Identificador: d.Id,
-			Valor:         Ast.TipoRetornado{Valor: nil, Tipo: Ast.NULL},
-			Fila:          d.Fila,
-			Columna:       d.Columna,
-			Tipo:          d.Tipo.Tipo,
-			Mutable:       d.Mutable,
-			Publico:       d.Publico,
-			Entorno:       scope,
-		}
-
-		//Verificar si no es vector, array o struct para agregar el tipo especial
-		if EsTipoEspecial(d.Tipo.Tipo) {
-			nSimbolo.TipoEspecial = d.Tipo
-		}
-		scope.Add(nSimbolo)
-	} else {
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+	nSimbolo = Ast.Simbolo{
+		Identificador: d.Id,
+		Valor:         Ast.TipoRetornado{Valor: nil, Tipo: Ast.NULL},
+		Fila:          d.Fila,
+		Columna:       d.Columna,
+		Tipo:          d.Tipo.Tipo,
+		Mutable:       d.Mutable,
+		Publico:       d.Publico,
+		Entorno:       scope,
 	}
 
+	//Verificar si no es vector, array o struct para agregar el tipo especial
+	if EsTipoEspecial(d.Tipo.Tipo) {
+		nSimbolo.TipoEspecial = d.Tipo
+	}
+
+	/*Aquí esta todo lo de C3D*/
+	if d.Stack {
+		direccion = scope.Size
+		nSimbolo.Direccion = direccion
+		nSimbolo.TipoDireccion = Ast.STACK
+		//Actualizar el obj3d
+		obj3D = ValorPorDefecto(d.Tipo.Tipo, scope)
+		nSimbolo.Valor = obj3D.Valor
+	} else {
+		direccion = Ast.GetH()
+		nSimbolo.Direccion = direccion
+		nSimbolo.TipoDireccion = Ast.HEAP
+		/*Código del aumento del heap*/
+		codigo3d = "H = H + 1;\n"
+		//Actualizar el obj3d
+		obj3D = ValorPorDefecto(d.Tipo.Tipo, scope)
+		obj3D.Codigo = codigo3d
+		nSimbolo.Valor = obj3D.Valor
+	}
+
+	scope.Add(nSimbolo)
+
 	return Ast.TipoRetornado{
-		Tipo:  Ast.EJECUTADO,
-		Valor: true,
+		Tipo:  Ast.DECLARACION,
+		Valor: obj3D,
 	}
 }
 
@@ -100,35 +115,8 @@ func (d DeclaracionConTipo) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 	return Ast.INSTRUCCION, Ast.DECLARACION
 }
 
-/*
-func ValorPorDefecto(tipo Ast.TipoRetornado)Ast.TipoRetornado{
-	var retorno Ast.TipoRetornado
-	switch tipo.Tipo{
-	case Ast.STRUCT:
-		estructura :=
-		retorno.Tipo = Ast.STRUCT
-
-	case Ast.I64:
-		retorno.Tipo = Ast.I64
-		retorno.Valor = 0
-	case Ast.F64:
-		retorno.Tipo = Ast.F64
-		retorno.Valor = float64(0)
-	case Ast.CHAR:
-		retorno.Tipo = Ast.CHAR
-		retorno.Valor = ""
-	case Ast.STRING:
-		retorno.Tipo = Ast.STRING
-		retorno.Valor = ""
-	case Ast.STR:
-		retorno.Tipo = Ast.STR
-		retorno.Valor = ""
-	case Ast.BOOLEAN:
-		retorno.Tipo = Ast.BOOLEAN
-		retorno.Valor = false
-	case Ast.USIZE:
-		retorno.Tipo = Ast.USIZE
-		retorno.Valor = 0
-	}
+func (d DeclaracionConTipo) SetHeap() interface{} {
+	Dcopia := d
+	Dcopia.Stack = false
+	return Dcopia
 }
-*/

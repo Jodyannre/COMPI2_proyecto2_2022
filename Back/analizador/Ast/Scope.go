@@ -766,3 +766,15 @@ func (s *Scope) AgregarPrint(cadena string) {
 
 	scope_global.Consola += cadena
 }
+
+func (s *Scope) GetNivel() int {
+	salida := 0
+	var scope_global *Scope
+	if s.prev != nil {
+		for scope_global = s; scope_global.prev != nil; scope_global = scope_global.prev {
+			//Buscando el scope global
+			salida++
+		}
+	}
+	return salida
+}

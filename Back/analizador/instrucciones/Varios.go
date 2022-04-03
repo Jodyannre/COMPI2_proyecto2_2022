@@ -3,7 +3,31 @@ package instrucciones
 import (
 	"Back/analizador/Ast"
 	"Back/analizador/expresiones"
+	"strconv"
 )
+
+func ErrorEnTipo(tipo Ast.TipoRetornado) Ast.TipoRetornado {
+	if tipo.Tipo == Ast.ERROR {
+		return tipo
+	}
+	if expresiones.EsTipoFinal(tipo.Tipo) {
+		return Ast.TipoRetornado{
+			Tipo:  Ast.BOOLEAN,
+			Valor: true,
+		}
+	}
+	return ErrorEnTipo(tipo.Valor.(Ast.TipoRetornado))
+}
+
+func EsAVelementos(tipo Ast.TipoDato) bool {
+	switch tipo {
+	case Ast.ARRAY_ELEMENTOS, Ast.ARRAY_FAC, Ast.VEC_ELEMENTOS,
+		Ast.VEC_FAC:
+		return true
+	default:
+		return false
+	}
+}
 
 func EsTipoEspecial(tipo Ast.TipoDato) bool {
 	switch tipo {
@@ -111,25 +135,81 @@ func GetTipoEstructura(tipo Ast.TipoRetornado, scope *Ast.Scope) Ast.TipoRetorna
 	}
 }
 
-func ErrorEnTipo(tipo Ast.TipoRetornado) Ast.TipoRetornado {
-	if tipo.Tipo == Ast.ERROR {
-		return tipo
-	}
-	if expresiones.EsTipoFinal(tipo.Tipo) {
-		return Ast.TipoRetornado{
-			Tipo:  Ast.BOOLEAN,
-			Valor: true,
-		}
-	}
-	return ErrorEnTipo(tipo.Valor.(Ast.TipoRetornado))
-}
-
-func EsAVelementos(tipo Ast.TipoDato) bool {
+func ValorPorDefecto(tipo Ast.TipoDato, scope *Ast.Scope) Ast.O3D {
+	var retorno Ast.TipoRetornado
+	var direccion int = scope.Size
+	var obj3D Ast.O3D
+	var temp = Ast.GetTemp()
+	var temp2 string
+	var codigo string
 	switch tipo {
-	case Ast.ARRAY_ELEMENTOS, Ast.ARRAY_FAC, Ast.VEC_ELEMENTOS,
-		Ast.VEC_FAC:
-		return true
-	default:
-		return false
+	case Ast.I64:
+		codigo += "/*************************DECLARACION DEFAULT*/\n"
+		codigo += temp + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp + "] = 0;\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp
+		retorno.Tipo = Ast.I64
+		retorno.Valor = 0
+	case Ast.F64:
+		codigo += "/*************************DECLARACION DEFAULT*/\n"
+		codigo += temp + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp + "] = 0.0;\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp
+		retorno.Tipo = Ast.F64
+		retorno.Valor = float64(0)
+	case Ast.CHAR:
+		codigo += "/*************************DECLARACION DEFAULT*/\n"
+		codigo += temp + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp + "] = 0;\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp
+		retorno.Tipo = Ast.CHAR
+		retorno.Valor = ""
+	case Ast.STRING, Ast.STR:
+		temp2 = Ast.GetTemp()
+		codigo += "/************AGREGANDO UN STRING/STR AL HEAP*/\n"
+		codigo += temp + " = " + "H;\n"
+		codigo += "heap[(int)H] = 0;\n"
+		codigo += "H = H + 1;\n"
+		codigo += "/********************************************/\n"
+		codigo += "/*************************DECLARACION DEFAULT*/\n"
+		codigo += temp2 + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp2 + "] = " + temp + ";\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp2
+		retorno.Tipo = tipo
+		retorno.Valor = ""
+	case Ast.BOOLEAN:
+		codigo += "/*************************DECLARACION DEFAULT*/\n"
+		codigo += temp + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp + "] = 0;\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp
+		retorno.Tipo = Ast.BOOLEAN
+		retorno.Valor = false
+	case Ast.USIZE:
+		codigo += "/************************DECLARACION DEFAULT*/\n"
+		codigo += temp + " = P + " + strconv.Itoa(direccion) + ";\n"
+		codigo += "stack[(int)" + temp + "] = 0;\n"
+		codigo += "/********************************************/\n"
+		scope.Size++
+		obj3D.Codigo = codigo
+		obj3D.Referencia = temp
+		retorno.Tipo = Ast.USIZE
+		retorno.Valor = 0
 	}
+	obj3D.Valor = retorno
+	return obj3D
 }

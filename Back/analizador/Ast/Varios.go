@@ -1,6 +1,9 @@
 package Ast
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+)
 
 func EsTransferencia(tipo TipoDato) bool {
 	if tipo == BREAK ||
@@ -57,18 +60,48 @@ func GetTemp() string {
 	return newTemporal
 }
 
+func ResetAll() {
+	Label = 1
+	Temporal = 1
+	Temporales = ""
+	P = 0
+	H = 0
+}
+
+func GetEncabezado() string {
+	salida := "#include <stdio.h>\n"
+	salida += "float stack[10000];\n"
+	salida += "float heap[10000];\n"
+	salida += "float P;\n"
+	salida += "float H;\n"
+	salida += Temporales + ";\n\n"
+	salida += "int main(){\n"
+	return salida
+}
+
+func GetFinEncabezado() string {
+	salida := "\treturn 0;\n"
+	salida += "}\n"
+	return salida
+}
+
+func Indentar(nivel int, cadena string) string {
+	ident := ""
+	salida := ""
+	for i := 0; i < nivel; i++ {
+		ident += "\t"
+	}
+
+	for _, linea := range strings.Split(strings.TrimSuffix(cadena, "\n"), "\n") {
+		salida += ident + linea + "\n"
+	}
+	return salida
+}
+
 /*Retorna la siguiente dirección del apuntador P (int)*/
 func GetP() int {
 	newP := P
 	P++
-	PGlobal++
-	return newP
-}
-
-/*Retorna la siguiente dirección del apuntador P (int) para nuevos ámbitos en ejecución*/
-func GetPGlobal() int {
-	newP := PGlobal
-	PGlobal++
 	return newP
 }
 

@@ -122,7 +122,12 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 
 	EntornoGlobal.UpdateScopeGlobal()
 	v.Consola += EntornoGlobal.Consola
+	//Agregar código y encabezado en C
+	v.Codigo += Ast.GetEncabezado()
 	v.Codigo += EntornoGlobal.Codigo
+	v.Codigo += Ast.GetFinEncabezado()
+	//Reiniciar todas las variables
+	Ast.ResetAll()
 	for i := 0; i < EntornoGlobal.Errores.Len(); i++ {
 		v.Errores.Add(EntornoGlobal.Errores.GetValue(i))
 	}

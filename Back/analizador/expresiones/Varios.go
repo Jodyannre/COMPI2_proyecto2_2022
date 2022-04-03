@@ -212,7 +212,11 @@ func Primitivo_To_String(valor interface{}, tipo Ast.TipoDato) string {
 		char := int(tmp[0])
 		salida = strconv.Itoa(char)
 	case Ast.BOOLEAN:
-		salida = strconv.FormatBool(valor.(bool))
+		if valor.(bool) {
+			salida = "1"
+		} else {
+			salida = "0"
+		}
 	}
 	return salida
 }

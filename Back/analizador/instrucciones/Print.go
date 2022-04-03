@@ -57,7 +57,13 @@ func (i PrintF) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 }
 
 func (p Print) Run(scope *Ast.Scope) interface{} {
+	var obj3d, obj3dValor, obj3dExp Ast.O3D
+	var codigo3d string
+	var newExp expresiones.Primitivo
+	var resExp Ast.TipoRetornado
 	resultado_expresion := p.Expresiones.GetValue(scope)
+	obj3dValor = resultado_expresion.Valor.(Ast.O3D)
+	resultado_expresion = obj3dValor.Valor
 	valor := ""
 	//Verificar que no sea un identificador
 	_, tipoParticular := p.Expresiones.(Ast.Abstracto).GetTipo()
@@ -104,9 +110,22 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 	//Actualizar consola del scope global directamente
 	//scope.Consola += valor + "\n"
 	scope.AgregarPrint(valor + "\n")
+
+	/*Trabajar todo el código 3d aquí */
+	/************************************************/
+	//Conseguir el código 3d de estos elementos
+	newExp = expresiones.NewPrimitivo(valor, Ast.STRING, 0, 0)
+	resExp = newExp.GetValue(scope)
+	obj3dExp = resExp.Valor.(Ast.O3D)
+	codigo3d += obj3dExp.Codigo
+	codigo3d += GetC3DExpresion(obj3dExp)
+	codigo3d += "printf (\"\\n\");\n"
+	/************************************************/
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.PRINT, Valor: true}
 	return Ast.TipoRetornado{
-		Tipo:  Ast.EJECUTADO,
-		Valor: true,
+		Tipo:  Ast.PRINT,
+		Valor: obj3d,
 	}
 }
 
@@ -114,6 +133,9 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	//Formatos de los regex
 	var salida string
 	var valor interface{}
+	var obj3d Ast.O3D
+	var obj3dValor Ast.O3D
+	var codigo3d string
 	regex, _ := regexp.Compile("{ *}|{:[\x3F]}")
 	posiciones_regex := regex.FindAllStringIndex(p.Cadena, -1)
 	encontrados := regex.MatchString(p.Cadena)    //Formato para encontrar los {} y {:?}
@@ -162,7 +184,14 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 			//En el primero agrego el primer elemento
 			resultado := p.GetCompareValues(scope, i, posiciones_regex[i])
 			if resultado.Tipo != Ast.ERROR {
-				salida += resultado.Valor.(string)
+				/************************************************/
+				//Conseguir el código 3d de estos elementos
+				obj3dExp := resultado.Valor.(Ast.O3D)
+				cadena := To_String(obj3dExp.Valor, scope)
+				codigo3d += obj3dExp.Codigo
+				codigo3d += GetC3DExpresion(obj3dExp)
+				/************************************************/
+				salida += cadena.(Ast.TipoRetornado).Valor.(string)
 			} else {
 				return resultado
 			}
@@ -172,11 +201,21 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 
 			if i >= p.Expresiones.Len() {
 				salida += elementos_string[i]
+				/************************************************/
+				//Conseguir el código 3d de estos elementos
+				newExp := expresiones.NewPrimitivo(elementos_string[i], Ast.STRING, 0, 0)
+				resExp := newExp.GetValue(scope)
+				obj3dExp := resExp.Valor.(Ast.O3D)
+				codigo3d += obj3dExp.Codigo
+				codigo3d += GetC3DExpresion(obj3dExp)
+				/************************************************/
 			} else {
 				resultado := p.GetCompareValues(scope, i, posiciones_regex[i])
 				if resultado.Tipo != Ast.ERROR {
-					valor = p.Expresiones.GetValue(i).(Ast.Expresion).GetValue(scope)
-					preCadena = To_String(valor.(Ast.TipoRetornado), scope).(Ast.TipoRetornado)
+					//valor = p.Expresiones.GetValue(i).(Ast.Expresion).GetValue(scope)
+					obj3dValor = resultado.Valor.(Ast.O3D)
+					valor = obj3dValor.Valor
+					preCadena = To_String(obj3dValor.Valor, scope).(Ast.TipoRetornado)
 					//valor = p.Expresiones.GetValue(i).(Ast.Expresion).GetValue(scope)
 					if preCadena.Tipo == Ast.ERROR {
 						//Crear el error y retornarlo
@@ -199,14 +238,27 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 					return resultado
 				}
 				salida += elementos_string[i] + cadena
+				/************************************************/
+				//Conseguir el código 3d de los elementos
+				newExp := expresiones.NewPrimitivo(elementos_string[i], Ast.STRING, 0, 0)
+				resExp := newExp.GetValue(scope)
+				obj3dExp := resExp.Valor.(Ast.O3D)
+				codigo3d += obj3dExp.Codigo
+				codigo3d += GetC3DExpresion(obj3dExp)
+				/************************************************/
+				codigo3d += obj3dValor.Codigo
+				codigo3d += GetC3DExpresion(obj3dValor)
 			}
 		}
 	}
 	//scope.Consola += salida + "\n"
 	scope.AgregarPrint(salida + "\n")
+	codigo3d += "printf (\"\\n\");\n"
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.STRING, Valor: "true"}
 	return Ast.TipoRetornado{
-		Valor: true,
-		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
+		Tipo:  Ast.PRINTF,
 	}
 }
 
@@ -326,9 +378,12 @@ var validacion_String = [2][11]Ast.TipoDato{
 }
 
 func (p PrintF) GetCompareValues(scope *Ast.Scope, i int, posiciones []int) Ast.TipoRetornado {
+	var obj3d Ast.O3D
 	salida := ""
 	//En el primero agrego el primer elemento
 	valor := p.Expresiones.GetValue(i).(Ast.Expresion).GetValue(scope)
+	obj3d = valor.Valor.(Ast.O3D)
+	valor = obj3d.Valor
 	//Verificar que el tipo espera es el que se va a imprimir
 	subString := p.Cadena[posiciones[0]:posiciones[1]]
 	subString = strings.Replace(subString, " ", "", -1)
@@ -355,7 +410,7 @@ func (p PrintF) GetCompareValues(scope *Ast.Scope, i int, posiciones []int) Ast.
 		case Ast.BOOLEAN:
 			salida += strconv.FormatBool(valor.Valor.(bool))
 		case Ast.VECTOR, Ast.ARRAY:
-			salida = To_String(valor, scope).(Ast.TipoRetornado).Valor.(string)
+			salida += To_String(valor, scope).(Ast.TipoRetornado).Valor.(string)
 		case Ast.STRUCT:
 			salida += valor.Valor.(Ast.Structs).GetPlantilla(scope)
 		default:
@@ -393,9 +448,15 @@ func (p PrintF) GetCompareValues(scope *Ast.Scope, i int, posiciones []int) Ast.
 			Valor: nError,
 		}
 	}
+	/*
+		obj3d.Valor = Ast.TipoRetornado{
+			Valor: valor,
+			Tipo:  valor.Tipo,
+		}
+	*/
 	return Ast.TipoRetornado{
-		Valor: salida,
-		Tipo:  Ast.STRING,
+		Valor: obj3d,
+		Tipo:  valor.Tipo,
 	}
 }
 
@@ -411,4 +472,52 @@ func (op PrintF) GetFila() int {
 }
 func (op PrintF) GetColumna() int {
 	return op.Columna
+}
+
+func GetC3DExpresion(obj3d Ast.O3D) string {
+	var codigo3d string
+	referencia := obj3d.Referencia
+	valor := obj3d.Valor
+	c := "c"
+	d := "d"
+	f := "f"
+	p := "%%"
+	switch valor.Tipo {
+	case Ast.STRING, Ast.STR:
+		temp := Ast.GetTemp()
+		temp2 := Ast.GetTemp()
+		lt := Ast.GetLabel()
+		lf := Ast.GetLabel()
+		salto := Ast.GetLabel()
+		codigo3d += "/******************************IMPRESION CADENA*/\n"
+		codigo3d += salto + ":\n"
+		codigo3d += temp + " = heap[(int)" + referencia + "]; //Get letra\n"
+		codigo3d += "if (" + temp + "!=0) goto " + lt + ";\n"
+		codigo3d += "goto " + lf + ";\n"
+		codigo3d += lt + ":\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + temp + "); //Imprimir la letra\n"
+		codigo3d += temp2 + " = " + referencia + "+ 1; //Actualizar posicion\n"
+		codigo3d += referencia + " = " + temp2 + ";\n"
+		codigo3d += "goto " + salto + ";\n"
+		codigo3d += lf + ":\n"
+		codigo3d += "/***********************************************/\n"
+	case Ast.I64, Ast.USIZE:
+		codigo3d += "/*********************************IMPRESION I64*/\n"
+		codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
+		codigo3d += "/***********************************************/\n"
+	case Ast.F64:
+		codigo3d += "/*********************************IMPRESION F64*/\n"
+		codigo3d += "printf(\"" + p + f + "\"," + referencia + "); //Imprimir el numero\n"
+		codigo3d += "/***********************************************/\n"
+	case Ast.BOOLEAN:
+		codigo3d += "/********************************IMPRESION BOOL*/\n"
+		codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
+		codigo3d += "/***********************************************/\n"
+	case Ast.CHAR:
+		codigo3d += "/********************************IMPRESION CHAR*/\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + referencia + "); //Imprimir el numero\n"
+		codigo3d += "/***********************************************/\n"
+	}
+
+	return codigo3d
 }

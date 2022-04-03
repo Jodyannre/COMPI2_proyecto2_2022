@@ -29,8 +29,8 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Primero crear el nuevo scope main
 	newScope := Ast.NewScope("Main", scope)
 	//Le agrego su posición en el stack, reinicio el puntero p para simular el nuevo ambito
-	newScope.Posicion = Ast.GetPGlobal()
-	Ast.ReiniciarP()
+	newScope.Posicion = scope.Size
+
 	var actual interface{}
 	var tipoGeneral interface{}
 	var respuesta interface{}
@@ -68,7 +68,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		}
 
 		//Agregar el código que trae la respuesta al entorno global para luego imprimirlo en la web
-		newScope.Codigo = respuesta.(Ast.TipoRetornado).Valor.(Ast.O3D).Codigo
+		newScope.Codigo += Ast.Indentar(newScope.GetNivel(), respuesta.(Ast.TipoRetornado).Valor.(Ast.O3D).Codigo)
 	}
 	newScope.UpdateScopeGlobal()
 	return Ast.TipoRetornado{

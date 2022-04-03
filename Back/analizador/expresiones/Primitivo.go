@@ -32,17 +32,20 @@ func (p Primitivo) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 		arrayAscii := strings.Split(cadenaAscii, ",")
 		codigo := ""
 		//Inicializar la cadena con el valor inicial del H guardado en el temporal
-		codigo += "/*******AGREGANDO UN STRING/STR AL HEAP*******/\n"
+		codigo += "/***************AGREGANDO UN STRING/STR AL HEAP*/\n"
 		codigo += temp + " = " + "H;\n"
 
 		for _, valor := range arrayAscii {
-			codigo += "heap[H] = " + valor + ";\n"
+			codigo += "heap[(int)H] = " + valor + "; //Letra\n"
 			codigo += "H = H + 1;\n"
+			Ast.GetH()
 		}
 		//Agregar caracter para saber que la cadena ha terminado
-		codigo += "heap[H] = 0;\n"
+		codigo += "heap[(int)H] = 0;\n"
 		codigo += "H = H + 1;\n"
-		codigo += "/*******FIN DEL STRING/STR*******/\n"
+		Ast.GetH()
+		codigo += "/***********************************************/\n"
+
 		obj.Codigo = codigo
 		obj.Referencia = temp
 	}

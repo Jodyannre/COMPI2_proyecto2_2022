@@ -75,7 +75,7 @@ func (op CustomSyntaxError) GetFecha() string {
 
 func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador string,
 	tipoIString, tipoDString string, scope *Ast.Scope) Ast.TipoRetornado {
-
+	var obj3d Ast.O3D
 	_, tipoI := elemento1.(Ast.Abstracto).GetTipo()
 	_, tipoD := elemento2.(Ast.Abstracto).GetTipo()
 	fila := elemento1.(Ast.Abstracto).GetFila()
@@ -157,6 +157,43 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 	case 14:
 		msg = "Semantic error, type error." +
 			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+		/*Error en identificadores*/
+	case 20:
+		msg = "Semantic error, \"" + operador + "\" variable doesn't not exist." +
+			" -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+		/*Error de mutabilidad en asignación*/
+	case 21:
+		msg = "Semantic error, can't modify a non-mutable " + operador +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 22:
+		msg = "Semantic error, can't assign Vec<" + tipoIString + ">" +
+			" to Vec<" + tipoDString + ">" +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 23:
+		msg = "Semantic error, the element \"" + operador + "\" doesn't exist in any scope." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 24:
+		msg = "Semantic error, can't assign " + tipoIString +
+			" type to " + tipoDString +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 25:
+		msg = "Semantic error, ARRAY dimensions don't match." +
+			" -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 26:
+		msg = "Semantic error, can't assign ARRAY[" + tipoIString + "]" +
+			" to ARRAY[" + tipoDString + "]" +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 27:
+		msg = "Semantic error, can't store Vec<" + tipoIString +
+			"> to a Vec<" + tipoDString + ">" +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
 		/*Errores en transferencia en lugares incorrectos */
 	case 30:
 		msg = "Semantic error, cannot break outside of a loop." +
@@ -171,8 +208,14 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 	nError.Ambito = scope.GetTipoScope()
 	scope.Errores.Add(nError)
 	scope.Consola += msg + "\n"
-	return Ast.TipoRetornado{
+
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.ERROR,
 		Valor: nError,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ERROR,
+		Valor: obj3d,
 	}
 }

@@ -471,10 +471,18 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 }
 
 func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetornado {
+	/*Variables 3d*/
+	var obj3d Ast.O3D
+	var obj3dValor Ast.O3D
+	var codigo3d string
+	var referencia string
+
 	//Verificar que el id  exista
 	existe := scope.Exist(id)
 	//Obtener el valor del id
 	simbolo_id := scope.GetSimbolo(id)
+	//Obtener el código 3d de conseguir la variable
+	obj3d = GenerarC3DGetSimbolo(simbolo_id)
 	//Verificar que los tipos sean correctos
 	//Primero verificar que no es un if expresion
 	_, tipoIn := a.Valor.(Ast.Abstracto).GetTipo()
@@ -484,24 +492,15 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 	} else {
 		preValor = a.Valor.(Ast.Expresion).GetValue(scope)
 	}
-	valor := preValor.(Ast.TipoRetornado)
+	obj3dValor = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+	valor := obj3dValor.Valor
 
 	if existe {
 		//Primero verificar si es mutable
 		if !simbolo_id.Mutable {
 			//No es mutable, error semántico
-			msg := "Semantic error, can't modify a non-mutable " + Ast.ValorTipoDato[int(simbolo_id.Tipo)] +
-				" type. -- Line: " + strconv.Itoa(a.Fila) +
-				" Column: " + strconv.Itoa(a.Columna)
-			nError := errores.NewError(a.Fila, a.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////ERROR/////////////////////////////////////
+			return errores.GenerarError(21, a, a, Ast.ValorTipoDato[int(simbolo_id.Tipo)], "", "", scope)
 		}
 		//Primero verificar
 		//Existe, ahora verificar los tipos
@@ -517,19 +516,9 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 					//Y la otra es que si traiga un tipo diferente
 					if vectorEntrante.Tipo != Ast.INDEFINIDO {
 						//Generar el Error, de lo contrario todo bien
-						msg := "Semantic error, can't assign Vector<" + Ast.ValorTipoDato[vectorEntrante.Tipo] + ">" +
-							" to Vector<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-							" type. -- Line: " + strconv.Itoa(a.Fila) +
-							" Column: " + strconv.Itoa(a.Columna)
-						nError := errores.NewError(a.Fila, a.Columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(22, a, a, "", Ast.ValorTipoDato[vectorEntrante.Tipo],
+							Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
 					} else {
 						//Copiar los valores del vector guardado al nuevo vector entrante
 						CopiarVector(&vectorGuardado, &vectorEntrante, simbolo_id)
@@ -543,21 +532,10 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 					if vectorGuardado.Tipo != fn_vectores.GetTipoVector(vectorEntrante) ||
 						!fn_vectores.GetNivelesVector(vectorGuardado, vectorEntrante) {
 						//Error no se pueden guardar 2 tipos de vectores diferentes
-						fila := vectorEntrante.GetFila()
-						columna := vectorEntrante.GetColumna()
-						msg := "Semantic error, can't store VECTOR<" + Ast.ValorTipoDato[fn_vectores.GetTipoVector(vectorEntrante)] +
-							"> to a VECTOR<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-							". -- Line: " + strconv.Itoa(fila) +
-							" Column: " + strconv.Itoa(columna)
-						nError := errores.NewError(fila, columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(25, a, a, id, Ast.ValorTipoDato[fn_vectores.GetTipoVector(vectorEntrante)],
+							Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
+
 					} else {
 						CopiarVector(&vectorGuardado, &vectorEntrante, simbolo_id)
 						valor = Ast.TipoRetornado{
@@ -583,19 +561,9 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 					//Y la otra es que si traiga un tipo diferente
 					if arrayEntrante.TipoArray != Ast.INDEFINIDO {
 						//Generar el Error, de lo contrario todo bien
-						msg := "Semantic error, can't assign ARRAY[" + Ast.ValorTipoDato[arrayEntrante.TipoArray] + "]" +
-							" to ARRAY[" + Ast.ValorTipoDato[arrayGuardado.TipoArray] + "]" +
-							" type. -- Line: " + strconv.Itoa(a.Fila) +
-							" Column: " + strconv.Itoa(a.Columna)
-						nError := errores.NewError(a.Fila, a.Columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(26, a, a, id, Ast.ValorTipoDato[arrayEntrante.TipoArray],
+							Ast.ValorTipoDato[arrayGuardado.TipoArray], scope)
 					} else {
 						//Copiar los valores del vector guardado al nuevo vector entrante
 						CopiarArray(arrayGuardado, arrayEntrante, simbolo_id)
@@ -608,18 +576,8 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 					//Comparar las dimensiones del array
 					verificarArray := CompararArrays(arrayGuardado, arrayEntrante, scope)
 					if !verificarArray {
-						msg := "Semantic error, ARRAY dimensions don't match." +
-							" -- Line: " + strconv.Itoa(a.Fila) +
-							" Column: " + strconv.Itoa(a.Columna)
-						nError := errores.NewError(a.Fila, a.Columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(25, a, a, id, "", "", scope)
 					}
 
 					CopiarArray(arrayGuardado, arrayEntrante, simbolo_id)
@@ -629,6 +587,44 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 					}
 				}
 			}
+
+			/*Trabajar el todo el cod3d desde aqui*/
+			codigo3d += obj3d.Codigo
+			codigo3d += obj3dValor.Codigo
+
+			/*Si es string verificar el tamaño del entrante y del que esta guardado*/
+			switch simbolo_id.Tipo {
+			case Ast.STRING, Ast.STR:
+				//Comparar los len de los string
+				esMenor := false
+				stringGuardado := simbolo_id.Valor.(Ast.TipoRetornado).Valor.(string)
+				stringValor := valor.Valor.(string)
+				if len(stringGuardado) < len(stringValor) {
+					esMenor = true
+				}
+				/*Get posicion, codigo3d y la nueva referencia*/
+				cod, ref := GetCod3DString(obj3d.Referencia, obj3dValor.Referencia, esMenor)
+				/*Actualizar referencia, codigo y posicion*/
+				referencia = ref
+				codigo3d += cod
+			case Ast.ARRAY:
+			case Ast.VECTOR:
+			case Ast.STRUCT:
+
+			}
+
+			if simbolo_id.TipoDireccion == Ast.STACK {
+				//Se va a guardar en el stack
+				temp := Ast.GetTemp()
+				codigo3d += temp + " = P + " + strconv.Itoa(simbolo_id.Direccion) + ";\n"
+				codigo3d += "stack[(int)" + temp + "] = " + referencia + ";\n"
+			} else {
+				//Se va a guardar en el heap
+				temp := Ast.GetTemp()
+				codigo3d += temp + " =" + strconv.Itoa(simbolo_id.Direccion) + ";\n"
+				codigo3d += "heap[(int)" + temp + "] = " + referencia + ";\n"
+			}
+
 			//Copiar valor
 			nuevoValor := valor
 			simbolo_id.Valor = nuevoValor
@@ -639,38 +635,20 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 				return valor
 			}
 			//Error de tipos, generar un error semántico
-			//fmt.Println("Erro de tipos")
-			msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-				" type to " + Ast.ValorTipoDato[int(simbolo_id.Valor.(Ast.TipoRetornado).Tipo)] +
-				" type. -- Line: " + strconv.Itoa(a.Fila) +
-				" Column: " + strconv.Itoa(a.Columna)
-			nError := errores.NewError(a.Fila, a.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////ERROR/////////////////////////////////////
+			return errores.GenerarError(24, a, a, id, Ast.ValorTipoDato[int(valor.Tipo)],
+				Ast.ValorTipoDato[int(simbolo_id.Valor.(Ast.TipoRetornado).Tipo)], scope)
 		}
 	} else {
 		//No existe, generar un error semántico
-		msg := "Semantic error, the element \"" + id + "\" doesn't exist in any scope." +
-			" -- Line:" + strconv.Itoa(a.Fila) + " Column: " + strconv.Itoa(a.Columna)
-		nError := errores.NewError(a.Fila, a.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		/////////////////////////////ERROR/////////////////////////////////////
+		return errores.GenerarError(23, a, a, id, "", "", scope)
 	}
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = valor
 	return Ast.TipoRetornado{
-		Tipo:  Ast.EJECUTADO,
-		Valor: true,
+		Tipo:  Ast.ASIGNACION,
+		Valor: obj3d,
 	}
 }
 
@@ -888,4 +866,75 @@ func CopiarArray(arrayGuardado expresiones.Array, arrayEntrante expresiones.Arra
 	arrayEntrante.Mutable = simbolo.Mutable
 	arrayEntrante.Tipo = arrayGuardado.Tipo
 	arrayEntrante.TipoArray = arrayGuardado.TipoArray
+}
+
+func GenerarC3DGetSimbolo(simbolo Ast.Simbolo) Ast.O3D {
+	/*Variables para C3D*/
+	var obj3d Ast.O3D
+	var temp string = Ast.GetTemp()
+	//var tempValor string = Ast.GetTemp()
+	var codigo3d string = ""
+	/*Verificar si la variable viene del heap o del stack*/
+
+	if simbolo.TipoDireccion == Ast.STACK {
+		codigo3d = "/*****************GET VARIABLE CON IDENTIFICADOR*/\n"
+
+		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
+		//codigo3d += tempValor + " = stack[(int)" + temp + "];\n"
+		codigo3d += "/***********************************************/\n"
+	} else {
+		codigo3d = "/*****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d += temp + " = " + strconv.Itoa(simbolo.Direccion) + ";\n"
+		//codigo3d += tempValor + " = heap[(int)" + temp + "];\n"
+		codigo3d += "/***********************************************/\n"
+	}
+
+	/*Inicializar el obj3d*/
+	obj3d.Referencia = temp
+	obj3d.Valor = simbolo.Valor.(Ast.TipoRetornado)
+	obj3d.Codigo = codigo3d
+
+	return obj3d
+}
+
+func GetCod3DString(posSimbolo, posValor string, nuevaPos bool) (string, string) {
+	var temp, temp1, temp2, temp3, temp4, temp5 = "", "", "", "", "", ""
+	var lt = ""
+	var lf = ""
+	var salto = ""
+	codigo3d := "/*****************************ASIGNACIÓN STRING*/\n"
+	temp = Ast.GetTemp()
+	temp1 = Ast.GetTemp()
+	temp2 = Ast.GetTemp()
+	temp3 = Ast.GetTemp()
+	temp4 = Ast.GetTemp()
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
+	salto = Ast.GetLabel()
+
+	if nuevaPos {
+		temp5 = Ast.GetTemp()
+		codigo3d += temp5 + " = H;\n"
+		codigo3d += "H = H + 1;\n"
+		Ast.GetH()
+		posSimbolo = temp5
+	}
+	codigo3d += temp + " = " + posSimbolo + "; //Guardar la referencia \n"
+	codigo3d += salto + ":\n"
+	codigo3d += temp1 + " = " + "heap[(int)" + posSimbolo + "];\n" //Valor string
+	codigo3d += temp2 + " = " + "heap[(int)" + posValor + "];\n"   //Valor string
+	codigo3d += "if (" + temp2 + " != 0) goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += "heap[(int)" + posSimbolo + "] = " + temp2 + "; //Asignar letra\n"
+	codigo3d += temp3 + " = " + posSimbolo + " + 1; //Next pos simbolo\n"
+	codigo3d += posSimbolo + " = " + temp3 + ";\n"
+	codigo3d += temp4 + " = " + posValor + " + 1; //Next pos valor\n"
+	codigo3d += posValor + " = " + temp4 + ";\n"
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += lf + ":\n"
+	codigo3d += "heap[(int)" + posSimbolo + "] = 0;\n"
+	codigo3d += posSimbolo + " = " + temp + "; //Recuperar el valor del inicio de la cadena\n"
+	codigo3d += "/***********************************************/\n"
+	return codigo3d, posSimbolo
 }
