@@ -17,6 +17,7 @@ type DeclaracionVector struct {
 	Fila          int
 	Columna       int
 	ScopeOriginal *Ast.Scope
+	Stack         bool
 }
 
 func NewDeclaracionVector(id string, tipoVector Ast.TipoRetornado, valor interface{}, mutable, publico bool,
@@ -30,6 +31,7 @@ func NewDeclaracionVector(id string, tipoVector Ast.TipoRetornado, valor interfa
 		Valor:      valor,
 		Fila:       fila,
 		Columna:    columna,
+		Stack:      true,
 	}
 	return nd
 }
@@ -38,6 +40,8 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 	//Verificar que no exista
 	var existe bool
 	var valor Ast.TipoRetornado
+	var codigo3d string
+	var obj3d, obj3dValor Ast.O3D
 	esIndefinido := false
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
@@ -46,6 +50,8 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
+		obj3dValor = valor.Valor.(Ast.O3D)
+		valor = obj3dValor.Valor
 	}
 	tipoIn = valor.Tipo
 	//Verificar error en el valor
@@ -119,10 +125,13 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 	//Crear el símbolo y agregarlo al scope
 	if esIndefinido {
+		temp := Ast.GetTemp()
 		//Actualizar la mutabilidad de la instancia
 		nVector := valor.Valor.(expresiones.Vector)
 		nVector.TipoVector = d.TipoVector
 		nVector.Mutable = d.Mutable
+		//Agregar el valor al obj3d
+		obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector}
 		nSimbolo := Ast.Simbolo{
 			Identificador: d.Id,
 			Valor:         Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector},
@@ -133,12 +142,28 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			Publico:       d.Publico,
 			Entorno:       scope,
 		}
-
+		/*Codigo 3d*/
+		if d.Stack {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.STACK
+			scope.Size++
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		} else {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.HEAP
+			scope.Size = Ast.GetValorH() - 1
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		}
 		scope.Add(nSimbolo)
 	} else {
+		temp := Ast.GetTemp()
 		//Actualizar la mutabilidad de la instancia
 		nVector := valor.Valor.(expresiones.Vector)
 		nVector.Mutable = d.Mutable
+		//Agregar el valor al obj3d
+		obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector}
 		nSimbolo := Ast.Simbolo{
 			Identificador: d.Id,
 			Valor:         Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector},
@@ -149,10 +174,31 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			Publico:       d.Publico,
 			Entorno:       scope,
 		}
+
+		/*Codigo 3d*/
+		/*Agregar el código de la creación del vector*/
+		codigo3d += obj3dValor.Codigo
+		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
+		if d.Stack {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.STACK
+			scope.Size++
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		} else {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.HEAP
+			scope.Size = Ast.GetValorH() - 1
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		}
+		codigo3d += "/***********************************************/\n"
+
 		scope.Add(nSimbolo)
 	}
 
-	return Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: Ast.DECLARACION}
 }
 
 func (op DeclaracionVector) GetFila() int {

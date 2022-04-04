@@ -59,6 +59,7 @@ func (i PrintF) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 func (p Print) Run(scope *Ast.Scope) interface{} {
 	var obj3d, obj3dValor, obj3dExp Ast.O3D
 	var codigo3d string
+	var preCodigo3d string
 	var newExp expresiones.Primitivo
 	var resExp Ast.TipoRetornado
 	resultado_expresion := p.Expresiones.GetValue(scope)
@@ -118,7 +119,8 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 	resExp = newExp.GetValue(scope)
 	obj3dExp = resExp.Valor.(Ast.O3D)
 	codigo3d += obj3dExp.Codigo
-	codigo3d += GetC3DExpresion(obj3dExp)
+	preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+	codigo3d += preCodigo3d
 	codigo3d += "printf (\"\\n\");\n"
 	/************************************************/
 	obj3d.Codigo = codigo3d
@@ -136,6 +138,7 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	var obj3d Ast.O3D
 	var obj3dValor Ast.O3D
 	var codigo3d string
+	var preCodigo3d string
 	regex, _ := regexp.Compile("{ *}|{:[\x3F]}")
 	posiciones_regex := regex.FindAllStringIndex(p.Cadena, -1)
 	encontrados := regex.MatchString(p.Cadena)    //Formato para encontrar los {} y {:?}
@@ -189,7 +192,8 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				obj3dExp := resultado.Valor.(Ast.O3D)
 				cadena := To_String(obj3dExp.Valor, scope)
 				codigo3d += obj3dExp.Codigo
-				codigo3d += GetC3DExpresion(obj3dExp)
+				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+				codigo3d += preCodigo3d
 				/************************************************/
 				salida += cadena.(Ast.TipoRetornado).Valor.(string)
 			} else {
@@ -207,7 +211,8 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				resExp := newExp.GetValue(scope)
 				obj3dExp := resExp.Valor.(Ast.O3D)
 				codigo3d += obj3dExp.Codigo
-				codigo3d += GetC3DExpresion(obj3dExp)
+				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+				codigo3d += preCodigo3d
 				/************************************************/
 			} else {
 				resultado := p.GetCompareValues(scope, i, posiciones_regex[i])
@@ -244,10 +249,12 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				resExp := newExp.GetValue(scope)
 				obj3dExp := resExp.Valor.(Ast.O3D)
 				codigo3d += obj3dExp.Codigo
-				codigo3d += GetC3DExpresion(obj3dExp)
+				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+				codigo3d += preCodigo3d
 				/************************************************/
 				codigo3d += obj3dValor.Codigo
-				codigo3d += GetC3DExpresion(obj3dValor)
+				preCodigo3d, _ = GetC3DExpresion(obj3dValor)
+				codigo3d += preCodigo3d
 			}
 		}
 	}
@@ -474,8 +481,9 @@ func (op PrintF) GetColumna() int {
 	return op.Columna
 }
 
-func GetC3DExpresion(obj3d Ast.O3D) string {
-	var codigo3d string
+func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
+	var codigo3d, resultado, siguientePos string
+	var obj3dTemp Ast.O3D
 	referencia := obj3d.Referencia
 	valor := obj3d.Valor
 	c := "c"
@@ -501,6 +509,7 @@ func GetC3DExpresion(obj3d Ast.O3D) string {
 		codigo3d += "goto " + salto + ";\n"
 		codigo3d += lf + ":\n"
 		codigo3d += "/***********************************************/\n"
+		siguientePos = referencia
 	case Ast.I64, Ast.USIZE:
 		codigo3d += "/*********************************IMPRESION I64*/\n"
 		codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
@@ -511,13 +520,94 @@ func GetC3DExpresion(obj3d Ast.O3D) string {
 		codigo3d += "/***********************************************/\n"
 	case Ast.BOOLEAN:
 		codigo3d += "/********************************IMPRESION BOOL*/\n"
-		codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
+		lt := Ast.GetLabel()
+		lf := Ast.GetLabel()
+		salto := Ast.GetLabel()
+		codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
+		codigo3d += "goto " + lf + ";\n"
+		codigo3d += lt + ":\n"
+		codigo3d += "printf(\"true\"); //Imprimir el booleano\n"
+		codigo3d += "goto " + salto + ";\n"
+		codigo3d += lf + ":\n"
+		codigo3d += "printf(\"false\"); //Imprimir el booleano\n"
+		codigo3d += salto + ":\n"
+		//codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
 		codigo3d += "/***********************************************/\n"
 	case Ast.CHAR:
 		codigo3d += "/********************************IMPRESION CHAR*/\n"
 		codigo3d += "printf(\"" + p + c + "\",(int)" + referencia + "); //Imprimir el numero\n"
 		codigo3d += "/***********************************************/\n"
-	}
+	case Ast.VECTOR:
+		//De momento no tengo idea, pendiente
+		//Recorrer todos sus elementos e irlos convirtiendo en string
+		vector := obj3d.Valor.Valor.(expresiones.Vector)
+		lista := vector.Valor
+		temp := ""
+		var tipoAnterior Ast.TipoDato
+		var elemento Ast.TipoRetornado
+		codigo3d += "/******************************IMPRESION VECTOR*/\n"
+		codigo3d += "printf(\"[\");\n"
+		for i := 0; i < lista.Len(); i++ {
+			if i != 0 && tipoAnterior != Ast.LIBRE {
+				codigo3d += "printf(\",\");\n"
+			}
+			elemento = lista.GetValue(i).(Ast.TipoRetornado)
+			if elemento.Tipo != Ast.STRING && elemento.Tipo != Ast.STR {
+				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
+				temp = Ast.GetTemp()
+				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
+				codigo3d += "/***********************************************/\n"
+			} else if (elemento.Tipo == Ast.STRING || elemento.Tipo == Ast.STR) && i == 0 {
+				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
+				temp = Ast.GetTemp()
+				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
+				codigo3d += "/***********************************************/\n"
+			} else {
+				temp = referencia
+			}
+			obj3dTemp.Valor = elemento
+			obj3dTemp.Referencia = temp
+			siguientePos = referencia
+			resultado, referencia = GetC3DExpresion(obj3dTemp)
+			tipoAnterior = elemento.Tipo
+			if elemento.Tipo == Ast.STRING ||
+				elemento.Tipo == Ast.STR ||
+				elemento.Tipo == Ast.STRING_OWNED {
+				codigo3d += "printf(\"\\\"\");\n"
+				codigo3d += resultado
+				codigo3d += "printf(\"\\\"\");\n"
+				siguientePos = referencia
+			} else if elemento.Tipo == Ast.CHAR {
+				codigo3d += "printf(\"'\");\n"
+				codigo3d += resultado
+				codigo3d += "printf(\"'\");\n"
+			} else {
+				codigo3d += resultado
+			}
 
-	return codigo3d
+			/*Actualizar la referencia para la próxima posición*/
+			codigo3d += "/****************************SIGUIENTE POSICION*/\n"
+			if elemento.Tipo == Ast.VECTOR {
+
+				/*
+					temp := Ast.GetTemp()
+					codigo3d += temp + " = " + referencia + " +  1" + ";\n"
+					referencia = temp
+				*/
+			} else if elemento.Tipo == Ast.STRUCT {
+
+			} else if elemento.Tipo == Ast.ARRAY {
+
+			} else {
+				temp := Ast.GetTemp()
+				codigo3d += temp + " = " + siguientePos + " + 1;\n"
+				referencia = temp
+			}
+			codigo3d += "/***********************************************/\n"
+
+		}
+		codigo3d += "printf(\"]\");\n"
+		codigo3d += "/***********************************************/\n"
+	}
+	return codigo3d, siguientePos
 }

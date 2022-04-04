@@ -17,6 +17,7 @@ type DeclaracionVectorNoRef struct {
 	Fila          int
 	Columna       int
 	ScopeOriginal *Ast.Scope
+	Stack         bool
 }
 
 func NewDeclaracionVectorNoRef(id string, tipoVector Ast.TipoRetornado, valor interface{}, mutable, publico bool,
@@ -30,6 +31,7 @@ func NewDeclaracionVectorNoRef(id string, tipoVector Ast.TipoRetornado, valor in
 		Valor:      valor,
 		Fila:       fila,
 		Columna:    columna,
+		Stack:      true,
 	}
 	return nd
 }
@@ -43,6 +45,8 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	var existe bool
 	var valor Ast.TipoRetornado
 	esIndefinido := false
+	var codigo3d string
+	var obj3d, obj3dValor Ast.O3D
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
@@ -50,6 +54,8 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
+		obj3dValor = valor.Valor.(Ast.O3D)
+		valor = obj3dValor.Valor
 	}
 	tipoIn = valor.Tipo
 	//Verificar error en el valor
@@ -142,11 +148,16 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 
 		scope.Add(nSimbolo)
 	} else {
+		//Temporales
+		temp := Ast.GetTemp()
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
 		nVector := nmVector.(expresiones.Vector)
 		//Actualizar la mutabilidad de la instancia
 		nVector.Mutable = d.Mutable
+		//Guardar el valor en el obj3d
+		obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector}
+
 		nSimbolo := Ast.Simbolo{
 			Identificador: d.Id,
 			Valor:         Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: nVector},
@@ -157,10 +168,25 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 			Publico:       d.Publico,
 			Entorno:       scope,
 		}
+
+		/*Codigo 3d*/
+		if d.Stack {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.STACK
+			scope.Size++
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		} else {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.HEAP
+			scope.Size = Ast.GetValorH() - 1
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		}
 		scope.Add(nSimbolo)
 	}
-
-	return Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: Ast.DECLARACION}
 }
 
 func (op DeclaracionVectorNoRef) GetFila() int {

@@ -117,13 +117,16 @@ func GetH() int {
 	return newH
 }
 
+func GetValorH() int {
+	return H
+}
+
 /* Actualizar el código actual con los que se van retornando de las operaciones anteriores.
 -->Retonar un objeto O3D<--*/
 func ActualizarCodigoAritmetica(op1 TipoRetornado, op2 TipoRetornado, operador string,
 	unario bool) O3D {
 	var codigo, referencia = "", ""
 	var codIzq, codDer O3D
-
 	if !unario {
 		codIzq = op1.Valor.(O3D)
 		codDer = op2.Valor.(O3D)
@@ -140,24 +143,25 @@ func ActualizarCodigoAritmetica(op1 TipoRetornado, op2 TipoRetornado, operador s
 		//Agregar el código anterior
 		codigo += codIzq.Codigo + "\n"
 		codigo += codDer.Codigo + "\n"
-
+		codigo += "/**************************OPERACION ARITMETICA*/\n"
 		//Crear el nuevo código con las referencias de los anteriores
 		referencia = GetTemp()
 		if operador == "/" || operador == "%" {
 			codigo += MathError(codIzq.Referencia, codDer.Referencia, referencia, operador)
 		} else {
-			codigo += referencia + " = " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " ;"
+			codigo += referencia + " = " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " ;\n"
 		}
 
 	} else {
 		codIzq = op1.Valor.(O3D)
 		if op1.Tipo != PRIMITIVO {
 			codigo += codIzq.Codigo + "\n"
+			codigo += "/**************************OPERACION ARITMETICA*/\n"
 		}
 		referencia = GetTemp()
 		codigo += referencia + " = " + codIzq.Referencia + " * " + " -1 ;"
 	}
-
+	codigo += "/***********************************************/\n"
 	//Crear el nuevo objeto 3D
 	obj := O3D{
 		Lt:         "",
@@ -192,7 +196,7 @@ func ActualizarCodigoRelacional(op1 TipoRetornado, op2 TipoRetornado, operador s
 	//Agregar el código anterior
 	codigo += codIzq.Codigo + "\n"
 	codigo += codDer.Codigo + "\n"
-
+	codigo += "/**************************OPERACION RELACIONAL*/\n"
 	//Get labels
 	lt = GetLabel()
 	lf = GetLabel()
@@ -200,6 +204,7 @@ func ActualizarCodigoRelacional(op1 TipoRetornado, op2 TipoRetornado, operador s
 	codigo += "if " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " goto " + lt + ";\n"
 	codigo += "goto " + lf + ";\n"
 
+	codigo += "/***********************************************/\n"
 	//Crear el nuevo objeto 3D
 	obj := O3D{
 		Lt:         lt,
@@ -221,7 +226,7 @@ func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador strin
 
 	codIzq = op1.Valor.(O3D)
 	codDer = op2.Valor.(O3D)
-
+	codigo += "/******************************OPERACION LOGICA*/\n"
 	if !unario {
 		if operador == "&&" {
 			/*AND*/
@@ -249,7 +254,7 @@ func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador strin
 		lt = codIzq.Lf
 		lf = codIzq.Lt
 	}
-
+	codigo += "/***********************************************/\n"
 	//Crear el nuevo objeto 3D
 	obj := O3D{
 		Lt:         lt,

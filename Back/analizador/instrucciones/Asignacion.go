@@ -615,14 +615,18 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 
 			if simbolo_id.TipoDireccion == Ast.STACK {
 				//Se va a guardar en el stack
-				temp := Ast.GetTemp()
-				codigo3d += temp + " = P + " + strconv.Itoa(simbolo_id.Direccion) + ";\n"
-				codigo3d += "stack[(int)" + temp + "] = " + referencia + ";\n"
+				referencia = obj3d.Referencia
+				//codigo3d += temp + " = P + " + strconv.Itoa(simbolo_id.Direccion) + ";\n"
+				codigo3d += "/*********************ASIGNACION DE NUEVO VALOR*/\n"
+				codigo3d += "stack[(int)" + referencia + "] = " + obj3dValor.Referencia + ";\n"
+				codigo3d += "/***********************************************/\n"
 			} else {
 				//Se va a guardar en el heap
-				temp := Ast.GetTemp()
-				codigo3d += temp + " =" + strconv.Itoa(simbolo_id.Direccion) + ";\n"
-				codigo3d += "heap[(int)" + temp + "] = " + referencia + ";\n"
+				referencia = obj3d.Referencia
+				//codigo3d += temp + " =" + strconv.Itoa(simbolo_id.Direccion) + ";\n"
+				codigo3d += "/*********************ASIGNACION DE NUEVO VALOR*/\n"
+				codigo3d += "heap[(int)" + referencia + "] = " + obj3dValor.Referencia + ";\n"
+				codigo3d += "/***********************************************/\n"
 			}
 
 			//Copiar valor
@@ -877,13 +881,13 @@ func GenerarC3DGetSimbolo(simbolo Ast.Simbolo) Ast.O3D {
 	/*Verificar si la variable viene del heap o del stack*/
 
 	if simbolo.TipoDireccion == Ast.STACK {
-		codigo3d = "/*****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d = "/***********GET VALOR VARIABLE CON IDENTIFICADOR*/\n"
 
 		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
 		//codigo3d += tempValor + " = stack[(int)" + temp + "];\n"
 		codigo3d += "/***********************************************/\n"
 	} else {
-		codigo3d = "/*****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d = "/***********GET VALOR VARIABLE CON IDENTIFICADOR*/\n"
 		codigo3d += temp + " = " + strconv.Itoa(simbolo.Direccion) + ";\n"
 		//codigo3d += tempValor + " = heap[(int)" + temp + "];\n"
 		codigo3d += "/***********************************************/\n"
