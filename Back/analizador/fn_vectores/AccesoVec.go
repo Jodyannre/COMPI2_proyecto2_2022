@@ -34,6 +34,9 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var posicion Ast.TipoRetornado
 	var resultado Ast.TipoRetornado
 	var id string
+	var idExp expresiones.Identificador
+	var obj3d, obj3dValor Ast.O3D
+	var referencia, codigo3d string
 	//Primero verificar que sea un identificador el id
 	_, tipoParticular := p.Identificador.(Ast.Abstracto).GetTipo()
 	if tipoParticular != Ast.IDENTIFICADOR {
@@ -71,6 +74,14 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	//Conseguir el simbolo y el vector
 	simbolo = scope.GetSimbolo(id)
+
+	/*Codigo 3d para conseguir el elemento del stack o del heap*/
+	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
+	obj3dValor = idExp.GetValue(scope).Valor.(Ast.O3D)
+	codigo3d += obj3d.Codigo
+	/************************************************************/
+
 	//Verificar que sea un vector
 	if simbolo.Tipo != Ast.VECTOR && simbolo.Tipo != Ast.ARRAY {
 		msg := "Semantic error, expected (VECTOR|ARRAY), found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
@@ -118,6 +129,13 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	//Verificar que la posición exista en el vector
 	if simbolo.Tipo == Ast.VECTOR {
+		temp := ""
+		temp2 := ""
+		temp3 := ""
+		temp4 := ""
+		lt := ""
+		lf := ""
+		salto := ""
 		if posicion.Valor.(int) >= vector.(expresiones.Vector).Size {
 			//Error, fuera de rango
 			fila := p.Posicion.(Ast.Abstracto).GetFila()
@@ -138,6 +156,34 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 		//Acceder al elemento
 		resultado = vector.(expresiones.Vector).Valor.GetValue(posicion.Valor.(int)).(Ast.TipoRetornado)
+
+		/*Trabajar código 3d*/
+		lt = Ast.GetLabel()
+		lf = Ast.GetLabel()
+		salto = Ast.GetLabel()
+
+		/***************CODIGO 3D******************/
+		temp = Ast.GetTemp()  //Temporal para guardar el size del vector
+		temp2 = Ast.GetTemp() //Temporal que va a guardar el size del vector
+		temp3 = Ast.GetTemp()
+		temp4 = Ast.GetTemp()
+		referencia = obj3dValor.Referencia
+		codigo3d += "/********************************GET SIZE VECTOR*/\n"
+		codigo3d += temp + " = heap[(int)" + referencia + "]; //Get size\n"
+		codigo3d += "if (" + strconv.Itoa(posicion.Valor.(int)) + " < " + temp + ") goto " + lt + ";\n"
+		codigo3d += "goto " + lf + ";\n"
+		codigo3d += lt + ":\n"
+		codigo3d += temp2 + " = " + referencia + " + 1; //Get inicio del vector\n"
+		codigo3d += temp3 + " = " + strconv.Itoa(posicion.Valor.(int)) + "; //Get posicion exacta\n"
+		codigo3d += temp4 + " = " + temp2 + " + " + temp3 + "; //Get elemento\n"
+		codigo3d += "goto " + salto + ";\n"
+		codigo3d += BoundsError(lf)
+		codigo3d += salto + ":\n"
+		codigo3d += "/***********************************************/\n"
+		referencia = temp4
+		obj3d.Valor = resultado
+		/******************************************/
+
 	}
 
 	if simbolo.Tipo == Ast.ARRAY {
@@ -158,30 +204,16 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 				Valor: nError,
 			}
 		}
-		//Validar que el array no sea de más dimensiones
-		/*
-			if vector.(expresiones.Array).TipoArray == Ast.ARRAY {
-				//Es de más dimensiones
-				fila := p.Posicion.(Ast.Abstracto).GetFila()
-				columna := p.Posicion.(Ast.Abstracto).GetColumna()
-				msg := "Semantic error, you are trying to access a position in one dimension and this ARRAY has multiple dimensions." +
-					". -- Line: " + strconv.Itoa(fila) +
-					" Column: " + strconv.Itoa(columna)
-				nError := errores.NewError(fila, columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
 
-			}
-		*/
 		//Acceder al elemento
 		resultado = vector.(expresiones.Array).Elementos.GetValue(posicion.Valor.(int)).(Ast.TipoRetornado)
 	}
-	return resultado
+	/* Retornar el OBJ3D*/
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ACCESO_VECTOR,
+		Valor: obj3d,
+	}
 }
 
 func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope, objeto interface{}) Ast.TipoRetornado {
@@ -274,4 +306,22 @@ func (v AccesoVec) GetFila() int {
 }
 func (v AccesoVec) GetColumna() int {
 	return v.Columna
+}
+
+func BoundsError(lf string) string {
+	codigo3d := ""
+	codigo3d += lf + ":\n"
+	codigo3d += "printf(\"%%c\", 66);\n"
+	codigo3d += "printf(\"%%c\", 111);\n"
+	codigo3d += "printf(\"%%c\", 117);\n"
+	codigo3d += "printf(\"%%c\", 110);\n"
+	codigo3d += "printf(\"%%c\", 100);\n"
+	codigo3d += "printf(\"%%c\", 115);\n"
+	codigo3d += "printf(\"%%c\", 64);\n"
+	codigo3d += "printf(\"%%c\", 114);\n"
+	codigo3d += "printf(\"%%c\", 114);\n"
+	codigo3d += "printf(\"%%c\", 111);\n"
+	codigo3d += "printf(\"%%c\", 114);\n"
+	codigo3d += "printf(\"\\n\");\n"
+	return codigo3d
 }

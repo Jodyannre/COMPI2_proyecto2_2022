@@ -542,17 +542,21 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		//Recorrer todos sus elementos e irlos convirtiendo en string
 		vector := obj3d.Valor.Valor.(expresiones.Vector)
 		lista := vector.Valor
-		temp := ""
+		temp := Ast.GetTemp()
+		contador := ""
 		var tipoAnterior Ast.TipoDato
 		var elemento Ast.TipoRetornado
 		codigo3d += "/******************************IMPRESION VECTOR*/\n"
+		codigo3d += temp + " = " + referencia + " + 1;//Subir una pos por el size del vec\n"
+		contador = temp
+		referencia = temp
 		codigo3d += "printf(\"[\");\n"
 		for i := 0; i < lista.Len(); i++ {
 			if i != 0 && tipoAnterior != Ast.LIBRE {
 				codigo3d += "printf(\",\");\n"
 			}
 			elemento = lista.GetValue(i).(Ast.TipoRetornado)
-			if elemento.Tipo != Ast.STRING && elemento.Tipo != Ast.STR {
+			if elemento.Tipo != Ast.STRING && elemento.Tipo != Ast.STR && elemento.Tipo != Ast.VECTOR {
 				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
 				temp = Ast.GetTemp()
 				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
@@ -561,6 +565,14 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
 				temp = Ast.GetTemp()
 				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
+				codigo3d += "/***********************************************/\n"
+			} else if elemento.Tipo == Ast.VECTOR {
+				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
+				temp2 := Ast.GetTemp()
+				//temp3 := Ast.GetTemp()
+				codigo3d += temp2 + " = heap[(int)" + contador + "];//Get direccion del otro vec\n"
+				//codigo3d += temp3 + " = heap[(int)" + temp2 + "];//Get Valor del vec\n"
+				temp = temp2
 				codigo3d += "/***********************************************/\n"
 			} else {
 				temp = referencia
@@ -589,11 +601,10 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 			codigo3d += "/****************************SIGUIENTE POSICION*/\n"
 			if elemento.Tipo == Ast.VECTOR {
 
-				/*
-					temp := Ast.GetTemp()
-					codigo3d += temp + " = " + referencia + " +  1" + ";\n"
-					referencia = temp
-				*/
+				temp := Ast.GetTemp()
+				codigo3d += temp + " = " + contador + " +  1" + ";\n"
+				contador = temp
+
 			} else if elemento.Tipo == Ast.STRUCT {
 
 			} else if elemento.Tipo == Ast.ARRAY {

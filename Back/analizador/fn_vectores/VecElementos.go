@@ -41,6 +41,7 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var obj3d, obj3dValor Ast.O3D
 	var preCodigo3d, codigo3d, referencia, referenciaRetorno string
 	var primeraPos bool = true
+	var vectores = arraylist.New()
 	var estructuraBase string
 	size := 0
 	capacity := 0
@@ -209,6 +210,9 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		} else {
 			referencia, preCodigo3d = GetCod3dElemento(referencia, primeraPos, false)
 		}
+		if tipoParticular == Ast.VECTOR {
+			vectores.Add(referencia)
+		}
 
 		codigo3d += preCodigo3d
 		//tipoAnterior.Tipo = valorElemento.Tipo
@@ -223,8 +227,14 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	if tipoAnterior.Tipo == Ast.VECTOR || tipoAnterior.Tipo == Ast.STRING || tipoAnterior.Tipo == Ast.STR {
 		//Agregar los elementos al vector
 		//Crear el vector padre
-		ref, cod := GetCod3dElemento(estructuraBase, true, false)
+		ref, cod := GetCod3dElemento(estructuraBase, true, true)
 		codigo3d += cod
+		/*Agregar los elementos al vector*/
+		for i := 0; i < vectores.Len(); i++ {
+			elemento := vectores.GetValue(i).(string)
+			_, cod := GetCod3dElemento(elemento, false, false)
+			codigo3d += cod
+		}
 		referenciaRetorno = ref
 	}
 
@@ -233,13 +243,15 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	newVector := expresiones.NewVector(elementos, tipoVector, size, capacity, vacio, v.Fila, v.Columna)
 	newVector.Tipo = Ast.VECTOR
-	//codigo3d += "/********************GUARDAR EL SIZE DEL VECTOR*/\n"
-	//codigo3d += referenciaRetorno +" = "+ strconv.Itoa(newVector.Size)+"; size del vec\n"
-	//codigo3d += "/***********************************************/\n"
+	codigo3d += "/********************GUARDAR EL SIZE DEL VECTOR*/\n"
+	codigo3d += "heap[(int)" + referenciaRetorno + "] = " + strconv.Itoa(newVector.Size) + ";\n"
+	codigo3d += "/***********************************************/\n"
 	codigo3d += "/***********************************************/\n"
 	/*Actualizar datos del obj3d a retornar*/
 	obj3d.Codigo = codigo3d
+	/*Agregar el tamaño al vector*/
 	obj3d.Referencia = referenciaRetorno
+
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.VECTOR,
 		Valor: newVector,
@@ -325,8 +337,9 @@ func GetCod3dElemento(referencia string, primeraPos bool, estructura bool) (stri
 		codigo3d += "/*****************************INICIO DEL VECTOR*/\n"
 		temp := Ast.GetTemp()
 		codigo3d += temp + " = H; //Guardar la referencia\n"
-		//codigo3d += "H = H + 1; //La primera posicion guardara el tamaño del vector\n"
+		codigo3d += "H = H + 1; //La primera posicion guardara el tamaño del vector\n"
 		ref = temp
+		Ast.GetH()
 		codigo3d += "/***********************************************/\n"
 	}
 	if !estructura {

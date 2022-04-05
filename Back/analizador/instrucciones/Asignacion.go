@@ -130,6 +130,7 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	}
 	//Obtener el valor del id
 	simbolo_id := scope.GetSimbolo(id)
+
 	//Obtener el vector
 	if simbolo_id.Tipo == Ast.ARRAY {
 		array = simbolo_id.Valor.(Ast.TipoRetornado).Valor.(expresiones.Array)
@@ -593,25 +594,29 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 			codigo3d += obj3dValor.Codigo
 
 			/*Si es string verificar el tamaño del entrante y del que esta guardado*/
-			switch simbolo_id.Tipo {
-			case Ast.STRING, Ast.STR:
-				//Comparar los len de los string
-				esMenor := false
-				stringGuardado := simbolo_id.Valor.(Ast.TipoRetornado).Valor.(string)
-				stringValor := valor.Valor.(string)
-				if len(stringGuardado) < len(stringValor) {
-					esMenor = true
-				}
-				/*Get posicion, codigo3d y la nueva referencia*/
-				cod, ref := GetCod3DString(obj3d.Referencia, obj3dValor.Referencia, esMenor)
-				/*Actualizar referencia, codigo y posicion*/
-				referencia = ref
-				codigo3d += cod
-			case Ast.ARRAY:
-			case Ast.VECTOR:
-			case Ast.STRUCT:
+			/*
+				switch simbolo_id.Tipo {
+				case Ast.STRING, Ast.STR:
+					//Comparar los len de los string
+					esMenor := false
+					stringGuardado := simbolo_id.Valor.(Ast.TipoRetornado).Valor.(string)
+					stringValor := valor.Valor.(string)
+					if len(stringGuardado) < len(stringValor) {
+						esMenor = true
+					}
+					//Get posicion, codigo3d y la nueva referencia
+					cod, ref := GetCod3DString(obj3d.Referencia, obj3dValor.Referencia, esMenor)
+					//Actualizar referencia, codigo y posicion
+					referencia = ref
+					obj3d.Referencia = referencia
+					codigo3d += cod
+				case Ast.ARRAY:
+				case Ast.VECTOR:
 
-			}
+				case Ast.STRUCT:
+
+				}
+			*/
 
 			if simbolo_id.TipoDireccion == Ast.STACK {
 				//Se va a guardar en el stack

@@ -99,8 +99,11 @@ func (a DimensionArray) GetColumna() int {
 }
 
 func EsUsize(valor Ast.TipoRetornado, tipoParticular Ast.TipoDato, elemento interface{}, scope *Ast.Scope) Ast.TipoRetornado {
-	if (valor.Tipo != Ast.USIZE && valor.Tipo != Ast.I64) ||
-		tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.I64 {
+	valor = valor.Valor.(Ast.O3D).Valor
+
+	//if (valor.Tipo != Ast.USIZE && valor.Tipo != Ast.I64) ||
+	//tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.I64 {
+	if valor.Tipo != Ast.USIZE && valor.Tipo != Ast.I64 {
 		//Error, se espera un usize
 		fila := elemento.(Ast.Abstracto).GetFila()
 		columna := elemento.(Ast.Abstracto).GetColumna()

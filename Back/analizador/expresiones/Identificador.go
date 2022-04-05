@@ -13,6 +13,10 @@ type Identificador struct {
 	Columna int
 }
 
+func NewIdentificador(val string, tipo Ast.TipoDato, fila, columna int) Identificador {
+	return Identificador{Tipo: tipo, Valor: val, Fila: fila, Columna: columna}
+}
+
 func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/*Variables para C3D*/
 	var temp string = Ast.GetTemp()
@@ -57,10 +61,6 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		Valor: obj3D,
 	}
 
-}
-
-func NewIdentificador(val string, tipo Ast.TipoDato, fila, columna int) Identificador {
-	return Identificador{Tipo: tipo, Valor: val, Fila: fila, Columna: columna}
 }
 
 func (p Identificador) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
