@@ -170,6 +170,8 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 		}
 
 		/*Codigo 3d*/
+		codigo3d += obj3dValor.Codigo
+		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
@@ -183,6 +185,7 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 			scope.Size = Ast.GetValorH() - 1
 			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
 		}
+		codigo3d += "/***********************************************/\n"
 		scope.Add(nSimbolo)
 	}
 	obj3d.Codigo = codigo3d
@@ -194,4 +197,9 @@ func (op DeclaracionVectorNoRef) GetFila() int {
 }
 func (op DeclaracionVectorNoRef) GetColumna() int {
 	return op.Columna
+}
+
+func ClonarVector3D() (string, string) {
+
+	return "", ""
 }

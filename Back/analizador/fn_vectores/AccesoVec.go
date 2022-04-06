@@ -79,6 +79,7 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "/********************************ACCESO A VECTOR*/\n"
 	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
 	obj3dValor = idExp.GetValue(scope).Valor.(Ast.O3D)
+	codigo3d += obj3dValor.Codigo
 	codigo3d += obj3d.Codigo
 	/************************************************************/
 
@@ -209,7 +210,7 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		resultado = vector.(expresiones.Array).Elementos.GetValue(posicion.Valor.(int)).(Ast.TipoRetornado)
 	}
 	/* Retornar el OBJ3D*/
-
+	obj3d.Codigo += codigo3d
 	return Ast.TipoRetornado{
 		Tipo:  Ast.ACCESO_VECTOR,
 		Valor: obj3d,

@@ -28,6 +28,12 @@ func (p CapacityVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var simbolo Ast.Simbolo
 	var vector expresiones.Vector
 	var id string
+	/***********VARIABLES C3D*************/
+	var idExp expresiones.Identificador
+	var obj3d, obj3dValor Ast.O3D
+	var codigo3d string
+	/*************************************/
+
 	//Primero verificar que sea un identificador el id
 	_, tipoParticular := p.Identificador.(Ast.Abstracto).GetTipo()
 	if tipoParticular != Ast.IDENTIFICADOR {
@@ -65,6 +71,14 @@ func (p CapacityVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	//Conseguir el simbolo y el vector
 	simbolo = scope.GetSimbolo(id)
+
+	/***************************CODIGO 3D*************************/
+	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
+	obj3dValor = idExp.GetValue(scope).Valor.(Ast.O3D)
+	codigo3d += obj3dValor.Codigo
+	/************************************************************/
+
 	//Verificar que sea un vector
 	if simbolo.Tipo != Ast.VECTOR {
 		msg := "Semantic error, expected Vector, found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
@@ -81,9 +95,16 @@ func (p CapacityVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
 
-	return Ast.TipoRetornado{
+	/*Codigo 3D*/
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = strconv.Itoa(vector.Capacity)
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.I64,
 		Valor: vector.Capacity,
+	}
+	return Ast.TipoRetornado{
+		Tipo:  Ast.VEC_CAPACITY,
+		Valor: obj3d,
 	}
 }
 

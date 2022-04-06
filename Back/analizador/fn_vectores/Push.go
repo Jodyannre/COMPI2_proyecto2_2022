@@ -194,7 +194,6 @@ func (p Push) Run(scope *Ast.Scope) interface{} {
 		vector.Vacio = false
 	}
 	simbolo.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: vector}
-	scope.UpdateSimbolo(id, simbolo)
 
 	/*CODIGO 3D PARA AGREGAR EL ELEMENTO AL VECTOR*/
 	/* PRIMERO CREAR UN NUEVO VECTOR Y AGREGARLE EL ELEMENTO DE ÚLTIMO */
@@ -209,6 +208,8 @@ func (p Push) Run(scope *Ast.Scope) interface{} {
 		referencia = temp
 		codigo3d += "stack[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
+		nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		simbolo.Direccion = nuevaDireccion
 	} else {
 		/*ESTA GUARDANDO EN EL HEAP*/
 		temp := Ast.GetTemp()
@@ -217,7 +218,11 @@ func (p Push) Run(scope *Ast.Scope) interface{} {
 		referencia = temp
 		codigo3d += "heap[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
+		nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		simbolo.Direccion = nuevaDireccion
 	}
+	/*Actualizar el simbolo en la tabla de símbolos*/
+	scope.UpdateSimbolo(id, simbolo)
 
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{

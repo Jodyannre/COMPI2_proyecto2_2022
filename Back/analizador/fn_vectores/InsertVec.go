@@ -36,6 +36,12 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 	var valor Ast.TipoRetornado
 	var posicion Ast.TipoRetornado
 	var id string
+	/*******VARIABLES PARA C3D********/
+	var idExp expresiones.Identificador
+	var obj3d, obj3Temp, obj3dValor Ast.O3D
+	var referencia, codigo3d string
+	/*********************************/
+
 	//Primero verificar que sea un identificador el id
 	_, tipoParticular := p.Identificador.(Ast.Abstracto).GetTipo()
 	if tipoParticular != Ast.IDENTIFICADOR {
@@ -73,6 +79,15 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 	}
 	//Conseguir el simbolo y el vector
 	simbolo = scope.GetSimbolo(id)
+
+	/*********C3D del Simbolo***********/
+	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
+	obj3d = idExp.GetValue(scope).Valor.(Ast.O3D)
+	referencia = obj3d.Referencia
+	codigo3d += obj3d.Codigo
+	/***********************************/
+
 	//Verificar que sea un vector
 	if simbolo.Tipo != Ast.VECTOR {
 		msg := "Semantic error, expected Vector, found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
@@ -92,6 +107,9 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 	//Verificar que el elemento que se va a agregar sea del mismo tipo que el que guarda el vector
 	//Primero calcular el valor
 	valor = p.Valor.(Ast.Expresion).GetValue(scope)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	valor = obj3dValor.Valor
+
 	if valor.Tipo == Ast.ERROR {
 		return valor
 	}
@@ -173,6 +191,9 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 
 	//Get la posición en donde se quiere agregar el nuevo valor
 	posicion = p.Posicion.(Ast.Expresion).GetValue(scope)
+	obj3Temp = posicion.Valor.(Ast.O3D)
+	posicion = obj3Temp.Valor
+
 	_, tipoParticular = p.Posicion.(Ast.Abstracto).GetTipo()
 	if posicion.Tipo == Ast.ERROR {
 		return posicion
@@ -238,10 +259,45 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 		vector.Vacio = false
 	}
 	simbolo.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: vector}
+
+	/*CODIGO 3D PARA AGREGAR EL ELEMENTO AL VECTOR*/
+	/* PRIMERO CREAR UN NUEVO VECTOR Y AGREGARLE EL ELEMENTO DE ÚLTIMO */
+	nReferencia, preCodigo3d := InsertarElemento3D(referencia, obj3dValor.Referencia, posicion.Valor.(int))
+	codigo3d += preCodigo3d
+	/*ACTUALIZAR LA POSICIÖN EN LA TABLA DE SÍMBOLOS*/
+	if simbolo.TipoDireccion == Ast.STACK {
+		/*ESTA GUARDADO EN EL STACK*/
+		temp := Ast.GetTemp()
+		codigo3d += "/*********************REGISTRAR EL NUEVO VECTOR*/\n"
+		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
+		referencia = temp
+		codigo3d += "stack[(int)" + referencia + "] = " + nReferencia + ";\n"
+		codigo3d += "/***********************************************/\n"
+		nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		simbolo.Direccion = nuevaDireccion
+	} else {
+		/*ESTA GUARDANDO EN EL HEAP*/
+		temp := Ast.GetTemp()
+		codigo3d += "/*********************REGISTRAR EL NUEVO VECTOR*/\n"
+		codigo3d += temp + " = " + strconv.Itoa(simbolo.Direccion) + "];\n"
+		referencia = temp
+		codigo3d += "heap[(int)" + referencia + "] = " + nReferencia + ";\n"
+		codigo3d += "/***********************************************/\n"
+		nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		simbolo.Direccion = nuevaDireccion
+	}
+
+	/*Actualizar el simbolo en la tabla de simbolos*/
 	scope.UpdateSimbolo(id, simbolo)
-	return Ast.TipoRetornado{
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.VEC_PUSH,
+		Valor: obj3d,
 	}
 }
 
@@ -254,4 +310,69 @@ func (v InsertVec) GetFila() int {
 }
 func (v InsertVec) GetColumna() int {
 	return v.Columna
+}
+
+func InsertarElemento3D(referencia, referenciaNuevoValor string, posicion int) (string, string) {
+	codigo3d := ""
+	inicioNuevoVec := Ast.GetTemp()
+	posVectorNuevo := Ast.GetTemp()
+	posVectorActual := Ast.GetTemp()
+	sizeAnterior := Ast.GetTemp()
+	nuevoSize := Ast.GetTemp()
+	contador := Ast.GetTemp()
+	elementoActual := Ast.GetTemp()
+	temp1 := Ast.GetTemp()
+	temp2 := Ast.GetTemp()
+	lt := Ast.GetLabel()
+	lf := Ast.GetLabel()
+	lt2 := Ast.GetLabel()
+	lf2 := Ast.GetLabel()
+	lt3 := Ast.GetLabel()
+	lf3 := Ast.GetLabel()
+	salto := Ast.GetLabel()
+	salto2 := Ast.GetLabel()
+	codigo3d += inicioNuevoVec + " = H; //Guardo la posición del nuevo vector \n"
+	codigo3d += "H = H + 1;\n"
+	Ast.GetH()
+	codigo3d += posVectorNuevo + " = H; //Inicializar contador del nuevo vector\n"
+	codigo3d += sizeAnterior + " = heap[(int)" + referencia + "];//Get el size actual\n"
+	codigo3d += nuevoSize + " = " + sizeAnterior + " + 1;//Nuevo size del vector\n"
+	codigo3d += "heap[(int)" + inicioNuevoVec + "] = " + nuevoSize + "; //Agregar nuevo size\n"
+	codigo3d += posVectorActual + " = " + referencia + " + 1;//Get inicio del vector actual\n"
+	codigo3d += contador + " = 0; //Inicializo contador\n"
+	codigo3d += "/******************VERIFICAR ELEMENTO A AGREGAR*/\n"
+	codigo3d += salto + ":\n"
+	codigo3d += "if (" + contador + " <= " + sizeAnterior + ") goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += "/*********VERIFICAR POSICION DEL NUEVO ELEMENTO*/\n"
+	codigo3d += lt + ":\n"
+	codigo3d += "if (" + contador + " != " + strconv.Itoa(posicion) + ") goto " + lt2 + ";\n"
+	codigo3d += "goto " + lf2 + ";\n"
+	codigo3d += "/*******************COPIAR ELEMENTOS DEL VECTOR*/\n"
+	codigo3d += salto2 + ":\n"
+	codigo3d += lt2 + ":\n"
+	codigo3d += "if (" + contador + " == " + sizeAnterior + ") goto " + lf3 + ";\n"
+	codigo3d += "goto " + lt3 + ";\n"
+	codigo3d += lt3 + ":\n"
+	codigo3d += elementoActual + " = heap[(int)" + posVectorActual + "]; //Valor del elemento\n"
+	codigo3d += "heap[(int)" + posVectorNuevo + "] = " + elementoActual + "; //Add nuevo elemento\n"
+	codigo3d += temp1 + " = " + contador + " + 1; //Actualizar contador\n"
+	codigo3d += contador + " = " + temp1 + ";\n"
+	codigo3d += temp2 + " = " + posVectorActual + " + 1;//Actualizar pos vec actual\n"
+	codigo3d += posVectorActual + " = " + temp2 + ";\n"
+	codigo3d += "H = H + 1;\n"
+	Ast.GetH()
+	codigo3d += posVectorNuevo + " = H ;//Actualizra pos vec nuevo\n"
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += lf2 + ":\n"
+	codigo3d += "/**************AGREGAR EL NUEVO ELEMENTO********/\n"
+	codigo3d += "heap[(int)" + posVectorNuevo + "] = " + referenciaNuevoValor + "; //Add nuevo elemento\n"
+	codigo3d += "H = H + 1;\n"
+	Ast.GetH()
+	codigo3d += posVectorNuevo + " = H ;//Actualizra pos vec nuevo\n"
+	codigo3d += "goto " + salto2 + ";\n"
+	codigo3d += lf3 + ":\n"
+	codigo3d += lf + ":\n"
+	codigo3d += "/***********************************************/\n"
+	return inicioNuevoVec, codigo3d
 }

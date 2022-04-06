@@ -143,6 +143,9 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			Entorno:       scope,
 		}
 		/*Codigo 3d*/
+		/*Agregar el código de la creación del vector*/
+		codigo3d += obj3dValor.Codigo
+		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
@@ -156,6 +159,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			scope.Size = Ast.GetValorH() - 1
 			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
 		}
+		codigo3d += "/***********************************************/\n"
 		scope.Add(nSimbolo)
 	} else {
 		temp := Ast.GetTemp()

@@ -663,12 +663,21 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 
 func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRetornado {
 	//Conseguir la posición en donde se quiere agregar el nuevo elemento
+	/*************VARIABLES 3D*************/
+	var obj3dPosicion Ast.O3D
+	var idExp expresiones.Identificador
+	var obj3d, obj3Temp, obj3dValor Ast.O3D
+	var referencia, codigo3d string
+	/**************************************/
 	agregarElemento := false
 	posicion := a.Id.(fn_vectores.AccesoVec).Posicion.(Ast.Expresion).GetValue(scope)
-	_, tipoParticular := a.Id.(fn_vectores.AccesoVec).Posicion.(Ast.Abstracto).GetTipo()
+	obj3dPosicion = posicion.Valor.(Ast.O3D)
+	posicion = obj3dPosicion.Valor
+
+	//_, tipoParticular := a.Id.(fn_vectores.AccesoVec).Posicion.(Ast.Abstracto).GetTipo()
 	//Verificar que sea usize
-	if (posicion.Tipo != Ast.USIZE && posicion.Tipo != Ast.I64) ||
-		tipoParticular == Ast.IDENTIFICADOR && posicion.Tipo == Ast.I64 {
+	if posicion.Tipo != Ast.USIZE && posicion.Tipo != Ast.I64 { //||
+		//tipoParticular == Ast.IDENTIFICADOR && posicion.Tipo == Ast.I64 {
 		//Error, se espera un usize
 		fila := a.Valor.(Ast.Abstracto).GetFila()
 		columna := a.Valor.(Ast.Abstracto).GetColumna()
@@ -691,6 +700,14 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 	existe := scope.Exist(id)
 	//Obtener el valor del id
 	simbolo_id := scope.GetSimbolo(id)
+
+	/*********C3D del Simbolo***********/
+	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
+	obj3d = idExp.GetValue(scope).Valor.(Ast.O3D)
+	referencia = obj3d.Referencia
+	codigo3d += obj3d.Codigo
+	/***********************************/
 
 	//Verificar que el simbolo sea un vector
 	if simbolo_id.Tipo != Ast.VECTOR {
@@ -720,7 +737,10 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 	} else {
 		preValor = a.Valor.(Ast.Expresion).GetValue(scope)
 	}
+
 	valor := preValor.(Ast.TipoRetornado)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	valor = obj3dValor.Valor
 
 	if existe {
 		//Primero verificar si es mutable
@@ -831,6 +851,10 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 					Valor: vector,
 				}
 				scope.UpdateSimbolo(id, simbolo_id)
+
+				/*********************CODIGO 3D*****************************/
+
+				/***********************************************************/
 			}
 		} else {
 			//No existe, generar un error semántico
@@ -946,4 +970,9 @@ func GetCod3DString(posSimbolo, posValor string, nuevaPos bool) (string, string)
 	codigo3d += posSimbolo + " = " + temp + "; //Recuperar el valor del inicio de la cadena\n"
 	codigo3d += "/***********************************************/\n"
 	return codigo3d, posSimbolo
+}
+
+func GetCod3DAsignacionVector(refVector, refElemento string, posicion int) string {
+
+	return ""
 }

@@ -15,7 +15,7 @@
 	
 <tr>
 <td cellpadding='4'>
-cola
+pila
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -25,24 +25,6 @@ cola
 </td>
 <td cellpadding='4'>
 2
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-vector
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>VECTOR
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-3
 </td>
 <td cellpadding='4'>
 4
