@@ -16,6 +16,8 @@ type StructTemplate struct {
 	Publico     bool
 	Fila        int
 	Columna     int
+	Stack       bool
+	Size        int
 }
 
 func NewStructTemplate(nombre string, atributos *arraylist.List, publico bool, fila, columna int) StructTemplate {
@@ -29,11 +31,23 @@ func NewStructTemplate(nombre string, atributos *arraylist.List, publico bool, f
 		Fila:        fila,
 		Columna:     columna,
 		AtributosIn: atributos,
+		Stack:       true,
 	}
 	return nuevo
 }
 
 func (s StructTemplate) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/**************VARIABLES 3D ********************/
+	var obj3d Ast.O3D
+	var codigo3d string
+	var referencia string = Ast.GetTemp()
+	/***********************************************/
+
+	codigo3d += "/*******************CREACION DE STRUCT TEMPLATE*/ \n"
+	codigo3d += referencia + " = " + "H;//Guardar posicion del struct \n"
+	codigo3d += "H = H + 1;\n"
+	Ast.GetH()
+
 	sinAtributos := false
 	var resultadoFormatoTipo Ast.TipoRetornado
 	if s.AtributosIn.Len() == 0 {
@@ -41,7 +55,12 @@ func (s StructTemplate) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		sinAtributos = true
 	}
 	if !sinAtributos {
+		codigo3d += "/*************RESERVA DE ESPACIO PARA ATRIBUTOS*/ \n"
 		for i := 0; i < s.AtributosIn.Len(); i++ {
+			/********************APARTAR MEMORIA PARA LOS ATRIBUTOS SIN VALOR***********************/
+			codigo3d += "H = H + 1;○\n"
+			Ast.GetH()
+			/***************************************************************************************/
 			att_val := s.AtributosIn.GetValue(i).(*Atributo)
 			//atributo := att_val.GetValue(scope)
 			for key, _ := range s.Atributos {
@@ -65,11 +84,20 @@ func (s StructTemplate) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 				return resultadoFormatoTipo
 			}
 			s.Atributos[att_val.Nombre] = att_val
+			s.Size++
 		}
 	}
 
-	return Ast.TipoRetornado{
+	codigo3d += "/***********************************************/ \n"
+
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.STRUCT,
 		Valor: s,
+	}
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = referencia
+	return Ast.TipoRetornado{
+		Tipo:  Ast.STRUCT,
+		Valor: obj3d,
 	}
 }

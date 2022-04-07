@@ -3,6 +3,7 @@ package expresiones
 import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
+	"reflect"
 	"strconv"
 
 	"github.com/colegno/arraylist"
@@ -99,7 +100,9 @@ func (a DimensionArray) GetColumna() int {
 }
 
 func EsUsize(valor Ast.TipoRetornado, tipoParticular Ast.TipoDato, elemento interface{}, scope *Ast.Scope) Ast.TipoRetornado {
-	valor = valor.Valor.(Ast.O3D).Valor
+	if reflect.TypeOf(valor.Valor) == reflect.TypeOf(Ast.O3D{}) {
+		valor = valor.Valor.(Ast.O3D).Valor
+	}
 
 	//if (valor.Tipo != Ast.USIZE && valor.Tipo != Ast.I64) ||
 	//tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.I64 {

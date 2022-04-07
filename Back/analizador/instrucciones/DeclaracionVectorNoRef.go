@@ -45,8 +45,10 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	var existe bool
 	var valor Ast.TipoRetornado
 	esIndefinido := false
+	/**********VARIABLES 3D***************/
 	var codigo3d string
 	var obj3d, obj3dValor Ast.O3D
+	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
@@ -129,6 +131,7 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 
 	//Crear el símbolo y agregarlo al scope
 	if esIndefinido {
+		temp := Ast.GetTemp()
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
 		nVector := nmVector.(expresiones.Vector)
@@ -145,7 +148,22 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 			Publico:       d.Publico,
 			Entorno:       scope,
 		}
-
+		codigo3d += obj3dValor.Codigo
+		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
+		if d.Stack {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.STACK
+			scope.Size++
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		} else {
+			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+			nSimbolo.Direccion = scope.Size
+			nSimbolo.TipoDireccion = Ast.HEAP
+			scope.Size++
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		}
+		codigo3d += "/***********************************************/\n"
 		scope.Add(nSimbolo)
 	} else {
 		//Temporales
@@ -182,7 +200,7 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
 			nSimbolo.TipoDireccion = Ast.HEAP
-			scope.Size = Ast.GetValorH() - 1
+			scope.Size++
 			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
 		}
 		codigo3d += "/***********************************************/\n"

@@ -15,16 +15,70 @@
 	
 <tr>
 <td cellpadding='4'>
-pila
+Prueba
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>VECTOR
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+1
+</td>
+<td cellpadding='4'>
+7
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+hola
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
 </td>
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-2
+8
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+adios
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+9
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+persona
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+7
 </td>
 <td cellpadding='4'>
 4

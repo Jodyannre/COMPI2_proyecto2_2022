@@ -113,9 +113,21 @@ func (p LenVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		}
 	} else {
 		vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Array)
-		return Ast.TipoRetornado{
+		/*Codigo 3D*/
+		temp = Ast.GetTemp()
+		codigo3d += "/*********************************LEN DEL ARRAY*/\n"
+		codigo3d += temp + " = heap[(int)" + referencia + "]; //Get size\n"
+		codigo3d += "/***********************************************/\n"
+		codigo3d += "/***********************************************/\n"
+		obj3d.Codigo = codigo3d
+		obj3d.Referencia = temp
+		obj3d.Valor = Ast.TipoRetornado{
 			Tipo:  Ast.I64,
 			Valor: vector.(expresiones.Array).Size,
+		}
+		return Ast.TipoRetornado{
+			Tipo:  Ast.VEC_LEN,
+			Valor: obj3d,
 		}
 	}
 

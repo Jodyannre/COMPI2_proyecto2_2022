@@ -113,6 +113,14 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	var valorPosicion Ast.TipoRetornado
 	posiciones := arraylist.New()
 	var array interface{}
+
+	/*************VARIABLES 3D*************/
+	var obj3dPosicion Ast.O3D
+	var idExp expresiones.Identificador
+	var obj3d, obj3dValor, objtemp Ast.O3D
+	var referencia, codigo3d string
+	/**************************************/
+
 	//Verificar que el id  exista
 	existe := scope.Exist(id)
 	if !existe {
@@ -131,6 +139,14 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	//Obtener el valor del id
 	simbolo_id := scope.GetSimbolo(id)
 
+	/*********C3D del Simbolo***********/
+	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
+	obj3d = idExp.GetValue(scope).Valor.(Ast.O3D)
+	referencia = obj3d.Referencia
+	codigo3d += obj3d.Codigo
+	/***********************************/
+
 	//Obtener el vector
 	if simbolo_id.Tipo == Ast.ARRAY {
 		array = simbolo_id.Valor.(Ast.TipoRetornado).Valor.(expresiones.Array)
@@ -148,6 +164,8 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 		preValor = a.Valor.(Ast.Expresion).GetValue(scope)
 	}
 	valor := preValor.(Ast.TipoRetornado)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	valor = obj3dValor.Valor
 
 	if existe {
 		//Primero verificar si es mutable
@@ -265,7 +283,11 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				//Get las posiciones
 				for i := 0; i < prePos.Len(); i++ {
 					posicion = prePos.GetValue(i)
+					/*******************************************************/
 					valorPosicion = posicion.(Ast.Expresion).GetValue(scope)
+					obj3dPosicion = valorPosicion.Valor.(Ast.O3D)
+					valorPosicion = obj3dPosicion.Valor
+					/*******************************************************/
 					_, tipoParticular := posicion.(Ast.Abstracto).GetTipo()
 					if valorPosicion.Tipo == Ast.ERROR {
 						return posicion.(Ast.TipoRetornado)
@@ -403,6 +425,8 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				for i := 0; i < prePos.Len(); i++ {
 					posicion = prePos.GetValue(i)
 					valorPosicion = posicion.(Ast.Expresion).GetValue(scope)
+					objtemp = valorPosicion.Valor.(Ast.O3D)
+					valorPosicion = objtemp.Valor
 					_, tipoParticular := posicion.(Ast.Abstracto).GetTipo()
 					if valorPosicion.Tipo == Ast.ERROR {
 						return posicion.(Ast.TipoRetornado)
@@ -417,12 +441,14 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 
 				//Buscar la posición
 				//Crear un nuevo valor
-				nuevoValor := valor
-				resultadoAsignacion = fn_vectores.UpdateElemento(array.(expresiones.Vector), prePos, posiciones, scope, nuevoValor)
+				//nuevoValor := valor
+				resultadoAsignacion = fn_vectores.UpdateElemento(array.(expresiones.Vector), prePos, posiciones, scope, obj3dValor, referencia)
+				objtemp = resultadoAsignacion.Valor.(Ast.O3D)
+				resultadoAsignacion = objtemp.Valor
 				if resultadoAsignacion.Tipo == Ast.ERROR {
 					return resultadoAsignacion
 				}
-
+				codigo3d += objtemp.Codigo
 				simbolo_id.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: array}
 				scope.UpdateSimbolo(id, simbolo_id)
 			} else {
@@ -464,9 +490,14 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 		}
 	}
 
-	return Ast.TipoRetornado{
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 
 }
@@ -666,7 +697,7 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 	/*************VARIABLES 3D*************/
 	var obj3dPosicion Ast.O3D
 	var idExp expresiones.Identificador
-	var obj3d, obj3Temp, obj3dValor Ast.O3D
+	var obj3d, obj3dValor Ast.O3D
 	var referencia, codigo3d string
 	/**************************************/
 	agregarElemento := false
@@ -853,7 +884,7 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 				scope.UpdateSimbolo(id, simbolo_id)
 
 				/*********************CODIGO 3D*****************************/
-
+				codigo3d += GetCod3DAsignacionVector(referencia, obj3dValor.Referencia, posicionNum)
 				/***********************************************************/
 			}
 		} else {
@@ -879,9 +910,16 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 			Valor: true,
 		}
 	}
-	return Ast.TipoRetornado{
+
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ASIGNACION,
+		Valor: obj3d,
 	}
 }
 
@@ -973,6 +1011,23 @@ func GetCod3DString(posSimbolo, posValor string, nuevaPos bool) (string, string)
 }
 
 func GetCod3DAsignacionVector(refVector, refElemento string, posicion int) string {
-
-	return ""
+	codigo3d := ""
+	vector := Ast.GetTemp()
+	sizeVec := Ast.GetTemp()
+	primeraPos := Ast.GetTemp()
+	posVector := Ast.GetTemp()
+	lt := Ast.GetLabel()
+	lf := Ast.GetLabel()
+	salto := Ast.GetLabel()
+	codigo3d += vector + " = heap[(int)" + refVector + "]; //Get el vector\n"
+	codigo3d += sizeVec + " = heap[(int)" + vector + "] //Size vector\n"
+	codigo3d += "if (" + strconv.Itoa(posicion) + " < " + sizeVec + " goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += primeraPos + " = " + vector + " + 1; //Get primera pos de vector \n "
+	codigo3d += posVector + " = " + primeraPos + " + " + strconv.Itoa(posicion) + "; //pos para asignar\n "
+	codigo3d += "heap[(int)" + posVector + "] = " + refElemento + ";\n"
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += fn_vectores.BoundsError(lf)
+	return codigo3d
 }

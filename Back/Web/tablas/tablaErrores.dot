@@ -17,17 +17,17 @@
 <td cellpadding='4'>
 1
 </td>
-<td cellpadding='4'>no viable alternative at input 'pila[0];'
+<td cellpadding='4'>missing ';' at '}'
 </td>
 <td cellpadding='4'>Global
 </td>
-<td cellpadding='4'>6
+<td cellpadding='4'>13
 </td>
 <td cellpadding='4'>
-27
+0
 </td>
 <td cellpadding='4'>
-04-05-2022 23:48:57
+04-07-2022 01:57:36
 </td>
 </tr>
 

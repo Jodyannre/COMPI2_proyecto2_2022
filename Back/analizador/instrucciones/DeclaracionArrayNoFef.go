@@ -22,6 +22,7 @@ type DeclaracionArrayNoRef struct {
 	Fila          int
 	Columna       int
 	ScopeOriginal *Ast.Scope
+	Stack         bool
 }
 
 func NewDeclaracionArrayNoRef(id string, dimension interface{},
@@ -36,6 +37,7 @@ func NewDeclaracionArrayNoRef(id string, dimension interface{},
 		Columna:   columna,
 		Dimension: dimension,
 		TipoArray: dimension.(expresiones.DimensionArray).TipoArray,
+		Stack:     true,
 	}
 	return nd
 }
@@ -49,14 +51,19 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	var validacionDimensiones string
 	var existe bool
 	var valor Ast.TipoRetornado
+	/**********VARIABLES 3D***************/
+	var codigo3d string
+	var obj3d, obj3dValor Ast.O3D
+	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
-
 	if tipoIn == Ast.VALOR {
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
+		obj3dValor = valor.Valor.(Ast.O3D)
+		valor = obj3dValor.Valor
 	}
 
 	dimension := d.Dimension.(Ast.Expresion).GetValue(scope)
@@ -218,12 +225,27 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		Tipo:  valor.Tipo,
 		Valor: nArray,
 	}
+	temp := Ast.GetTemp()
+	codigo3d += obj3dValor.Codigo
+	codigo3d += "/**************************DECLARACION DE ARRAY*/\n"
+	if d.Stack {
+		codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+		nSimbolo.Direccion = scope.Size
+		nSimbolo.TipoDireccion = Ast.STACK
+		scope.Size++
+		codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+	} else {
+		codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
+		nSimbolo.Direccion = scope.Size
+		nSimbolo.TipoDireccion = Ast.HEAP
+		scope.Size++
+		codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+	}
+	codigo3d += "/***********************************************/\n"
 
 	scope.Add(nSimbolo)
-	return Ast.TipoRetornado{
-		Tipo:  Ast.EJECUTADO,
-		Valor: true,
-	}
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: Ast.DECLARACION}
 }
 
 func (op DeclaracionArrayNoRef) GetFila() int {

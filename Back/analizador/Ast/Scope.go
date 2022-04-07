@@ -26,6 +26,7 @@ type Scope struct {
 	Global               bool
 	Posicion             int
 	Size                 int
+	Stack                bool
 }
 
 func (scope *Scope) GetTablaModulos() map[string]interface{} {
@@ -45,6 +46,7 @@ func NewScope(name string, prev *Scope) Scope {
 	nuevo.Size = 0
 	nuevo.Codigo = ""
 	nuevo.Consola = ""
+	nuevo.Stack = true
 	return nuevo
 }
 

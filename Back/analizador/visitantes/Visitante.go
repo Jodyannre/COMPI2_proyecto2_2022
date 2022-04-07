@@ -58,6 +58,13 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	var mainEncontrado bool = false
 	var contadorMain int = 0
 	var posicionMain int = 0
+	var resultado Ast.TipoRetornado
+
+	/**************VARIABLES 3D*******************/
+	var codigo3d string
+	var obj3d Ast.O3D
+
+	/*********************************************/
 
 	//Primera pasada para agregar todas las declaraciones de las variables y los elemenos
 	//Buscar el main y verificar que solo exista uno o no ejecutar y error de que no hay main
@@ -72,7 +79,9 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 		}
 		if tipoParticular == Ast.DECLARACION {
 			//Declarar variables globales
-			actual.(Ast.Instruccion).Run(&EntornoGlobal)
+			resultado = actual.(Ast.Instruccion).Run(&EntornoGlobal).(Ast.TipoRetornado)
+			obj3d = resultado.Valor.(Ast.O3D)
+			resultado = obj3d.Valor
 		} else if tipoGeneral == Ast.EXPRESION {
 			//Verificar que sea el main
 			if tipoParticular == Ast.FUNCION_MAIN {
@@ -117,9 +126,8 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 
 		//Ejetuar el método main
 		metodoMain.(Ast.Expresion).GetValue(&EntornoGlobal)
-
 	}
-
+	EntornoGlobal.Codigo += Ast.Indentar(EntornoGlobal.GetNivel(), codigo3d)
 	EntornoGlobal.UpdateScopeGlobal()
 	v.Consola += EntornoGlobal.Consola
 	//Agregar código y encabezado en C

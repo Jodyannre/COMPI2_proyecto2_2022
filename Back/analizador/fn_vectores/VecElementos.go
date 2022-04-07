@@ -38,11 +38,13 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	tipoDelArrayAnterior := Ast.TipoRetornado{Tipo: Ast.INDEFINIDO, Valor: true}
 	var vector expresiones.Vector
 	var array expresiones.Array
+	/********************VARIABLES 3D*******************************/
 	var obj3d, obj3dValor Ast.O3D
 	var preCodigo3d, codigo3d, referencia, referenciaRetorno string
 	var primeraPos bool = true
 	var vectores = arraylist.New()
 	var estructuraBase string
+	/***************************************************************/
 	size := 0
 	capacity := 0
 	vacio := true

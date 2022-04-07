@@ -35,6 +35,14 @@ func NewStructInstancia(plantilla Ast.TipoRetornado, atributos *arraylist.List, 
 }
 
 func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/*****************VARIABLES 3D***********************/
+	var codigo3d string
+	var obj3dValorAtt, obj3d Ast.O3D
+	var inicioStruct string
+	var posicionActual string
+	var referenciaStruct string
+	/****************************************************/
+
 	var plantilla StructTemplate
 	var nombreNewScope string
 	var simboloPlantilla Ast.Simbolo
@@ -57,9 +65,11 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		}
 	}
 	if s.Plantilla.Tipo == Ast.STRUCT {
+
 		//simboloPlantilla = scope.Exist_fms(s.Plantilla.Valor.(string))
 		simboloPlantilla = scope.Exist_fms_local(s.Plantilla.Valor.(string))
 		nombreNewScope = s.Plantilla.Valor.(string)
+
 	} else {
 		//Es un acceso a modulo, ejecutarlo
 		resultadoAccesoModulo = s.Plantilla.Valor.(AccesoModulo).GetValue(scope)
@@ -144,6 +154,16 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Recuperar el struct
 	plantilla = simboloPlantilla.Valor.(Ast.TipoRetornado).Valor.(StructTemplate)
 
+	/***************************************/
+	inicioStruct = Ast.GetTemp()
+	posicionActual = Ast.GetTemp()
+	codigo3d += "/************************************NEW STRUCT*/ \n"
+	codigo3d += "/***********************************************/ \n"
+	codigo3d += inicioStruct + " = H; //Guardar referencia del inicio del struct\n"
+	codigo3d += posicionActual + " = " + inicioStruct + ";//Posicion inicial para atributos\n"
+	referenciaStruct = inicioStruct
+	/***************************************/
+
 	if plantilla.AtributosIn.Len() != s.AtributosIn.Len() {
 		//Error la cantidad de atributos no concuerda
 		fila := s.Fila
@@ -191,6 +211,9 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 		//Get el valor del atributo
 		valorAtt := atributoActual.GetValue(scope)
+		obj3dValorAtt = valorAtt.Valor.(Ast.O3D)
+		codigo3d += obj3dValorAtt.Codigo
+		valorAtt = obj3dValorAtt.Valor
 		if valorAtt.Tipo == Ast.ERROR {
 			return valorAtt
 		}
@@ -269,12 +292,23 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			}
 		}
 
-		//Todo bien ,entonces crear el struct
+		//Todo bien ,entonces crear el atributo y agregarlo al struct
 		nuevoSimbolo := Ast.NewSimbolo(atributoActual.Nombre, attActual.Valor,
 			atributoActual.Fila, atributoActual.Columna,
 			attActual.TipoAtributo.Tipo, atributoActual.Mutable, atributoActual.Publico)
 		nuevoSimbolo.Publico = attPlantilla.Publico
-		//Si el tipo es acceso modulo, modificarlo y dejarlo como un struct
+		nuevoSimbolo.Direccion = newScope.Size
+		newScope.Size++
+		nuevoSimbolo.TipoDireccion = Ast.HEAP
+
+		/***************************COD 3D PARA CREAR EL ATRIBUTO*************************/
+		codigo3d += "/************************AGREGAR VALOR ATRIBUTO*/ \n"
+		codigo3d += "heap[(int)" + posicionActual + "] = " + obj3dValorAtt.Referencia + ";//Agregar atributo\n"
+		codigo3d += "H = H + 1;\n"
+		Ast.GetH()
+		codigo3d += posicionActual + " = H; // Siguiente posicion del struct \n"
+		codigo3d += "/***********************************************/ \n"
+		/*********************************************************************************/
 
 		newScope.Add(nuevoSimbolo)
 	}
@@ -300,10 +334,16 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		//De lo contrario actualizar el tipo de la declaracion
 		s.Plantilla = nTipo
 	}
+	obj3d.Valor = Ast.TipoRetornado{
+		Tipo:  Ast.STRUCT,
+		Valor: s,
+	}
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = referenciaStruct
 
 	return Ast.TipoRetornado{
 		Tipo:  Ast.STRUCT,
-		Valor: s,
+		Valor: obj3d,
 	}
 }
 

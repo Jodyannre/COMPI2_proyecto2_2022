@@ -67,7 +67,7 @@ func (p AccesoArray) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	simbolo = scope.GetSimbolo(id)
 
 	/*Codigo 3d para conseguir el elemento del stack o del heap*/
-	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	codigo3d += "/*********************************ACCESO A ARRAY*/\n"
 	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
 	obj3dValor = idExp.GetValue(scope).Valor.(Ast.O3D)
 	referencia = obj3dValor.Referencia
@@ -114,7 +114,7 @@ func (p AccesoArray) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Copiar lista
 	copiaLista = p.Posiciones.Clone()
 	if simbolo.Tipo == Ast.ARRAY {
-		resultado = GetElemento(array.(expresiones.Array), copiaLista, posiciones, scope)
+		resultado = GetElemento(array.(expresiones.Array), copiaLista, posiciones, scope, referencia)
 	} else {
 		resultado = GetElementoVector(array.(expresiones.Vector), copiaLista, posiciones, scope, referencia)
 	}
@@ -130,9 +130,17 @@ func (p AccesoArray) AccesoPorExpresion(scope *Ast.Scope) interface{} {
 	var posicion interface{}
 	var valorPosicion Ast.TipoRetornado
 	var copiaLista *arraylist.List
+	/*******************VARIABLES 3D ******************/
+	var obj3d, obj3dValor, objTemp Ast.O3D
+	var codigo3d string
+	/*************************************************/
+
 	posiciones := arraylist.New()
 	//Conseguir el array
 	array := p.Identificador.(Ast.Expresion).GetValue(scope)
+	obj3dValor = array.Valor.(Ast.O3D)
+	array = obj3dValor.Valor
+
 	//Verificar que sea un array
 	if array.Tipo != Ast.ARRAY {
 		fila := p.Identificador.(Ast.Abstracto).GetFila()
@@ -154,6 +162,8 @@ func (p AccesoArray) AccesoPorExpresion(scope *Ast.Scope) interface{} {
 	for i := 0; i < p.Posiciones.Len(); i++ {
 		posicion = p.Posiciones.GetValue(i)
 		valorPosicion = posicion.(Ast.Expresion).GetValue(scope)
+		objTemp = valorPosicion.Valor.(Ast.O3D)
+		valorPosicion = objTemp.Valor
 		_, tipoParticular := posicion.(Ast.Abstracto).GetTipo()
 		if valorPosicion.Tipo == Ast.ERROR {
 			return posicion.(Ast.TipoRetornado)
@@ -169,8 +179,16 @@ func (p AccesoArray) AccesoPorExpresion(scope *Ast.Scope) interface{} {
 	//Buscar la posición
 	//Copiar lista
 	copiaLista = p.Posiciones.Clone()
-	resultado = GetElemento(array.Valor.(expresiones.Array), copiaLista, posiciones, scope)
-	return resultado
+	resultado = GetElemento(array.Valor.(expresiones.Array), copiaLista, posiciones, scope, obj3dValor.Referencia)
+	codigo3d += obj3dValor.Codigo
+	codigo3d += resultado.Valor.(Ast.O3D).Codigo
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = resultado.Valor.(Ast.O3D).Valor
+	obj3d.Referencia = resultado.Valor.(Ast.O3D).Referencia
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ACCESO_ARRAY,
+		Valor: obj3d,
+	}
 }
 
 func (v AccesoArray) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
@@ -185,7 +203,15 @@ func (v AccesoArray) GetColumna() int {
 }
 
 //p.Posiciones
-func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope) Ast.TipoRetornado {
+func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope, ref string) Ast.TipoRetornado {
+	/***********VARIABLES 3D********/
+	var obj3d, obj3dValor Ast.O3D
+	var referencia string
+	var codigo3d string
+	var lf string
+	referencia = ref
+	/*******************************/
+
 	posicion := posiciones.GetValue(0).(int)
 	elemento := elementos.GetValue(0)
 	posiciones.RemoveAtIndex(0)
@@ -209,7 +235,19 @@ func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones 
 	}
 	if posiciones.Len() == 0 {
 		//Si es 0, entonces retornar la posición actual
-		return array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
+		valor := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
+		if valor.Tipo == Ast.VECTOR {
+			obj3dValor = GetCod3dAccesoArray(referencia, posicion, true)
+		} else {
+			obj3dValor = GetCod3dAccesoArray(referencia, posicion, false)
+		}
+		codigo3d += obj3dValor.Codigo
+		codigo3d += obj3dValor.Lt + ":\n"
+		codigo3d += "/***********************************************/\n"
+		obj3d.Codigo = codigo3d
+		obj3d.Valor = valor
+		obj3d.Referencia = obj3dValor.Referencia
+		return Ast.TipoRetornado{Valor: obj3d, Tipo: obj3d.Valor.Tipo}
 	}
 	if posiciones.Len() > 0 && array.TipoArray != Ast.ARRAY {
 		//Error, no hay más dimensiones
@@ -229,10 +267,19 @@ func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones 
 		}
 	}
 	next := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
-
+	/*Codigo 3d para el siguiente elemento vector*/
+	obj3dValor = GetCod3dAccesoVector(referencia, posicion, true)
+	codigo3d += obj3dValor.Codigo
+	lf = Ast.GetLabel()
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += obj3dValor.Lt + ":\n"
 	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
-	return GetElemento(next.Valor.(expresiones.Array), elementos, posiciones, scope)
-
+	obj3d = GetElemento(next.Valor.(expresiones.Array), elementos, posiciones, scope, obj3dValor.Referencia).Valor.(Ast.O3D)
+	codigo3d += obj3d.Codigo
+	codigo3d += lf + ":\n"
+	codigo3d += "/***********************************************/\n"
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{Tipo: Ast.ACCESO_ARRAY, Valor: obj3d}
 }
 
 //Get elemento vector
@@ -344,6 +391,56 @@ func GetCod3dAccesoVector(ref string, pos int, estructura bool) Ast.O3D {
 	codigo3d += "goto " + lf + ";\n"
 	codigo3d += lt + ":\n"
 	codigo3d += temp2 + " = " + referencia + " + 1; //Get inicio del vector\n"
+	codigo3d += temp3 + " = " + strconv.Itoa(posicion) + "; //Get posicion exacta\n"
+	codigo3d += temp4 + " = " + temp2 + " + " + temp3 + "; //Get elemento\n"
+	/*Si es una estructura, obtener su direccion*/
+	if estructura {
+		temp5 = Ast.GetTemp()
+		codigo3d += temp5 + " = " + "heap[(int)" + temp4 + "];//Get posicion exacta de objeto\n"
+		obj3d.Referencia = temp5
+	} else {
+		temp5 = Ast.GetTemp()
+		codigo3d += temp5 + " = " + "heap[(int)" + temp4 + "];//Get posicion exacta de objeto\n"
+		obj3d.Referencia = temp5
+	}
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += BoundsError(lf)
+	//codigo3d += salto + ":\n"
+	/******************************************/
+	obj3d.Lt = salto
+	obj3d.Codigo = codigo3d
+	return obj3d
+}
+
+func GetCod3dAccesoArray(ref string, pos int, estructura bool) Ast.O3D {
+	var obj3d Ast.O3D
+	var codigo3d string
+	temp := ""
+	temp2 := ""
+	temp3 := ""
+	temp4 := ""
+	temp5 := ""
+	lt := ""
+	lf := ""
+	salto := ""
+	referencia := ref
+	posicion := pos
+	/*Trabajar código 3d*/
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
+	salto = Ast.GetLabel()
+
+	/***************CODIGO 3D******************/
+	temp = Ast.GetTemp()  //Temporal para guardar el size del vector
+	temp2 = Ast.GetTemp() //Temporal que va a guardar el size del vector
+	temp3 = Ast.GetTemp()
+	temp4 = Ast.GetTemp()
+	codigo3d += "/*************************GET ELEMENTO DE ARRAY*/\n"
+	codigo3d += temp + " = heap[(int)" + referencia + "]; //Get size\n"
+	codigo3d += "if (" + strconv.Itoa(posicion) + " < " + temp + ") goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += temp2 + " = " + referencia + " + 1; //Get inicio del array\n"
 	codigo3d += temp3 + " = " + strconv.Itoa(posicion) + "; //Get posicion exacta\n"
 	codigo3d += temp4 + " = " + temp2 + " + " + temp3 + "; //Get elemento\n"
 	/*Si es una estructura, obtener su direccion*/

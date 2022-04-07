@@ -43,6 +43,7 @@ func NewAtributo(nombre string, valor interface{}, mutable bool, fila, columna i
 
 func (a *Atributo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var valor Ast.TipoRetornado
+	var obj3d Ast.O3D
 	///////////////////////////////////////////////////////
 	//Clono el puntero para no modificarlo luego
 	clone := a.Clonar()
@@ -51,6 +52,8 @@ func (a *Atributo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		valor = a.Valor.(Ast.TipoRetornado)
 	} else {
 		valor = a.Valor.(Ast.Expresion).GetValue(scope)
+		obj3d = valor.Valor.(Ast.O3D)
+		valor = obj3d.Valor
 	}
 
 	if valor.Tipo == Ast.ERROR {
@@ -71,9 +74,14 @@ func (a *Atributo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	clone.Valor = valor
 
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.ATRIBUTO,
 		Valor: clone,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ATRIBUTO,
+		Valor: obj3d,
 	}
 }
 

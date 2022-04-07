@@ -38,13 +38,26 @@ func (v ArrayElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	tipoDelArrayAnterior := Ast.TipoRetornado{Tipo: Ast.INDEFINIDO, Valor: true}
 	var vector expresiones.Vector
 	var array expresiones.Array
+	/********************VARIABLES 3D*******************************/
+	var obj3d, obj3dValor Ast.O3D
+	var preCodigo3d, codigo3d, referencia, referenciaRetorno string
+	var primeraPos bool = true
+	var arrays = arraylist.New()
+	var estructuraBase string
+	/***************************************************************/
 	size := 0
 	vacio := true
+	codigo3d += "/*****************************CREACION DE ARRAY*/\n"
+	codigo3d += "/***********************************************/\n"
 
 	for i := 0; i < v.Elementos.Len(); i++ {
 		elemento = v.Elementos.GetValue(i)
 		//Calcular el valor del elemento
 		valorElemento = elemento.(Ast.Expresion).GetValue(scope)
+		obj3dValor = valorElemento.Valor.(Ast.O3D)
+		valorElemento = obj3dValor.Valor
+		codigo3d += obj3dValor.Codigo
+		referencia = obj3dValor.Referencia
 		//Si hay error solo lo retorno
 		if valorElemento.Tipo == Ast.ERROR {
 			return valorElemento
@@ -231,12 +244,41 @@ func (v ArrayElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		//Todo bien, entonces agregar el elemento a la lista del vector
 		elementos.Add(valorElemento)
 		size++
+
+		/*Get el codigo3d de agregar ese elemento al heap*/
+		if tipoParticular == Ast.ARRAY || tipoParticular == Ast.STRING || tipoParticular == Ast.STR {
+			//referencia, preCodigo3d = GetCod3dElemento(referencia, primeraPos, true)
+			if primeraPos {
+				estructuraBase = referencia
+			}
+		} else {
+			referencia, preCodigo3d = GetCod3dElemento(referencia, primeraPos, false)
+		}
+		if tipoParticular == Ast.ARRAY {
+			arrays.Add(referencia)
+		}
+		codigo3d += preCodigo3d
 		if vacio {
+			primeraPos = false
 			vacio = false
+			referenciaRetorno = referencia
 			tipoVector = expresiones.EsArray(tipoParticular)
 		}
 	}
-	//Actualizar capacity
+
+	if tipoAnterior.Tipo == Ast.ARRAY || tipoAnterior.Tipo == Ast.STRING || tipoAnterior.Tipo == Ast.STR {
+		//Agregar los elementos al vector
+		//Crear el vector padre
+		ref, cod := GetCod3dElemento(estructuraBase, true, true)
+		codigo3d += cod
+		/*Agregar los elementos al vector*/
+		for i := 0; i < arrays.Len(); i++ {
+			elemento := arrays.GetValue(i).(string)
+			_, cod := GetCod3dElemento(elemento, false, false)
+			codigo3d += cod
+		}
+		referenciaRetorno = ref
+	}
 
 	newArray := expresiones.NewArray(elementos, tipoVector, size, v.Fila, v.Columna)
 	if tipoAnterior.Tipo == Ast.ARRAY {
@@ -248,6 +290,17 @@ func (v ArrayElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	if newArray.TipoDelArray.Tipo == Ast.INDEFINIDO {
 		newArray.TipoDelArray.Tipo = newArray.TipoArray
 	}
+
+	/******************CODIGO 3D***********************/
+	codigo3d += "/*********************GUARDAR EL SIZE DEL ARRAY*/\n"
+	codigo3d += "heap[(int)" + referenciaRetorno + "] = " + strconv.Itoa(newArray.Size) + ";\n"
+	codigo3d += "/***********************************************/\n"
+	codigo3d += "/***********************************************/\n"
+	/**************************************************/
+	/*Actualizar datos del obj3d a retornar*/
+	obj3d.Codigo = codigo3d
+	/*Agregar la referencia del array*/
+	obj3d.Referencia = referenciaRetorno
 
 	//concordancia := ConcordanciaDimensiones(newArray)
 	concordancia2 := ConcordanciaArray(newArray)
@@ -268,11 +321,14 @@ func (v ArrayElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			Valor: nError,
 		}
 	}
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.ARRAY,
 		Valor: newArray,
 	}
-
+	return Ast.TipoRetornado{
+		Tipo:  Ast.ARRAY,
+		Valor: obj3d,
+	}
 }
 
 func (v ArrayElementos) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
@@ -407,4 +463,27 @@ func ConcordanciaArray(arr expresiones.Array) string {
 		}
 	}
 	return actual
+}
+
+func GetCod3dElemento(referencia string, primeraPos bool, estructura bool) (string, string) {
+	codigo3d := ""
+	ref := ""
+	if primeraPos {
+		codigo3d += "/******************************INICIO DEL ARRAY*/\n"
+		temp := Ast.GetTemp()
+		codigo3d += temp + " = H; //Guardar la referencia\n"
+		codigo3d += "H = H + 1; //La primera posicion guardara el tamaño del Array\n"
+		ref = temp
+		Ast.GetH()
+		codigo3d += "/***********************************************/\n"
+	}
+	if !estructura {
+		codigo3d += "/*********************AGREGAR ELEMENTO AL ARRAY*/\n"
+		codigo3d += "heap[(int)H] = " + referencia + "; //Agregando elemento al Array\n"
+		codigo3d += "H = H + 1;\n"
+		Ast.GetH()
+		codigo3d += "/***********************************************/\n"
+	}
+
+	return ref, codigo3d
 }
