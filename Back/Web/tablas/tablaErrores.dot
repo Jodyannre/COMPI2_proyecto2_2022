@@ -17,17 +17,17 @@
 <td cellpadding='4'>
 1
 </td>
-<td cellpadding='4'>missing ';' at '}'
+<td cellpadding='4'>Semantic error, MAIN method not found. -- Line: 0 Column: 0
 </td>
 <td cellpadding='4'>Global
 </td>
-<td cellpadding='4'>13
+<td cellpadding='4'>0
 </td>
 <td cellpadding='4'>
 0
 </td>
 <td cellpadding='4'>
-04-07-2022 01:57:36
+04-08-2022 02:09:20
 </td>
 </tr>
 

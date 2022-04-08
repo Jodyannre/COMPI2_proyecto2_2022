@@ -39,8 +39,8 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var codigo3d string
 	var obj3dValorAtt, obj3d Ast.O3D
 	var inicioStruct string
-	var posicionActual string
 	var referenciaStruct string
+	atributos := arraylist.New()
 	/****************************************************/
 
 	var plantilla StructTemplate
@@ -153,16 +153,6 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	//Recuperar el struct
 	plantilla = simboloPlantilla.Valor.(Ast.TipoRetornado).Valor.(StructTemplate)
-
-	/***************************************/
-	inicioStruct = Ast.GetTemp()
-	posicionActual = Ast.GetTemp()
-	codigo3d += "/************************************NEW STRUCT*/ \n"
-	codigo3d += "/***********************************************/ \n"
-	codigo3d += inicioStruct + " = H; //Guardar referencia del inicio del struct\n"
-	codigo3d += posicionActual + " = " + inicioStruct + ";//Posicion inicial para atributos\n"
-	referenciaStruct = inicioStruct
-	/***************************************/
 
 	if plantilla.AtributosIn.Len() != s.AtributosIn.Len() {
 		//Error la cantidad de atributos no concuerda
@@ -300,16 +290,10 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		nuevoSimbolo.Direccion = newScope.Size
 		newScope.Size++
 		nuevoSimbolo.TipoDireccion = Ast.HEAP
-
-		/***************************COD 3D PARA CREAR EL ATRIBUTO*************************/
-		codigo3d += "/************************AGREGAR VALOR ATRIBUTO*/ \n"
-		codigo3d += "heap[(int)" + posicionActual + "] = " + obj3dValorAtt.Referencia + ";//Agregar atributo\n"
-		codigo3d += "H = H + 1;\n"
-		Ast.GetH()
-		codigo3d += posicionActual + " = H; // Siguiente posicion del struct \n"
-		codigo3d += "/***********************************************/ \n"
-		/*********************************************************************************/
-
+		//Agregar las referencias
+		/*****************************************/
+		atributos.Add(obj3dValorAtt.Referencia)
+		/*****************************************/
 		newScope.Add(nuevoSimbolo)
 	}
 	//Agregar el scope al struct y finalizar retornando el scope
@@ -334,6 +318,28 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		//De lo contrario actualizar el tipo de la declaracion
 		s.Plantilla = nTipo
 	}
+
+	/***************************************/
+	inicioStruct = Ast.GetTemp()
+	codigo3d += "/************************************NEW STRUCT*/ \n"
+	codigo3d += inicioStruct + " = H; //Guardar referencia del inicio del struct\n"
+	referenciaStruct = inicioStruct
+	codigo3d += "/***********************************************/ \n"
+
+	/***************AGREGAR ATRIBUTOS********************/
+	for i := 0; i < atributos.Len(); i++ {
+		referenciaValor := atributos.GetValue(i).(string)
+		/***************************COD 3D PARA CREAR EL ATRIBUTO*************************/
+		codigo3d += "/**************************CREAR VALOR ATRIBUTO*/ \n"
+		codigo3d += "heap[(int)H] = " + referenciaValor + ";//Agregar atributo\n"
+		codigo3d += "H = H + 1;\n"
+		Ast.GetH()
+		codigo3d += "/***********************************************/ \n"
+		/*********************************************************************************/
+	}
+	/****************************************************/
+	/***************************************/
+
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.STRUCT,
 		Valor: s,

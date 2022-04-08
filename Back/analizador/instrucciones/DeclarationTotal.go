@@ -37,10 +37,13 @@ func NewDeclaracionTotal(id string, valor interface{}, tipo Ast.TipoRetornado, m
 func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	//Verificar si es un tipo especial
 	var esEspecial bool = false
-	var cod3D string = ""
+	/*****************************VARIABLES 3D*****************************/
+	var codigo3d string = ""
 	var obj3DValor, obj3D Ast.O3D
 	var temp string
 	var direccion int
+	var scopeAnterior string
+	/*********************************************************************/
 
 	//Verificar que el id no exista
 
@@ -60,7 +63,15 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	if tipoIn == Ast.IF_EXPRESION || tipoIn == Ast.MATCH_EXPRESION || tipoIn == Ast.LOOP_EXPRESION {
 		preValor = d.Valor.(Ast.Instruccion).Run(scope)
 	} else if tipoIn == Ast.VALOR {
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion)
+		/***************************************************************/
 		preValor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
 	} else {
 		preValor = d.Valor.(Ast.Expresion).GetValue(scope)
 	}
@@ -142,49 +153,49 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 
 	if d.Stack {
 		//Agregar el código anterior
-		cod3D += obj3DValor.Codigo
-		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
+		codigo3d += obj3DValor.Codigo
+		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
 		/*Get la dirección donde se guardara */
 		direccion = scope.Size
 		//Conseguir la dirección del stack donde se va a guardar la nueva variable
-		cod3D += temp + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
+		codigo3d += temp + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
 		//Se guarda la nueva variable en el stack
-		cod3D += "stack[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
+		codigo3d += "stack[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
 		//Aumentar el SP del ambito
 		scope.Size++
-		cod3D += "/***********************************************/\n"
+		codigo3d += "/***********************************************/\n"
 		//Agregar la dirección al símbolo
 		nSimbolo.Direccion = direccion
 		nSimbolo.TipoDireccion = Ast.STACK
 		//Actualizar el obj3d
-		obj3D.Codigo = cod3D
+		obj3D.Codigo = codigo3d
 		obj3D.Valor = valor
 
 	} else {
 		//Agregar el código anterior
-		cod3D += obj3DValor.Codigo
-		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
+		codigo3d += obj3DValor.Codigo
+		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
 		/*Get la dirección donde se guardara */
 		direccion = Ast.GetH()
 		//Conseguir la dirección del stack donde se va a guardar la nueva variable
-		cod3D += temp + " = " + " H;\n"
+		codigo3d += temp + " = " + " H;\n"
 		//Se guarda la nueva variable en el stack
-		cod3D += "heap[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
+		codigo3d += "heap[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
 		//Aumentar H
-		cod3D += "H = H + 1;\n"
-		cod3D += "/***********************************************/\n"
+		codigo3d += "H = H + 1;\n"
+		codigo3d += "/***********************************************/\n"
 		//Aumentar el scope
 		scope.Size++
 		//Agregar la dirección al símbolo
 		nSimbolo.Direccion = direccion
 		nSimbolo.TipoDireccion = Ast.HEAP
 		//Actualizar el obj3d
-		obj3D.Codigo = cod3D
+		obj3D.Codigo = codigo3d
 		obj3D.Valor = valor
 	}
 

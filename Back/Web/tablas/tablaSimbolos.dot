@@ -15,7 +15,25 @@
 	
 <tr>
 <td cellpadding='4'>
-Prueba
+imprimir
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+1
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+Persona
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -24,7 +42,7 @@ Prueba
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-1
+5
 </td>
 <td cellpadding='4'>
 7
@@ -33,16 +51,16 @@ Prueba
 
 <tr>
 <td cellpadding='4'>
-hola
+nombre
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>I64
+<td cellpadding='4'>STR
 </td>
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-8
+13
 </td>
 <td cellpadding='4'>
 8
@@ -51,7 +69,7 @@ hola
 
 <tr>
 <td cellpadding='4'>
-adios
+edad
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -60,7 +78,7 @@ adios
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-9
+14
 </td>
 <td cellpadding='4'>
 8
@@ -69,7 +87,7 @@ adios
 
 <tr>
 <td cellpadding='4'>
-persona
+nPersona
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -78,7 +96,7 @@ persona
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-7
+12
 </td>
 <td cellpadding='4'>
 4

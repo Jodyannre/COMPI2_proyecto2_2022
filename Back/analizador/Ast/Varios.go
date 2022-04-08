@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+func AgregarFuncion(funcion string) {
+	FuncionesC3D += funcion + "\n"
+}
+
 func EsTransferencia(tipo TipoDato) bool {
 	if tipo == BREAK ||
 		tipo == BREAK_EXPRESION ||
@@ -41,6 +45,10 @@ func EsFuncion(tipo interface{}) bool {
 	return validador
 }
 
+func GetFuncionesC3D() string {
+	return FuncionesC3D
+}
+
 func GetLabel() string {
 	newLabel := "L" + strconv.Itoa(Label)
 	Label++
@@ -66,6 +74,7 @@ func ResetAll() {
 	Temporales = ""
 	P = 0
 	H = 0
+	FuncionesC3D = ""
 }
 
 func GetEncabezado() string {
@@ -103,6 +112,10 @@ func GetP() int {
 	newP := P
 	P++
 	return newP
+}
+
+func GetPactual() int {
+	return P
 }
 
 /* Reiniciar P cada vez que entra en un nuevo entorno*/

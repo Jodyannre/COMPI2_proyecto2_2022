@@ -2,6 +2,7 @@ package visitantes
 
 import (
 	"Back/analizador/Ast"
+	"Back/analizador/Ast/simbolos"
 	"Back/analizador/errores"
 	"Back/parser"
 	"fmt"
@@ -55,13 +56,14 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	var actual interface{}
 	var tipoParticular, tipoGeneral Ast.TipoDato
 	var metodoMain interface{}
+	var preMetodoMain simbolos.FuncionMain
 	var mainEncontrado bool = false
 	var contadorMain int = 0
 	var posicionMain int = 0
+	var sizeMain int = 0
 	var resultado Ast.TipoRetornado
 
 	/**************VARIABLES 3D*******************/
-	var codigo3d string
 	var obj3d Ast.O3D
 
 	/*********************************************/
@@ -69,11 +71,42 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	//Primera pasada para agregar todas las declaraciones de las variables y los elemenos
 	//Buscar el main y verificar que solo exista uno o no ejecutar y error de que no hay main
 
-	//Pasada de declaraciones
+	//Pasada para  buscar el main y apartar espacio del tamaño del main
 	for i := 0; i < instrucciones.Len(); i++ {
 		actual = instrucciones.GetValue(i)
 		if actual != nil {
 			tipoGeneral, tipoParticular = actual.(Ast.Abstracto).GetTipo()
+		} else {
+			continue
+		}
+		if tipoGeneral == Ast.EXPRESION {
+			//Verificar que sea el main
+			if tipoParticular == Ast.FUNCION_MAIN {
+				mainEncontrado = true
+				contadorMain++
+				posicionMain = i
+				//Get el metodo main
+				metodoMain = instrucciones.GetValue(posicionMain)
+				//Apartar el espacio para el main
+				preMetodoMain = metodoMain.(simbolos.FuncionMain)
+				for i := 0; i < preMetodoMain.Instrucciones.Len(); i++ {
+					instruccion := preMetodoMain.Instrucciones.GetValue(i)
+					_, tipoParticular := instruccion.(Ast.Abstracto).GetTipo()
+					if tipoParticular == Ast.DECLARACION {
+						sizeMain++
+						Ast.GetP()
+					}
+				}
+			}
+		}
+	}
+
+	//Pasada para declarar todo lo global arriba del main
+	EntornoGlobal.Size = sizeMain
+	for i := 0; i < instrucciones.Len(); i++ {
+		actual = instrucciones.GetValue(i)
+		if actual != nil {
+			_, tipoParticular = actual.(Ast.Abstracto).GetTipo()
 		} else {
 			continue
 		}
@@ -82,13 +115,6 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 			resultado = actual.(Ast.Instruccion).Run(&EntornoGlobal).(Ast.TipoRetornado)
 			obj3d = resultado.Valor.(Ast.O3D)
 			resultado = obj3d.Valor
-		} else if tipoGeneral == Ast.EXPRESION {
-			//Verificar que sea el main
-			if tipoParticular == Ast.FUNCION_MAIN {
-				mainEncontrado = true
-				contadorMain++
-				posicionMain = i
-			}
 		}
 	}
 
@@ -127,13 +153,14 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 		//Ejetuar el método main
 		metodoMain.(Ast.Expresion).GetValue(&EntornoGlobal)
 	}
-	EntornoGlobal.Codigo += Ast.Indentar(EntornoGlobal.GetNivel(), codigo3d)
+	//EntornoGlobal.Codigo += Ast.Indentar(EntornoGlobal.GetNivel(), codigo3d)
 	EntornoGlobal.UpdateScopeGlobal()
 	v.Consola += EntornoGlobal.Consola
 	//Agregar código y encabezado en C
 	v.Codigo += Ast.GetEncabezado()
 	v.Codigo += EntornoGlobal.Codigo
 	v.Codigo += Ast.GetFinEncabezado()
+	v.Codigo += Ast.GetFuncionesC3D()
 	//Reiniciar todas las variables
 	Ast.ResetAll()
 	for i := 0; i < EntornoGlobal.Errores.Len(); i++ {

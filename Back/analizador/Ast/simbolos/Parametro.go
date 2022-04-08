@@ -27,9 +27,14 @@ func NewParametro(id string, tipo Ast.TipoDato, tipoD Ast.TipoRetornado, mutable
 }
 
 func (p Parametro) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
-	return Ast.TipoRetornado{
+	var obj3d Ast.O3D
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  p.TipoDeclaracion.Tipo,
 		Valor: p.Identificador,
+	}
+	return Ast.TipoRetornado{
+		Tipo:  p.TipoDeclaracion.Tipo,
+		Valor: obj3d,
 	}
 }
 

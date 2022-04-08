@@ -30,6 +30,12 @@ func NewLlamadaFuncion(id Ast.Expresion, parametros *arraylist.List, tipo Ast.Ti
 }
 
 func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/**************************VARIABLES 3D***************************/
+	var codigo3d string
+	var obj3dValor Ast.O3D
+
+	/*****************************************************************/
+
 	var simbolo Ast.Simbolo
 	var funcion Funcion
 	var parametrosCreados Ast.TipoRetornado
@@ -104,6 +110,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	} else {
 		//simbolo = newScope.GetSimbolo(l.Identificador.(Identificador).Valor)
 		funcion = simbolo.Valor.(Ast.TipoRetornado).Valor.(Funcion)
+		newScope.Posicion = simbolo.Direccion
 	}
 
 	//Verificar que la función reciba o no parámetros y se estén enviando parámetros
@@ -147,8 +154,19 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		l.ScopeOriginal = &newScope
 	}
 
+	/********************************CAMBIO DE AMBITO PARA DECLARAR PARAMENTROS********************/
+	codigo3d += "P = P + " + strconv.Itoa(simbolo.Direccion) + "; //Set direccion ambito simulado \n"
+	/**********************************************************************************************/
+
 	//Crear los parámetros de las funciones
 	parametrosCreados = funcion.RunParametros(&newScope, l.ScopeOriginal, l.Parametros)
+	obj3dValor = parametrosCreados.Valor.(Ast.O3D)
+	parametrosCreados = obj3dValor.Valor
+	codigo3d += obj3dValor.Codigo
+
+	/********************************RETORNO AL AMBITO ANTERIOR************************************/
+	codigo3d += "P = P - " + strconv.Itoa(simbolo.Direccion) + "; //Retorno al ambito anterior \n"
+	/**********************************************************************************************/
 
 	if parametrosCreados.Tipo == Ast.ERROR {
 		newScope.UpdateScopeGlobal()

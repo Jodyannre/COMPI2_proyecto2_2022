@@ -41,8 +41,22 @@ func (a AccesoStruct) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var existeAtributo bool
 	var nombreAtributo string
 	var tipoParticular Ast.TipoDato
+
+	/********************VARIABLES 3D***********************/
+	var obj3dValor, obj3d Ast.O3D
+	var codigo3d string
+	var ambitoSimulado string
+	var ambitoStruct string
+	var valorAtributo string
+	var posicionAtributo string
+
+	/*******************************************************/
 	//Para verificar si es un struct
 	valor := a.NombreStruct.(Ast.Expresion).GetValue(scope)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	codigo3d += obj3dValor.Codigo
+	valor = obj3dValor.Valor
+
 	//Si es error devolverlo
 	if valor.Tipo == Ast.ERROR {
 		return valor
@@ -155,6 +169,19 @@ func (a AccesoStruct) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Sí existe, entonces recuperar el símbolo del atributo
 	simboloAtributo = structInstancia.Entorno.GetSimbolo(nombreAtributo)
 
+	/*******************CAMBIO DE ÁMBITO PARA OBTENER EL VALOR DEL ATRIBUTO*********************/
+	codigo3d += "/*********************************ACCESO STRUCT*/ \n"
+	ambitoStruct = Ast.GetTemp()
+	ambitoSimulado = Ast.GetTemp()
+	posicionAtributo = Ast.GetTemp()
+	valorAtributo = Ast.GetTemp()
+	codigo3d += ambitoStruct + " = " + obj3dValor.Referencia + ";//Get inicio struct\n"
+	codigo3d += ambitoSimulado + " = " + ambitoStruct + "; //Get ambito simulado\n"
+	codigo3d += posicionAtributo + " = " + ambitoSimulado + " + " + strconv.Itoa(simboloAtributo.Direccion) + "; //Get pos att\n"
+	codigo3d += valorAtributo + " = heap[(int)" + posicionAtributo + "]; //Valor atributo\n"
+	codigo3d += "/***********************************************/ \n"
+	/*******************************************************************************************/
+
 	//Verificar que el atributo sea público
 	/*
 		if !simboloAtributo.Publico {
@@ -174,7 +201,13 @@ func (a AccesoStruct) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			}
 		}
 	*/
-	return simboloAtributo.Valor.(Ast.TipoRetornado)
+	obj3d.Referencia = valorAtributo
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = simboloAtributo.Valor.(Ast.TipoRetornado)
+	return Ast.TipoRetornado{
+		Valor: obj3d,
+		Tipo:  obj3d.Valor.Tipo,
+	}
 }
 
 func (v AccesoStruct) GetTipo() (Ast.TipoDato, Ast.TipoDato) {

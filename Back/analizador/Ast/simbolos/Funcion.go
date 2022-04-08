@@ -38,6 +38,12 @@ func NewFuncion(nombre string, tipo Ast.TipoDato, instrucciones *arraylist.List,
 }
 
 func (f Funcion) Run(scope *Ast.Scope) interface{} {
+	/********************VARIABLES 3D***********************/
+	var obj3d, obj3dValor Ast.O3D
+	var codigo3d string
+	var codigoFuncion string
+	/*******************************************************/
+
 	var actual interface{}
 	var tipoGeneral interface{}
 	var respuesta interface{}
@@ -55,14 +61,20 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		if tipoGeneral == Ast.INSTRUCCION {
 			//Declarar variables globales
 			respuesta = actual.(Ast.Instruccion).Run(scope)
+			obj3dValor = respuesta.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			respuesta = obj3dValor.Valor
 			if respuesta.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return respuesta
 			}
+			codigo3d += obj3dValor.Codigo
 		} else if tipoGeneral == Ast.EXPRESION {
 			respuesta = actual.(Ast.Expresion).GetValue(scope)
+			obj3dValor = respuesta.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			respuesta = obj3dValor.Valor
 			if respuesta.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return respuesta
 			}
+			codigo3d += obj3dValor.Codigo
 		}
 		//scope.UpdateReferencias()
 
@@ -191,9 +203,21 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		scope.Consola += msg + "\n"
 	}
 
-	return Ast.TipoRetornado{
+	//Crear el código de la función
+	codigoFuncion += "void " + f.Nombre + "(){\n"
+	codigoFuncion += Ast.Indentar(scope.GetNivel(), codigo3d)
+	codigoFuncion += "}\n"
+	codigo3d = f.Nombre + "();\n"
+	Ast.AgregarFuncion(codigoFuncion)
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+	obj3d.Codigo = codigo3d
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 
@@ -228,14 +252,8 @@ func (f Funcion) RunParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, paramet
 	// crear los parámetros
 	parametrosCreados = CrearParametros(scope, scopeOrigen, f.Parametros, parametrosIN)
 
-	if parametrosCreados.Tipo == Ast.ERROR {
-		return parametrosCreados
-	}
+	return parametrosCreados
 
-	return Ast.TipoRetornado{
-		Tipo:  Ast.BOOLEAN,
-		Valor: true,
-	}
 }
 
 func TiposCorrectos(scope *Ast.Scope, parametros, parametrosIN *arraylist.List) Ast.TipoRetornado {
@@ -390,6 +408,11 @@ func TiposCorrectos(scope *Ast.Scope, parametros, parametrosIN *arraylist.List) 
 }
 
 func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, parametrosIN *arraylist.List) Ast.TipoRetornado {
+	/**********************VARIABLES 3d*************************/
+	var obj3dParametroIn, obj3dparametro, obj3dValor, obj3d Ast.O3D
+	var codigo3d string
+	/***********************************************************/
+
 	var iterador int
 	var resultadoParametro, tipoParametro, tipoParametroIN Ast.TipoRetornado
 	var parametroIN, parametro, resultadoDeclaracion interface{}
@@ -402,8 +425,16 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 		paramTemp.TipoDeclaracion = tipoParametro
 		parametro = paramTemp
 		parametroIN = parametrosIN.GetValue(iterador)
-		tipoParametroIN = parametroIN.(Ast.Expresion).GetValue(scopeOrigen) //**************
+		/***************************************************************/
+		tipoParametroIN = parametroIN.(Ast.Expresion).GetValue(scopeOrigen)
+		obj3dParametroIn = tipoParametroIN.Valor.(Ast.O3D)
+		tipoParametroIN = obj3dParametroIn.Valor
+		/***************************************************************/
 		resultadoParametro = parametro.(Ast.Expresion).GetValue(scope)
+		obj3dparametro = resultadoParametro.Valor.(Ast.O3D)
+		resultadoParametro = obj3dparametro.Valor
+		/***************************************************************/
+
 		if resultadoParametro.Tipo == Ast.ERROR {
 			return resultadoParametro
 		}
@@ -449,6 +480,9 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 
 			}
+			obj3dValor = resultadoDeclaracion.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			resultadoDeclaracion = obj3dValor.Valor
+			codigo3d += obj3dValor.Codigo
 
 		} else if expresiones.EsVAS(tipoParametroIN.Tipo) {
 
@@ -476,7 +510,9 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 				nuevaDeclaracion.ScopeOriginal = scopeOrigen
 				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 			}
-
+			obj3dValor = resultadoDeclaracion.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			resultadoDeclaracion = obj3dValor.Valor
+			codigo3d += obj3dValor.Codigo
 		}
 
 		if resultadoDeclaracion.(Ast.TipoRetornado).Tipo == Ast.ERROR {
@@ -493,9 +529,14 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 		}
 
 	}
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.BOOLEAN,
 		Valor: true,
+	}
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{
+		Tipo:  Ast.BOOLEAN,
+		Valor: obj3d,
 	}
 }
 

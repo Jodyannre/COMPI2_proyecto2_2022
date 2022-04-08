@@ -34,7 +34,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var actual interface{}
 	var tipoGeneral interface{}
 	var respuesta interface{}
-
+	newScope.Codigo += Ast.Indentar(newScope.GetNivel(), "P = 0; //Volver p a 0 para ejecutar el main \n")
 	//Recorrer y ejecutar todas las instrucciones
 	for i := 0; i < f.Instrucciones.Len(); i++ {
 		actual = f.Instrucciones.GetValue(i)

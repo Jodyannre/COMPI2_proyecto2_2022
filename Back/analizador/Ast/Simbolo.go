@@ -18,6 +18,7 @@ type Simbolo struct {
 	Referencia_puntero *Simbolo
 	Direccion          int
 	TipoDireccion      TipoDato
+	Size               int
 }
 
 type SimboloReporte struct {
@@ -43,6 +44,7 @@ func NewSimbolo(identificador string, valor interface{}, fila int, columna int,
 		Referencia_puntero: nil,
 		Entorno:            nil,
 		TipoEspecial:       TipoRetornado{Valor: true, Tipo: INDEFINIDO},
+		Size:               0,
 	}
 	return simbolo
 }

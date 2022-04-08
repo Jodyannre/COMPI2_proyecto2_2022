@@ -3,6 +3,7 @@ package Ast
 var P, H = 0, 0
 var Label, Temporal int = 1, 1
 var Temporales string = ""
+var FuncionesC3D string = ""
 
 type TipoDato int
 

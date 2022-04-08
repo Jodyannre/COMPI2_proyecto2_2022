@@ -34,6 +34,13 @@ func NewDeclaracionFuncion(id string, valor interface{}, tipo Ast.TipoRetornado,
 }
 
 func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
+	/**************VARIABLES 3D*****************/
+	var direccion int = scope.Size
+	var codigo3d string
+	var obj3d Ast.O3D
+
+	/*******************************************/
+
 	//Verificar que el id no exista
 
 	existe := scope.Exist_actual(d.Id)
@@ -83,6 +90,17 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 		Tipo:  Ast.FUNCION,
 	}
 
+	/*******************APARTAR ESPACIO EN EL STACK PARA SUS PARAMETROS**************************/
+	funcion := valor.Valor.(Funcion)
+	for i := 0; i < funcion.Parametros.Len(); i++ {
+		Ast.GetP()
+		scope.Size++
+	}
+	//Uno último para los returns
+	Ast.GetP()
+	scope.Size++
+	/********************************************************************************************/
+
 	//Todo bien crear y agregar el símbolo
 
 	nSimbolo := Ast.Simbolo{
@@ -94,12 +112,22 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
 		Entorno:       scope,
+		Size:          scope.Size,
 	}
+	nSimbolo.Direccion = direccion
+	nSimbolo.TipoDireccion = Ast.STACK
+
 	scope.Add(nSimbolo)
 	scope.Addfms(nSimbolo)
+	obj3d.Codigo = codigo3d
+
+	obj3d.Valor = Ast.TipoRetornado{
+		Valor: true,
+		Tipo:  Ast.EJECUTADO,
+	}
 
 	return Ast.TipoRetornado{
-		Valor: true,
+		Valor: obj3d,
 		Tipo:  Ast.EJECUTADO,
 	}
 

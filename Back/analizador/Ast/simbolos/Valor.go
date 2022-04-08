@@ -28,8 +28,21 @@ func NewValor(valor Ast.Expresion, tipo Ast.TipoDato, referencia bool, mutable b
 }
 
 func (v Valor) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/***********************VARIABLES 3D***********************/
+	var obj3dValor, obj3d Ast.O3D
+	var codigo3d string
+	var referencia string
+	/**********************************************************/
+
 	//Verificar que los valores de referencia sean correctos
 	valor := v.Valor.GetValue(scope)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	valor = obj3dValor.Valor
+	codigo3d += obj3dValor.Codigo
+	referencia = obj3dValor.Referencia
+	obj3d.Valor = valor
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = referencia
 
 	if !EsPosibleReferencia(valor.Tipo) && v.Referencia {
 		//Error, ese tipo de valor no se puede enviar como referencia
@@ -48,7 +61,10 @@ func (v Valor) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			Valor: nError,
 		}
 	}
-	return valor
+	return Ast.TipoRetornado{
+		Valor: obj3d,
+		Tipo:  Ast.VALOR,
+	}
 }
 func (p Valor) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 	return Ast.INSTRUCCION, p.Tipo

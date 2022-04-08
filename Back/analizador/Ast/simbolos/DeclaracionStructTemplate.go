@@ -35,8 +35,9 @@ func NewDeclaracionStructTemplate(id string, atributos *arraylist.List, publico 
 func (d DeclaracionStructTemplate) Run(scope *Ast.Scope) interface{} {
 	/**************VARIABLES 3D ********************/
 	var obj3d, obj3dValor Ast.O3D
-	var codigo3d, referencia string
-	var posicion int
+	var codigo3d string
+	//var referencia string
+	//var posicion int
 	/***********************************************/
 
 	//Verificar si existe, devuelve un símbolo
@@ -63,7 +64,7 @@ func (d DeclaracionStructTemplate) Run(scope *Ast.Scope) interface{} {
 	nuevaPlantilla := NewStructTemplate(d.Id, d.Atributos, d.Publico, d.Fila, d.Columna)
 	plantillaCreada := nuevaPlantilla.GetValue(scope)
 	obj3dValor = plantillaCreada.Valor.(Ast.O3D)
-	referencia = obj3dValor.Referencia
+	//referencia = obj3dValor.Referencia
 	codigo3d += obj3dValor.Codigo
 	plantillaCreada = obj3dValor.Valor
 
@@ -83,30 +84,31 @@ func (d DeclaracionStructTemplate) Run(scope *Ast.Scope) interface{} {
 		Referencia:    false,
 	}
 	/******************AGREGAR NUEVO ELEMENTO A LA PILA RESPECTIVA******************/
-	posicion = scope.Size
-	scope.Size++
-	nuevaPosicion := ""
-	nuevaPosicion = Ast.GetTemp()
-	if d.Stack {
-		codigo3d += "/************************AGREGAR NUEVO ELEMENTO*/ \n"
-		codigo3d += nuevaPosicion + " = P + " + strconv.Itoa(posicion) + ";\n"
-		codigo3d += "stack[(int)" + nuevaPosicion + "] = " + referencia + ";\n"
-		codigo3d += "/***********************************************/\n"
-		nSimbolo.TipoDireccion = Ast.STACK
-	} else {
-		codigo3d += "/************************AGREGAR NUEVO ELEMENTO*/ \n"
-		codigo3d += nuevaPosicion + " = P + " + strconv.Itoa(posicion) + ";\n"
-		codigo3d += "heap[(int)" + nuevaPosicion + "] = " + referencia + ";\n"
-		codigo3d += "/***********************************************/\n"
-		nSimbolo.TipoDireccion = Ast.HEAP
-	}
-	nSimbolo.Direccion = posicion
+
+	//posicion = scope.Size
+	//scope.Size++
+	//nuevaPosicion := ""
+	//nuevaPosicion = Ast.GetTemp()
+	//if d.Stack {
+	//codigo3d += "/************************AGREGAR NUEVO ELEMENTO*/ \n"
+	//codigo3d += nuevaPosicion + " = P + " + strconv.Itoa(posicion) + ";\n"
+	//codigo3d += "stack[(int)" + nuevaPosicion + "] = " + referencia + ";\n"
+	//codigo3d += "/***********************************************/\n"
+	//nSimbolo.TipoDireccion = Ast.STACK
+	//} else {
+	//codigo3d += "/************************AGREGAR NUEVO ELEMENTO*/ \n"
+	//codigo3d += nuevaPosicion + " = P + " + strconv.Itoa(posicion) + ";\n"
+	//codigo3d += "heap[(int)" + nuevaPosicion + "] = " + referencia + ";\n"
+	//codigo3d += "/***********************************************/\n"
+	//nSimbolo.TipoDireccion = Ast.HEAP
+	//}
+	//nSimbolo.Direccion = posicion
 	/*******************************************************************************/
-	codigo3d += "/***********************************************/\n"
+	//codigo3d += "/***********************************************/\n"
 	scope.Add(nSimbolo)
 	scope.Addfms(nSimbolo)
 	obj3d.Valor = plantillaCreada
-	obj3d.Codigo = codigo3d
+	obj3d.Codigo = ""
 
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
