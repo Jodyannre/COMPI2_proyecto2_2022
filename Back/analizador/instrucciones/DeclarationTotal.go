@@ -39,7 +39,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	var esEspecial bool = false
 	/*****************************VARIABLES 3D*****************************/
 	var codigo3d string = ""
-	var obj3DValor, obj3D Ast.O3D
+	var obj3DValor, obj3D, obj3dTemp Ast.O3D
 	var temp string
 	var direccion int
 	var scopeAnterior string
@@ -66,9 +66,11 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		scopeAnterior = Ast.GetTemp()
 		/*********************SCOPE SIMULADO****************************/
 		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
-		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion)
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
 		/***************************************************************/
 		preValor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		codigo3d += obj3dTemp.Codigo
 		/*********************RETORNO SCOPE ANTERIOR********************/
 		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
 		/***************************************************************/
@@ -77,7 +79,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	}
 
 	obj3DValor = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
-	valor := obj3D.Valor
+	valor := obj3DValor.Valor
 
 	//Cambiar valor de i64 a usize si la declaración es usize y el valor que viene es un i64
 	if d.Tipo.Tipo == Ast.USIZE && tipoIn == Ast.I64 {
@@ -153,7 +155,9 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 
 	if d.Stack {
 		//Agregar el código anterior
-		codigo3d += obj3DValor.Codigo
+		if tipoIn != Ast.VALOR {
+			codigo3d += obj3DValor.Codigo
+		}
 		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
@@ -175,7 +179,9 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 
 	} else {
 		//Agregar el código anterior
-		codigo3d += obj3DValor.Codigo
+		if tipoIn != Ast.VALOR {
+			codigo3d += obj3DValor.Codigo
+		}
 		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 
 		/*Get el nuevo temporal*/

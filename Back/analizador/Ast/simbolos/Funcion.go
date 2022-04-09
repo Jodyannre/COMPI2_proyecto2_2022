@@ -418,6 +418,10 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 	var parametroIN, parametro, resultadoDeclaracion interface{}
 	var paramTemp Parametro
 	var verificacionDeReferencia Ast.TipoRetornado
+
+	/***********************REINICIO EL SIZE DEL SCOPE*********/
+	scope.Size = 1
+	/**********************************************************/
 	for iterador = 0; iterador < parametros.Len(); iterador++ {
 		parametro = parametros.GetValue(iterador)
 		tipoParametro = parametro.(Parametro).FormatearTipo(scope)

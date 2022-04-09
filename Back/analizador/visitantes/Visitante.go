@@ -158,9 +158,10 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 	v.Consola += EntornoGlobal.Consola
 	//Agregar código y encabezado en C
 	v.Codigo += Ast.GetEncabezado()
-	v.Codigo += EntornoGlobal.Codigo
-	v.Codigo += Ast.GetFinEncabezado()
 	v.Codigo += Ast.GetFuncionesC3D()
+	v.Codigo += Ast.GetInicioMain()
+	v.Codigo += EntornoGlobal.Codigo
+	v.Codigo += Ast.GetFinFuncionMain()
 	//Reiniciar todas las variables
 	Ast.ResetAll()
 	for i := 0; i < EntornoGlobal.Errores.Len(); i++ {

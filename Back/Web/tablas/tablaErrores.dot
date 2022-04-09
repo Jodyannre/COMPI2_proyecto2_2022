@@ -17,17 +17,17 @@
 <td cellpadding='4'>
 1
 </td>
-<td cellpadding='4'>Semantic error, MAIN method not found. -- Line: 0 Column: 0
+<td cellpadding='4'>no viable alternative at input 'fnimprimir(num1:i64,num2i64)'
 </td>
 <td cellpadding='4'>Global
 </td>
-<td cellpadding='4'>0
+<td cellpadding='4'>1
 </td>
 <td cellpadding='4'>
-0
+28
 </td>
 <td cellpadding='4'>
-04-08-2022 02:09:20
+04-08-2022 17:31:51
 </td>
 </tr>
 

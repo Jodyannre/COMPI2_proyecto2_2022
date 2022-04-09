@@ -197,9 +197,12 @@ func EsPosibleReferencia(tipo Ast.TipoDato) bool {
 }
 
 func VerificarReferencia(param interface{}, value interface{}, scope *Ast.Scope, scopeOriginal *Ast.Scope) Ast.TipoRetornado {
+	var obj3dTemp Ast.O3D
 	parametro := param.(Parametro)
 	valor := value.(Valor)
 	respuestaValor := valor.GetValue(scopeOriginal)
+	obj3dTemp = respuestaValor.Valor.(Ast.O3D)
+	respuestaValor = obj3dTemp.Valor
 	tipoParametro := parametro.FormatearTipo(scope)
 	if parametro.Referencia {
 		if !valor.Referencia {

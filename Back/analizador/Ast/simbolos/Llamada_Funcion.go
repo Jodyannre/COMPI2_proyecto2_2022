@@ -33,7 +33,8 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/**************************VARIABLES 3D***************************/
 	var codigo3d string
 	var obj3dValor Ast.O3D
-
+	var obj3dTemp Ast.O3D
+	var codigoTemp string
 	/*****************************************************************/
 
 	var simbolo Ast.Simbolo
@@ -151,22 +152,18 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	//Verificar que el scopeOriginal no sea null
 	if l.ScopeOriginal == nil {
-		l.ScopeOriginal = &newScope
+		l.ScopeOriginal = scope
 	}
-
+	codigo3d += "/*******************************LLAMADA FUNCION*/\n"
+	codigo3d += "/*********************DECLARACION DE PARAMETROS*/\n"
 	/********************************CAMBIO DE AMBITO PARA DECLARAR PARAMENTROS********************/
 	codigo3d += "P = P + " + strconv.Itoa(simbolo.Direccion) + "; //Set direccion ambito simulado \n"
 	/**********************************************************************************************/
-
 	//Crear los parámetros de las funciones
 	parametrosCreados = funcion.RunParametros(&newScope, l.ScopeOriginal, l.Parametros)
 	obj3dValor = parametrosCreados.Valor.(Ast.O3D)
 	parametrosCreados = obj3dValor.Valor
 	codigo3d += obj3dValor.Codigo
-
-	/********************************RETORNO AL AMBITO ANTERIOR************************************/
-	codigo3d += "P = P - " + strconv.Itoa(simbolo.Direccion) + "; //Retorno al ambito anterior \n"
-	/**********************************************************************************************/
 
 	if parametrosCreados.Tipo == Ast.ERROR {
 		newScope.UpdateScopeGlobal()
@@ -175,6 +172,20 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	//Ejecutar la función
 	resultadoFuncion = funcion.Run(&newScope).(Ast.TipoRetornado)
+	obj3dTemp = resultadoFuncion.Valor.(Ast.O3D)
+	codigoTemp += "/**************************EJECUCION DE FUNCION*/\n"
+	codigoTemp += obj3dTemp.Codigo
+	codigoTemp += "/***********************************************/\n"
+	codigo3d += codigoTemp
+	/********************************RETORNO AL AMBITO ANTERIOR************************************/
+	codigo3d += "P = P - " + strconv.Itoa(simbolo.Direccion) + "; //Retorno al ambito anterior \n"
+	/**********************************************************************************************/
+	codigo3d += "/***********************************************/\n"
+	codigo3d += "/***********************************************/\n"
+	obj3dTemp.Codigo = codigo3d
+	resultadoFuncion.Valor = obj3dTemp
+
+	//newScope.Codigo += codigo3d
 	newScope.UpdateScopeGlobal()
 	/*
 		if newScope.Errores.Len() > 0 {

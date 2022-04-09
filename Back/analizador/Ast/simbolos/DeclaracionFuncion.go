@@ -38,7 +38,7 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 	var direccion int = scope.Size
 	var codigo3d string
 	var obj3d Ast.O3D
-
+	var sizeFuncion int
 	/*******************************************/
 
 	//Verificar que el id no exista
@@ -95,10 +95,12 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 	for i := 0; i < funcion.Parametros.Len(); i++ {
 		Ast.GetP()
 		scope.Size++
+		sizeFuncion++
 	}
 	//Uno último para los returns
 	Ast.GetP()
 	scope.Size++
+	sizeFuncion++
 	/********************************************************************************************/
 
 	//Todo bien crear y agregar el símbolo
@@ -112,7 +114,7 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
 		Entorno:       scope,
-		Size:          scope.Size,
+		Size:          sizeFuncion,
 	}
 	nSimbolo.Direccion = direccion
 	nSimbolo.TipoDireccion = Ast.STACK

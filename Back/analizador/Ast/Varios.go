@@ -84,13 +84,18 @@ func GetEncabezado() string {
 	salida += "float P;\n"
 	salida += "float H;\n"
 	salida += Temporales + ";\n\n"
-	salida += "int main(){\n"
+
 	return salida
 }
 
-func GetFinEncabezado() string {
+func GetFinFuncionMain() string {
 	salida := "\treturn 0;\n"
 	salida += "}\n"
+	return salida
+}
+
+func GetInicioMain() string {
+	salida := "int main(){\n"
 	return salida
 }
 

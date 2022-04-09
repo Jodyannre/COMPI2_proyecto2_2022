@@ -29,7 +29,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Primero crear el nuevo scope main
 	newScope := Ast.NewScope("Main", scope)
 	//Le agrego su posición en el stack, reinicio el puntero p para simular el nuevo ambito
-	newScope.Posicion = scope.Size
+	newScope.Posicion = 0
 
 	var actual interface{}
 	var tipoGeneral interface{}
