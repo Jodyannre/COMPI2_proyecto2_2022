@@ -15,7 +15,7 @@
 	
 <tr>
 <td cellpadding='4'>
-sumar
+imprimir
 </td>
 <td cellpadding='4'>FUNCION
 </td>
@@ -33,29 +33,11 @@ sumar
 
 <tr>
 <td cellpadding='4'>
-num1
+cola
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>I64
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-7
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-num2
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>I64
+<td cellpadding='4'>VECTOR
 </td>
 <td cellpadding='4'>Local
 </td>
@@ -69,11 +51,11 @@ num2
 
 <tr>
 <td cellpadding='4'>
-num1
+vector
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>I64
+<td cellpadding='4'>VECTOR
 </td>
 <td cellpadding='4'>Local
 </td>
@@ -81,25 +63,7 @@ num1
 1
 </td>
 <td cellpadding='4'>
-9
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-num2
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>I64
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-1
-</td>
-<td cellpadding='4'>
-18
+12
 </td>
 </tr>
 

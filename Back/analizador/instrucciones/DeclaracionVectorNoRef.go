@@ -46,13 +46,24 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	var valor Ast.TipoRetornado
 	esIndefinido := false
 	/**********VARIABLES 3D***************/
-	var codigo3d string
-	var obj3d, obj3dValor Ast.O3D
+	var codigo3d, scopeAnterior string
+	var obj3d, obj3dValor, obj3dClone, obj3dTemp Ast.O3D
 	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
+		/***************************************************************/
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = valor.Valor.(Ast.O3D)
+		valor = obj3dTemp.Valor
+		codigo3d += obj3dTemp.Codigo
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
@@ -134,7 +145,9 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 		temp := Ast.GetTemp()
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
-		nVector := nmVector.(expresiones.Vector)
+		obj3dClone = nmVector.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		nVector := obj3dClone.Valor.Valor.(expresiones.Vector)
+		codigo3d += obj3dClone.Codigo
 		//Actualizar la mutabilidad de la instancia
 		nVector.TipoVector = d.TipoVector
 		nVector.Mutable = d.Mutable
@@ -148,20 +161,20 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 			Publico:       d.Publico,
 			Entorno:       scope,
 		}
-		codigo3d += obj3dValor.Codigo
+		//codigo3d += obj3dClone.Codigo
 		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
 			nSimbolo.TipoDireccion = Ast.STACK
 			scope.Size++
-			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		} else {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
 			nSimbolo.TipoDireccion = Ast.HEAP
 			scope.Size++
-			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		}
 		codigo3d += "/***********************************************/\n"
 		scope.Add(nSimbolo)
@@ -170,7 +183,9 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 		temp := Ast.GetTemp()
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
-		nVector := nmVector.(expresiones.Vector)
+		obj3dClone = nmVector.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		nVector := obj3dClone.Valor.Valor.(expresiones.Vector)
+		codigo3d += obj3dClone.Codigo
 		//Actualizar la mutabilidad de la instancia
 		nVector.Mutable = d.Mutable
 		//Guardar el valor en el obj3d
@@ -188,20 +203,20 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 		}
 
 		/*Codigo 3d*/
-		codigo3d += obj3dValor.Codigo
+		//codigo3d += obj3dValor.Codigo
 		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
 			nSimbolo.TipoDireccion = Ast.STACK
 			scope.Size++
-			codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+			codigo3d += "stack[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		} else {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 			nSimbolo.Direccion = scope.Size
 			nSimbolo.TipoDireccion = Ast.HEAP
 			scope.Size++
-			codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+			codigo3d += "heap[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		}
 		codigo3d += "/***********************************************/\n"
 		scope.Add(nSimbolo)

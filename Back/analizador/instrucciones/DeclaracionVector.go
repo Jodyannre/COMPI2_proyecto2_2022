@@ -40,13 +40,24 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 	//Verificar que no exista
 	var existe bool
 	var valor Ast.TipoRetornado
-	var codigo3d string
-	var obj3d, obj3dValor Ast.O3D
+	var codigo3d, scopeAnterior string
+	var obj3d, obj3dValor, obj3dTemp Ast.O3D
 	esIndefinido := false
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
+		/***************************************************************/
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = valor.Valor.(Ast.O3D)
+		valor = obj3dTemp.Valor
+		codigo3d += obj3dTemp.Codigo
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)

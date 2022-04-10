@@ -1,5 +1,11 @@
 package Ast
 
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
+
 var P, H = 0, 0
 var Label, Temporal int = 1, 1
 var Temporales string = ""
@@ -224,4 +230,85 @@ func (t TipoRetornado) GetFila() int {
 }
 func (t TipoRetornado) GetColumna() int {
 	return t.Columna
+}
+
+/* Método solo para clonar un string*/
+func (t TipoRetornado) Clonar(scope *Scope) interface{} {
+	return CrearString3D(t)
+}
+
+func CrearString3D(valor TipoRetornado) TipoRetornado {
+
+	obj := O3D{
+		Lt:         "",
+		Lf:         "",
+		Valor:      valor,
+		Codigo:     "",
+		Referencia: Primitivo_To_String(valor.Valor, valor.Tipo),
+	}
+
+	//Verificar que sea un string o un str
+
+	temp := GetTemp()
+	cadenaAscii := obj.Referencia
+	arrayAscii := strings.Split(cadenaAscii, ",")
+	codigo := ""
+	//Inicializar la cadena con el valor inicial del H guardado en el temporal
+	codigo += "/***************AGREGANDO UN STRING/STR AL HEAP*/\n"
+	codigo += temp + " = " + "H;\n"
+
+	for _, valor := range arrayAscii {
+		codigo += "heap[(int)H] = " + valor + "; //Letra\n"
+		codigo += "H = H + 1;\n"
+		GetH()
+	}
+	//Agregar caracter para saber que la cadena ha terminado
+	codigo += "heap[(int)H] = 0;\n"
+	codigo += "H = H + 1;\n"
+	GetH()
+	codigo += "/***********************************************/\n"
+
+	obj.Codigo = codigo
+	obj.Referencia = temp
+
+	return TipoRetornado{
+		Tipo:  PRIMITIVO,
+		Valor: obj,
+	}
+
+}
+
+func Primitivo_To_String(valor interface{}, tipo TipoDato) string {
+	var salida string = ""
+	switch tipo {
+	case I64, USIZE:
+		salida = strconv.Itoa(valor.(int))
+	case F64:
+		salida = fmt.Sprintf("%f", valor.(float64))
+	case STR, STRING:
+		primera := true
+		tmp := valor.(string)
+		runes := []rune(tmp)
+		salida = ""
+		for i := 0; i < len(runes); i++ {
+			if primera {
+				salida += strconv.Itoa(int(runes[i]))
+				primera = false
+			} else {
+				salida += "," + strconv.Itoa(int(runes[i]))
+			}
+
+		}
+	case CHAR:
+		tmp := valor.(string)
+		char := int(tmp[0])
+		salida = strconv.Itoa(char)
+	case BOOLEAN:
+		if valor.(bool) {
+			salida = "1"
+		} else {
+			salida = "0"
+		}
+	}
+	return salida
 }

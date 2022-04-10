@@ -6,6 +6,7 @@ import (
 	"Back/analizador/expresiones"
 	"Back/analizador/instrucciones"
 	"strconv"
+	"strings"
 
 	"github.com/colegno/arraylist"
 )
@@ -208,7 +209,11 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 	codigoFuncion += Ast.Indentar(scope.GetNivel(), codigo3d)
 	codigoFuncion += "}\n"
 	codigo3d = f.Nombre + "();\n"
-	Ast.AgregarFuncion(codigoFuncion)
+
+	if !strings.Contains(Ast.GetFuncionesC3D(), "void "+f.Nombre+"(){\n") {
+		Ast.AgregarFuncion(codigoFuncion)
+	}
+
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,

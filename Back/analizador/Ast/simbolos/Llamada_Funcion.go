@@ -111,7 +111,9 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	} else {
 		//simbolo = newScope.GetSimbolo(l.Identificador.(Identificador).Valor)
 		funcion = simbolo.Valor.(Ast.TipoRetornado).Valor.(Funcion)
-		newScope.Posicion = simbolo.Direccion
+		//newScope.Posicion = simbolo.Direccion
+		newScope.Posicion = scope.Size
+		simbolo.Direccion = scope.Size
 	}
 
 	//Verificar que la función reciba o no parámetros y se estén enviando parámetros

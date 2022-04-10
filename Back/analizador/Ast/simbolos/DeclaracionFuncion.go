@@ -35,10 +35,10 @@ func NewDeclaracionFuncion(id string, valor interface{}, tipo Ast.TipoRetornado,
 
 func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 	/**************VARIABLES 3D*****************/
-	var direccion int = scope.Size
+	//var direccion int = scope.Size
 	var codigo3d string
 	var obj3d Ast.O3D
-	var sizeFuncion int
+	//var sizeFuncion int
 	/*******************************************/
 
 	//Verificar que el id no exista
@@ -91,16 +91,18 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 	}
 
 	/*******************APARTAR ESPACIO EN EL STACK PARA SUS PARAMETROS**************************/
-	funcion := valor.Valor.(Funcion)
-	for i := 0; i < funcion.Parametros.Len(); i++ {
+	//funcion := valor.Valor.(Funcion)
+	/*
+		for i := 0; i < funcion.Parametros.Len(); i++ {
+			Ast.GetP()
+			scope.Size++
+			sizeFuncion++
+		}
+		//Uno último para los returns
 		Ast.GetP()
 		scope.Size++
 		sizeFuncion++
-	}
-	//Uno último para los returns
-	Ast.GetP()
-	scope.Size++
-	sizeFuncion++
+	*/
 	/********************************************************************************************/
 
 	//Todo bien crear y agregar el símbolo
@@ -114,9 +116,9 @@ func (d DeclaracionFuncion) Run(scope *Ast.Scope) interface{} {
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
 		Entorno:       scope,
-		Size:          sizeFuncion,
+		Size:          1,
 	}
-	nSimbolo.Direccion = direccion
+	nSimbolo.Direccion = 0
 	nSimbolo.TipoDireccion = Ast.STACK
 
 	scope.Add(nSimbolo)
