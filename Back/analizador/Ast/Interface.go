@@ -56,6 +56,7 @@ type AccesoVectorAbstracto interface {
 
 type Clones interface {
 	Clonar(scope *Scope) interface{}
+	SetReferencia(referencia string) interface{}
 }
 
 type CrearStruct interface {

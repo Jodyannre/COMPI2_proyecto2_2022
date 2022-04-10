@@ -541,8 +541,10 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		//De momento no tengo idea, pendiente
 		//Recorrer todos sus elementos e irlos convirtiendo en string
 		vector := obj3d.Valor.Valor.(expresiones.Vector)
+		primeraPos := true
 		lista := vector.Valor
 		temp := Ast.GetTemp()
+		posicionEnVector := Ast.GetTemp()
 		contador := ""
 		var tipoAnterior Ast.TipoDato
 		var elemento Ast.TipoRetornado
@@ -550,6 +552,7 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		codigo3d += temp + " = " + referencia + " + 1;//Subir una pos por el size del vec\n"
 		contador = temp
 		referencia = temp
+		codigo3d += posicionEnVector + " = " + referencia + "; //Guardar posicion de vec actual \n"
 		codigo3d += "printf(\"[\");\n"
 		for i := 0; i < lista.Len(); i++ {
 			if i != 0 && tipoAnterior != Ast.LIBRE {
@@ -561,11 +564,12 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 				temp = Ast.GetTemp()
 				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
 				codigo3d += "/***********************************************/\n"
-			} else if (elemento.Tipo == Ast.STRING || elemento.Tipo == Ast.STR) && i == 0 {
+			} else if (elemento.Tipo == Ast.STRING || elemento.Tipo == Ast.STR) && primeraPos {
 				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
 				temp = Ast.GetTemp()
 				codigo3d += temp + " = heap[(int)" + referencia + "];//Get valor\n"
 				codigo3d += "/***********************************************/\n"
+				primeraPos = false
 			} else if elemento.Tipo == Ast.VECTOR {
 				codigo3d += "/*********************GET ELEMENTO DESDE VECTOR*/\n"
 				temp2 := Ast.GetTemp()
@@ -589,6 +593,9 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 				codigo3d += resultado
 				codigo3d += "printf(\"\\\"\");\n"
 				siguientePos = referencia
+				codigo3d += posicionEnVector + " = " + posicionEnVector + " + 1; //sig pos vec\n"
+				siguientePos = posicionEnVector
+				primeraPos = true
 			} else if elemento.Tipo == Ast.CHAR {
 				codigo3d += "printf(\"'\");\n"
 				codigo3d += resultado
@@ -609,6 +616,10 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 
 			} else if elemento.Tipo == Ast.ARRAY {
 
+			} else if elemento.Tipo == Ast.STR {
+				temp := Ast.GetTemp()
+				codigo3d += temp + " = " + siguientePos + ";\n"
+				referencia = temp
 			} else {
 				temp := Ast.GetTemp()
 				codigo3d += temp + " = " + siguientePos + " + 1;\n"

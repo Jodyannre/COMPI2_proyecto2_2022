@@ -212,7 +212,7 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		} else {
 			referencia, preCodigo3d = GetCod3dElemento(referencia, primeraPos, false)
 		}
-		if tipoParticular == Ast.VECTOR {
+		if tipoParticular == Ast.VECTOR || tipoParticular == Ast.STRING || tipoParticular == Ast.STR {
 			vectores.Add(referencia)
 		}
 
@@ -229,13 +229,15 @@ func (v VecElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	if tipoAnterior.Tipo == Ast.VECTOR || tipoAnterior.Tipo == Ast.STRING || tipoAnterior.Tipo == Ast.STR {
 		//Agregar los elementos al vector
 		//Crear el vector padre
-		ref, cod := GetCod3dElemento(estructuraBase, true, true)
+		ref, cod := GetCod3dElemento(estructuraBase, true, false)
 		codigo3d += cod
 		/*Agregar los elementos al vector*/
 		for i := 0; i < vectores.Len(); i++ {
-			elemento := vectores.GetValue(i).(string)
-			_, cod := GetCod3dElemento(elemento, false, false)
-			codigo3d += cod
+			if i != 0 {
+				elemento := vectores.GetValue(i).(string)
+				_, cod := GetCod3dElemento(elemento, false, false)
+				codigo3d += cod
+			}
 		}
 		referenciaRetorno = ref
 	}

@@ -19,6 +19,7 @@ type StructInstancia struct {
 	AtributosIn *arraylist.List
 	Fila        int
 	Columna     int
+	Referencia  string
 }
 
 func NewStructInstancia(plantilla Ast.TipoRetornado, atributos *arraylist.List, mutable bool, fila, columna int) StructInstancia {
@@ -406,6 +407,16 @@ func (s StructInstancia) GetMutable() bool {
 }
 
 func (s StructInstancia) Clonar(scope *Ast.Scope) interface{} {
+	direccionStructOriginal := s.Referencia
+	posicionActual := Ast.GetTemp()
+	nuevaDireccion := Ast.GetTemp()
+	contadorNuevoStruct := Ast.GetTemp()
+	elementoActual := Ast.GetTemp()
+	tempContadorNuevoStruct := Ast.GetTemp()
+	tempPosicionActual := Ast.GetTemp()
+	codigo3d := ""
+	var obj3d, obj3dPreElemento Ast.O3D
+
 	nAtributosIn := arraylist.New()
 	var nElemento *Atributo
 
@@ -418,19 +429,69 @@ func (s StructInstancia) Clonar(scope *Ast.Scope) interface{} {
 		Tipo:      s.Tipo,
 	}
 	//Copiar la lista de atributos
+	codigo3d += "/**************************CLONAR VECTOR*/\n"
+	/*********************INICIALIZAR VARIABLES DEL VIEJO STRUCT****************/
+	codigo3d += posicionActual + " = " + direccionStructOriginal + "; //Dir del struct a copiar \n"
+	/***************************************************************************/
+
+	/********************CREAR EL NUEVO STRUCT EN 3D****************************/
+	codigo3d += "/*************VARIABLES DEL NUEVO STRUCT*/\n"
+	codigo3d += nuevaDireccion + " = H; //Nueva direccion \n"
+	codigo3d += contadorNuevoStruct + " = H; //Contador para el nuevo struct \n"
+	codigo3d += "H = H + " + strconv.Itoa(s.AtributosIn.Len()) + "; //Apartar espacio del struct \n"
+	for i := 0; i < s.AtributosIn.Len(); i++ {
+		Ast.GetH()
+	}
+	codigo3d += "/****************************************/\n"
+	/***************************************************************************/
+
 	for i := 0; i < s.AtributosIn.Len(); i++ {
 		elemento := s.AtributosIn.GetValue(i).(*Atributo)
 		tipoElemento := elemento.Tipo
 		if expresiones.EsVAS(tipoElemento) {
-			preElemento := elemento.Valor.(Ast.Clones).Clonar(scope)
-			valor := preElemento
-			nElemento = valor.(*Atributo)
+			codigo3d += elementoActual + " = heap[(int)" + posicionActual + "]; //Get elemento\n"
+			preReferencia := elemento.Valor.(Ast.Clones).SetReferencia(elementoActual)
+			preElemento := preReferencia.(Ast.Clones).Clonar(scope)
+			obj3dPreElemento = preElemento.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			elemento.Valor = obj3dPreElemento.Valor
+			nElemento = elemento
+			codigo3d += "heap[(int)" + contadorNuevoStruct + "] = " + obj3dPreElemento.Referencia + "; //Guardar elemento\n"
+			codigo3d += "/******************ACTUALIZAR CONTADORES*/\n"
+			codigo3d += tempContadorNuevoStruct + " = " + contadorNuevoStruct + " + 1; //sig pos\n"
+			codigo3d += contadorNuevoStruct + " = " + tempContadorNuevoStruct + "; //sig pos\n"
+			codigo3d += tempPosicionActual + " = " + posicionActual + " + 1; //sig pos\n"
+			codigo3d += posicionActual + " = " + tempPosicionActual + "; //sig pos\n"
+			codigo3d += "/****************************************/\n"
 		} else {
+			codigo3d += elementoActual + " = heap[(int)" + posicionActual + "]; //Get elemento\n"
+			codigo3d += "heap[(int)" + contadorNuevoStruct + "] = " + elementoActual + "; //Guardar elemento\n"
+			codigo3d += "/******************ACTUALIZAR CONTADORES*/\n"
+			codigo3d += tempContadorNuevoStruct + " = " + contadorNuevoStruct + " + 1; //sig pos\n"
+			codigo3d += contadorNuevoStruct + " = " + tempContadorNuevoStruct + "; //sig pos\n"
+			codigo3d += tempPosicionActual + " = " + posicionActual + " + 1; //sig pos\n"
+			codigo3d += posicionActual + " = " + tempPosicionActual + "; //sig pos\n"
+			codigo3d += "/****************************************/\n"
 			nElemento = elemento
 		}
 		nAtributosIn.Add(nElemento)
 	}
+
+	codigo3d += "/****************************************/\n"
 	nS.AtributosIn = nAtributosIn
 
-	return nS
+	obj3d.Valor = Ast.TipoRetornado{
+		Tipo:  Ast.STRUCT,
+		Valor: nS,
+	}
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = nuevaDireccion
+	return Ast.TipoRetornado{
+		Tipo:  Ast.STRUCT,
+		Valor: obj3d,
+	}
+}
+
+func (s StructInstancia) SetReferencia(referencia string) interface{} {
+	s.Referencia = referencia
+	return s
 }

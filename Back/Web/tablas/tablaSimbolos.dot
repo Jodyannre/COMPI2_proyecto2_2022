@@ -15,6 +15,24 @@
 	
 <tr>
 <td cellpadding='4'>
+Persona
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+1
+</td>
+<td cellpadding='4'>
+7
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
 imprimir
 </td>
 <td cellpadding='4'>FUNCION
@@ -24,7 +42,7 @@ imprimir
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-1
+7
 </td>
 <td cellpadding='4'>
 0
@@ -33,16 +51,52 @@ imprimir
 
 <tr>
 <td cellpadding='4'>
-cola
+nombre
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>VECTOR
+<td cellpadding='4'>STR
 </td>
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
+15
+</td>
+<td cellpadding='4'>
 8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+edad
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+16
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nPersona
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+14
 </td>
 <td cellpadding='4'>
 4
@@ -51,16 +105,16 @@ cola
 
 <tr>
 <td cellpadding='4'>
-vector
+nPersona
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>VECTOR
+<td cellpadding='4'>STRUCT
 </td>
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-1
+7
 </td>
 <td cellpadding='4'>
 12

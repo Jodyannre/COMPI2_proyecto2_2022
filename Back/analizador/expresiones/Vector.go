@@ -2,7 +2,6 @@ package expresiones
 
 import (
 	"Back/analizador/Ast"
-	"strconv"
 
 	//"Back/analizador/instrucciones"
 
@@ -74,11 +73,13 @@ func (v Vector) Clonar(scope *Ast.Scope) interface{} {
 	var codigo3d string
 	var referencia string
 	var referenciaVectorOriginal string = v.Referencia
-	var contadorVectorOriginal string = Ast.GetTemp()
+	//var contadorVectorOriginal string = Ast.GetTemp()
 	var sizeVectorOriginal string = Ast.GetTemp()
 	var contadorPosicionVector string = Ast.GetTemp()
 	var inicioVectorNuevo string = Ast.GetTemp()
 	var contadorVectorClone string = Ast.GetTemp()
+	var ElementoActual string = Ast.GetTemp()
+	var ReferenciaElementoActual string = Ast.GetTemp()
 	var elementoString Ast.TipoRetornado
 	var elementoAbstracto interface{}
 	var obj3dValor, obj3d, obj3dElementos, obj3dPreElemento Ast.O3D
@@ -95,15 +96,19 @@ func (v Vector) Clonar(scope *Ast.Scope) interface{} {
 		TipoVector: v.TipoVector,
 	}
 	codigo3d += "/***************OBTENER VALORES A CLONAR*/\n"
-	codigo3d += contadorVectorOriginal + " = 0; //Iniciar contador para el vector\n"
+
 	codigo3d += sizeVectorOriginal + " = heap[(int)" + referenciaVectorOriginal + "]; //Get size de vec \n"
 	codigo3d += contadorPosicionVector + " = " + referenciaVectorOriginal + " + 1; //Get primera pos del vec a clonar\n"
-
+	//codigo3d += referenciaVectorOriginal + " = " + contadorPosicionVector + ";\n"
 	codigo3d += "/**************************CLONAR VECTOR*/\n"
+
 	codigo3d += inicioVectorNuevo + " = " + " H; //Guardar Inicio del vector clone\n"
 	codigo3d += "heap[(int)H] = " + sizeVectorOriginal + "; //Guardar size del vector\n"
-	codigo3d += "H = H + " + strconv.Itoa(nLista.Len()) + "; //Apartar el espacio para los elementos del vector\n"
-	codigo3d += contadorVectorClone + " = 0; //Iniciar contador para el nuevo vector \n"
+	codigo3d += "H = H + 1;\n"
+	codigo3d += "H = H + " + sizeVectorOriginal + "; //Apartar el espacio para los elementos del vector\n"
+	codigo3d += contadorVectorClone + " = " + inicioVectorNuevo + "; //Iniciar contador para el nuevo vector \n"
+	codigo3d += "heap[(int)" + inicioVectorNuevo + "] = " + sizeVectorOriginal + "; //Agregar size al vector clone \n"
+	referencia = inicioVectorNuevo
 	for i := 0; i < v.Valor.Len(); i++ {
 		Ast.GetH()
 	}
@@ -111,37 +116,32 @@ func (v Vector) Clonar(scope *Ast.Scope) interface{} {
 	for i := 0; i < v.Valor.Len(); i++ {
 		elemento := v.Valor.GetValue(i).(Ast.TipoRetornado)
 		if EsVAS(elemento.Tipo) {
-			preElemento := elemento.Valor.(Ast.Clones).Clonar(scope)
-			/*
-				obj3dPreElemento = preElemento.(Ast.TipoRetornado).Valor.(Ast.O3D)
-				preElemento = obj3dPreElemento.Valor
-				_, tipoParticular := preElemento.(Ast.Abstracto).GetTipo()
-				valor := Ast.TipoRetornado{Valor: preElemento}
-				switch tipoParticular {
-				case Ast.ARRAY:
-					valor.Tipo = Ast.ARRAY
-				case Ast.VECTOR:
-					valor.Tipo = Ast.VECTOR
-				case Ast.STRUCT:
-					valor.Tipo = Ast.STRUCT
-				}
-			*/
-			//obj3dPreElemento.Valor = valor
-			//nElemento = valor
+			//codigo3d += contadorVectorOriginal + " = " + referenciaVectorOriginal + "; //Es vector, retornar a size\n"
+			codigo3d += ElementoActual + " = " + "heap[(int)" + contadorPosicionVector + "]; //Get elemento \n"
+			preReferencia := elemento.Valor.(Ast.Clones).SetReferencia(ElementoActual)
+			preElemento := preReferencia.(Ast.Clones).Clonar(scope)
 			obj3dPreElemento = preElemento.(Ast.TipoRetornado).Valor.(Ast.O3D)
 			codigo3d += obj3dPreElemento.Codigo
 			nElemento = preElemento
+			obj3dElementos.Referencia = obj3dPreElemento.Referencia
 		} else {
+			if elemento.Tipo == Ast.STR || elemento.Tipo == Ast.STRING {
+				codigo3d += ElementoActual + " = " + "heap[(int)" + contadorPosicionVector + "]; //Get elemento \n"
+			} else {
+				codigo3d += ElementoActual + " = " + "heap[(int)" + contadorPosicionVector + "]; //Get elemento \n"
+			}
 			//nElemento = elemento
 			obj3dElementos.Valor = elemento
 			if elemento.Tipo == Ast.STRING || elemento.Tipo == Ast.STR {
 				elementoAbstracto = elemento
+				elementoAbstracto = elementoAbstracto.(Ast.Clones).SetReferencia(ElementoActual)
 				elementoString = elementoAbstracto.(Ast.Clones).Clonar(scope).(Ast.TipoRetornado)
 				obj3dPreElemento = elementoString.Valor.(Ast.O3D)
 				obj3dElementos.Referencia = obj3dPreElemento.Referencia
 				codigo3d += obj3dPreElemento.Codigo
 			} else {
 				obj3dElementos.Referencia = Primitivo_To_String(elemento.Valor, elemento.Tipo)
+				obj3dElementos.Referencia = ElementoActual
 			}
 			nElemento = Ast.TipoRetornado{
 				Valor: obj3dElementos,
@@ -149,21 +149,28 @@ func (v Vector) Clonar(scope *Ast.Scope) interface{} {
 			}
 		}
 		nLista.Add(nElemento)
-	}
-	codigo3d += "/****************************************/\n"
-	//nV.Valor = nLista
+		codigo3d += "/*******************ADD ELEMENTOS VECTOR*/\n"
 
-	codigo3d += "/********************ADD ELEMENTOS VECTOR*/\n"
-	referencia = inicioVector
+		codigo3d += ReferenciaElementoActual + " = " + obj3dElementos.Referencia + "; //Get referencia del valor\n"
+		codigo3d += contadorVectorClone + " = " + contadorVectorClone + " + 1" + "; //sig posicion vec nuevo\n"
+		codigo3d += "heap[(int)" + contadorVectorClone + "] = " + ReferenciaElementoActual + "; //Add elemento\n"
+		//codigo3d += contadorVectorClone + " = " + contadorVectorClone + " + 1; //sig pos de contador vec clone\n"
+		codigo3d += contadorPosicionVector + " = " + contadorPosicionVector + " + 1; // sig pos vec original \n"
+		/*
+			if elemento.Tipo == Ast.STR || elemento.Tipo == Ast.STRING {
+				codigo3d += contadorPosicionVector + " = " + contadorPosicionVector + " + 1; // sig pos vec original \n"
+			}
+		*/
+		codigo3d += "/****************************************/\n"
+	}
+
+	codigo3d += "/****************************************/\n"
+	codigo3d += "/****************************************/\n"
+
 	for i := 0; i < nLista.Len(); i++ {
 		obj3dValor = nLista.GetValue(i).(Ast.TipoRetornado).Valor.(Ast.O3D)
-		codigo3d += "heap[(int)H] = " + obj3dValor.Referencia + ";//Agregar elemento al vector\n"
-		codigo3d += "H = H + 1;\n"
-		Ast.GetH()
 		listaFinal.Add(obj3dValor.Valor)
 	}
-	codigo3d += "/****************************************/\n"
-	codigo3d += "/****************************************/\n"
 
 	nV.Valor = listaFinal
 	obj3d.Valor = Ast.TipoRetornado{
@@ -179,6 +186,11 @@ func (v Vector) Clonar(scope *Ast.Scope) interface{} {
 		Valor: obj3d,
 	}
 
+}
+
+func (v Vector) SetReferencia(referencia string) interface{} {
+	v.Referencia = referencia
+	return v
 }
 
 func (v Vector) CalcularCapacity(size int, capacity int) int {

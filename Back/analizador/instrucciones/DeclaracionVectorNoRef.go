@@ -143,6 +143,9 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	//Crear el símbolo y agregarlo al scope
 	if esIndefinido {
 		temp := Ast.GetTemp()
+		vectorTemp := valor.Valor.(expresiones.Vector)
+		vectorTemp.Referencia = obj3dTemp.Referencia
+		valor.Valor = vectorTemp
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
 		obj3dClone = nmVector.(Ast.TipoRetornado).Valor.(Ast.O3D)
@@ -181,11 +184,15 @@ func (d DeclaracionVectorNoRef) Run(scope *Ast.Scope) interface{} {
 	} else {
 		//Temporales
 		temp := Ast.GetTemp()
+		vectorTemp := valor.Valor.(expresiones.Vector)
+		vectorTemp.Referencia = obj3dTemp.Referencia
+		valor.Valor = vectorTemp
 		//Clonar la lista para evitar la referencia
 		nmVector := valor.Valor.(Ast.Clones).Clonar(scope)
 		obj3dClone = nmVector.(Ast.TipoRetornado).Valor.(Ast.O3D)
 		nVector := obj3dClone.Valor.Valor.(expresiones.Vector)
 		codigo3d += obj3dClone.Codigo
+
 		//Actualizar la mutabilidad de la instancia
 		nVector.Mutable = d.Mutable
 		//Guardar el valor en el obj3d

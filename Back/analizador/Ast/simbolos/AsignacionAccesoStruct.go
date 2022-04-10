@@ -34,6 +34,12 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 	var resultadoAtributo Ast.TipoRetornado
 	var idAtributo, idStruct string
 
+	/*************VARIABLES 3D*************/
+	var idExp expresiones.Identificador
+	var obj3d, obj3dValor Ast.O3D
+	var referenciaStruct, referenciaValor, codigo3d string
+	/**************************************/
+
 	if reflect.TypeOf(nombreAtributo) != reflect.TypeOf(expresiones.Identificador{}) {
 		fila := nombreAtributo.(Ast.Abstracto).GetFila()
 		columna := nombreAtributo.(Ast.Abstracto).GetColumna()
@@ -218,6 +224,14 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		//Get el simbolo del struct
 		simboloStruct := scope.GetSimbolo(idStruct)
 
+		/*****************************GET C3D DESDE SIMBOLO*****************************/
+		codigo3d += "/********************************ACCESO A STRUCT*/\n"
+		idExp = expresiones.NewIdentificador(idStruct, Ast.IDENTIFICADOR, 0, 0)
+		obj3d = idExp.GetValue(scope).Valor.(Ast.O3D)
+		referenciaStruct = obj3d.Referencia
+		codigo3d += obj3d.Codigo
+		/*******************************************************************************/
+
 		if simboloStruct.Tipo != Ast.STRUCT {
 			fila := a.Valor.(Ast.Abstracto).GetFila()
 			columna := a.Valor.(Ast.Abstracto).GetColumna()
@@ -293,8 +307,22 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		//Get el simbolo del atributo
 		simboloAtributo := structInstancia.Entorno.GetSimbolo(idAtributo)
 
+		/*****************************GET C3D DESDE SIMBOLO*****************************/
+		scopeActual := Ast.GetTemp()
+		posicionAtributo := Ast.GetTemp()
+		codigo3d += "/******************************ACCESO A ATRIBUTO*/\n"
+		codigo3d += scopeActual + " = " + referenciaStruct + "; //Scope simulado \n"
+		codigo3d += posicionAtributo + " = " + scopeActual + " + " + strconv.Itoa(simboloAtributo.Direccion) + "; //Get direccion del att\n"
+		/*******************************************************************************/
+
 		//Get el valor nuevo del atributo
+		/****************************GET C3D DE NUEVO VALOR*****************************/
 		newValue := a.Valor.(Ast.Expresion).GetValue(scope)
+		obj3dValor = newValue.Valor.(Ast.O3D)
+		newValue = obj3dValor.Valor
+		referenciaValor = obj3dValor.Referencia
+		codigo3d += obj3dValor.Codigo
+		/*******************************************************************************/
 
 		if newValue.Tipo == Ast.ERROR {
 			return newValue
@@ -380,12 +408,25 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		//Actualizar el valor del atributo
 		simboloAtributo.Valor = newValue
 
+		/****************************GET C3D DEL UPDATE VALOR****************************/
+		codigo3d += "/********************ACTUALIZAR ATRIBUTO*/\n"
+		codigo3d += "heap[(int)" + posicionAtributo + "] = " + referenciaValor + "; //actualizar valor \n"
+		codigo3d += "/****************************************/\n"
+		codigo3d += "/****************************************/\n"
+		codigo3d += "/****************************************/\n"
+		/*******************************************************************************/
+
 		//Actualizar el valor del símbolo en el scope
 		structInstancia.Entorno.UpdateSimbolo(idAtributo, simboloAtributo)
 
 	}
-	return Ast.TipoRetornado{
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Valor: true,
+		Tipo:  Ast.EJECUTADO,
+	}
+	return Ast.TipoRetornado{
+		Valor: obj3d,
 		Tipo:  Ast.EJECUTADO,
 	}
 }

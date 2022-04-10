@@ -3,7 +3,6 @@ package Ast
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 var P, H = 0, 0
@@ -208,10 +207,11 @@ const (
 )
 
 type TipoRetornado struct {
-	Tipo    TipoDato
-	Valor   interface{}
-	Fila    int
-	Columna int
+	Tipo       TipoDato
+	Valor      interface{}
+	Fila       int
+	Columna    int
+	Referencia string
 }
 
 type O3D struct {
@@ -237,39 +237,53 @@ func (t TipoRetornado) Clonar(scope *Scope) interface{} {
 	return CrearString3D(t)
 }
 
+func (t TipoRetornado) SetReferencia(referencia string) interface{} {
+	t.Referencia = referencia
+	return t
+}
+
 func CrearString3D(valor TipoRetornado) TipoRetornado {
 
 	obj := O3D{
-		Lt:         "",
-		Lf:         "",
-		Valor:      valor,
-		Codigo:     "",
-		Referencia: Primitivo_To_String(valor.Valor, valor.Tipo),
+		Lt:     "",
+		Lf:     "",
+		Valor:  valor,
+		Codigo: "",
+		//Referencia: Primitivo_To_String(valor.Valor, valor.Tipo),
+		Referencia: "",
 	}
 
 	//Verificar que sea un string o un str
-
-	temp := GetTemp()
-	cadenaAscii := obj.Referencia
-	arrayAscii := strings.Split(cadenaAscii, ",")
-	codigo := ""
+	referencia := valor.Referencia
+	contadorStringOriginal := GetTemp()
+	inicioNuevoString := GetTemp()
+	letra := GetTemp()
+	contadorTemp := GetTemp()
+	lt := GetLabel()
+	lf := GetLabel()
+	salto := GetLabel()
+	codigo3d := ""
 	//Inicializar la cadena con el valor inicial del H guardado en el temporal
-	codigo += "/***************AGREGANDO UN STRING/STR AL HEAP*/\n"
-	codigo += temp + " = " + "H;\n"
+	codigo3d += "/*********************************CLONAR CADENA*/\n"
+	codigo3d += contadorStringOriginal + " = " + referencia + "; //Guardar referencia \n"
+	codigo3d += inicioNuevoString + " = H; //Guardar inicio del nuevo string\n"
+	codigo3d += salto + ":\n"
+	codigo3d += letra + " = heap[(int)" + contadorStringOriginal + "]; //Get letra\n"
+	codigo3d += "if (" + letra + "!=0) goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += "heap[(int)H] = " + letra + "; //Guardar la nueva letra \n"
+	codigo3d += contadorTemp + " = " + contadorStringOriginal + "+ 1; //Actualizar posicion\n"
+	codigo3d += contadorStringOriginal + " = " + contadorTemp + ";\n"
+	codigo3d += "H = H + 1;\n"
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += lf + ":\n"
+	codigo3d += "heap[(int)H] = 0; //Guardar fin de cadena \n"
+	codigo3d += "H = H + 1;\n"
+	codigo3d += "/***********************************************/\n"
 
-	for _, valor := range arrayAscii {
-		codigo += "heap[(int)H] = " + valor + "; //Letra\n"
-		codigo += "H = H + 1;\n"
-		GetH()
-	}
-	//Agregar caracter para saber que la cadena ha terminado
-	codigo += "heap[(int)H] = 0;\n"
-	codigo += "H = H + 1;\n"
-	GetH()
-	codigo += "/***********************************************/\n"
-
-	obj.Codigo = codigo
-	obj.Referencia = temp
+	obj.Codigo = codigo3d
+	obj.Referencia = inicioNuevoString
 
 	return TipoRetornado{
 		Tipo:  PRIMITIVO,

@@ -35,6 +35,11 @@ func NewDeclaracionNoRef(id string, valor interface{}, tipo Ast.TipoRetornado, m
 func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 	//Verificar si es un tipo especial
 	var esEspecial bool = false
+	/*****************************VARIABLES 3D*****************************/
+	var codigo3d string = ""
+	var obj3DValor, obj3d, obj3dTemp, obj3dClone Ast.O3D
+	var scopeAnterior string
+	/*********************************************************************/
 	//Verificar que el id no exista
 
 	existe := scope.Exist_actual(d.Id)
@@ -63,11 +68,24 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 	if tipoIn == Ast.IF_EXPRESION || tipoIn == Ast.MATCH_EXPRESION || tipoIn == Ast.LOOP_EXPRESION {
 		preValor = d.Valor.(Ast.Instruccion).Run(scope)
 	} else if tipoIn == Ast.VALOR {
+		//preValor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
+		/***************************************************************/
 		preValor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		codigo3d += obj3dTemp.Codigo
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
 	} else {
 		preValor = d.Valor.(Ast.Expresion).GetValue(scope)
 	}
-	valor := preValor.(Ast.TipoRetornado)
+	//valor := preValor.(Ast.TipoRetornado)
+	obj3DValor = preValor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+	valor := obj3DValor.Valor
 
 	//Cambiar valor de i64 a usize si la declaración es usize y el valor que viene es un i64
 	if d.Tipo.Tipo == Ast.USIZE && tipoIn == Ast.I64 {
@@ -159,11 +177,17 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 
 	//Todo bien crear y agregar el símbolo
 	//Clonar el valor
-	valorRef := valor.Valor.(Ast.Clones).Clonar(scope)
-	valor = Ast.TipoRetornado{
-		Tipo:  valor.Tipo,
-		Valor: valorRef,
-	}
+	preValorRef := valor.Valor.(Ast.Clones).SetReferencia(obj3DValor.Referencia)
+	valorRef := preValorRef.(Ast.Clones).Clonar(scope)
+	obj3dClone = valorRef.(Ast.TipoRetornado).Valor.(Ast.O3D)
+	codigo3d += obj3dClone.Codigo
+	valorRef = obj3dClone.Valor
+	/*
+		valor = Ast.TipoRetornado{
+			Tipo:  valor.Tipo,
+			Valor: valorRef,
+		}
+	*/
 
 	nSimbolo := Ast.Simbolo{
 		Identificador: d.Id,
@@ -180,12 +204,23 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 		nSimbolo.TipoEspecial = d.Tipo
 	}
 
+	//Agregar la direccion
+	nSimbolo.Direccion = scope.Size
+	scope.Size++
+	nSimbolo.TipoDireccion = Ast.STACK
+
 	//Verificar si es array, vector o struct, para clonarlos
 
 	scope.Add(nSimbolo)
 
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Valor: true,
+		Tipo:  Ast.EJECUTADO,
+	}
+	obj3d.Codigo = codigo3d
+
+	return Ast.TipoRetornado{
+		Valor: obj3d,
 		Tipo:  Ast.EJECUTADO,
 	}
 
