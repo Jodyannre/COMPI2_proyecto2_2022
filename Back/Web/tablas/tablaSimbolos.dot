@@ -51,6 +51,24 @@ imprimir
 
 <tr>
 <td cellpadding='4'>
+escribir
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+13
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
 nombre
 </td>
 <td cellpadding='4'>VARIABLE
@@ -60,7 +78,7 @@ nombre
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-15
+20
 </td>
 <td cellpadding='4'>
 8
@@ -78,7 +96,7 @@ edad
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-16
+21
 </td>
 <td cellpadding='4'>
 8
@@ -96,7 +114,25 @@ nPersona
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-14
+19
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+arr1
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>ARRAY
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+23
 </td>
 <td cellpadding='4'>
 4
@@ -118,6 +154,24 @@ nPersona
 </td>
 <td cellpadding='4'>
 12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+numero
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+7
+</td>
+<td cellpadding='4'>
+30
 </td>
 </tr>
 

@@ -429,7 +429,7 @@ func (s StructInstancia) Clonar(scope *Ast.Scope) interface{} {
 		Tipo:      s.Tipo,
 	}
 	//Copiar la lista de atributos
-	codigo3d += "/**************************CLONAR VECTOR*/\n"
+	codigo3d += "/**************************CLONAR STRUCT*/\n"
 	/*********************INICIALIZAR VARIABLES DEL VIEJO STRUCT****************/
 	codigo3d += posicionActual + " = " + direccionStructOriginal + "; //Dir del struct a copiar \n"
 	/***************************************************************************/

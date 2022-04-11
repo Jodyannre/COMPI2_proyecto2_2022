@@ -37,6 +37,7 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 	var esEspecial bool = false
 	/*****************************VARIABLES 3D*****************************/
 	var codigo3d string = ""
+	var posicionAguardar string = ""
 	var obj3DValor, obj3d, obj3dTemp, obj3dClone Ast.O3D
 	var scopeAnterior string
 	/*********************************************************************/
@@ -188,6 +189,11 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 			Valor: valorRef,
 		}
 	*/
+
+	/*******************************CODIGO 3D*************************************/
+	posicionAguardar = Ast.GetTemp()
+	codigo3d += posicionAguardar + " = P + " + strconv.Itoa(scope.Size) + "; //Get pos para guardar\n"
+	codigo3d += "stack[(int)" + posicionAguardar + "] = " + obj3dClone.Referencia + "; //Guardar nuevo valor\n"
 
 	nSimbolo := Ast.Simbolo{
 		Identificador: d.Id,

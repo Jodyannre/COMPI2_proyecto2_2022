@@ -498,7 +498,7 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 			if tipoParametro.Tipo == Ast.DIMENSION_ARRAY {
 				nuevaDeclaracion := instrucciones.NewDeclaracionArrayNoRef(
 					resultadoParametro.Valor.(string), tipoParametro.Valor, parametro.(Parametro).Mutable,
-					false, tipoParametroIN.Valor, parametro.(Ast.Abstracto).GetFila(),
+					false, parametroIN, parametro.(Ast.Abstracto).GetFila(),
 					parametro.(Ast.Abstracto).GetColumna())
 				//Ejecutar declaración
 				nuevaDeclaracion.ScopeOriginal = scopeOrigen

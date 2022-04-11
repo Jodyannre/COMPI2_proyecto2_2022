@@ -52,13 +52,26 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	var existe bool
 	var valor Ast.TipoRetornado
 	/**********VARIABLES 3D***************/
-	var codigo3d string
-	var obj3d, obj3dValor Ast.O3D
+	var codigo3d string = ""
+	var obj3dValor, obj3d, obj3dTemp, obj3dClone Ast.O3D /*obj3dClone*/
+	var scopeAnterior string
 	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
+		//valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
+		/***************************************************************/
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = valor.Valor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		valor = obj3dTemp.Valor
+		codigo3d += obj3dTemp.Codigo
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
@@ -215,16 +228,27 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		Publico:       d.Publico,
 	}
 
-	//Clonar la lista para evitar la referencia
+	//Preparar la referencia del array original
+	arrayTemp := valor.Valor.(expresiones.Array)
+	arrayTemp.Referencia = obj3dTemp.Referencia
+	valor.Valor = arrayTemp
+	//Clonar el array
 	nArray := valor.Valor.(Ast.Clones).Clonar(scope)
+	obj3dClone = nArray.(Ast.TipoRetornado).Valor.(Ast.O3D)
+	nArray = obj3dClone.Valor
+	codigo3d += obj3dClone.Codigo
 	//Actualizar la mutabilidad de la instancia
 	mnArray := nArray.(expresiones.Array)
 	mnArray.Mutable = d.Mutable
 	nArray = mnArray
+	//Agregar el resultado al obj3d
+	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.ARRAY, Valor: nArray}
+
 	nSimbolo.Valor = Ast.TipoRetornado{
 		Tipo:  valor.Tipo,
 		Valor: nArray,
 	}
+
 	temp := Ast.GetTemp()
 	codigo3d += obj3dValor.Codigo
 	codigo3d += "/**************************DECLARACION DE ARRAY*/\n"
@@ -233,13 +257,15 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		nSimbolo.Direccion = scope.Size
 		nSimbolo.TipoDireccion = Ast.STACK
 		scope.Size++
-		codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		codigo3d += "stack[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
+		Ast.GetP()
 	} else {
 		codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
 		nSimbolo.Direccion = scope.Size
 		nSimbolo.TipoDireccion = Ast.HEAP
 		scope.Size++
-		codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		codigo3d += "heap[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
+		Ast.GetH()
 	}
 	codigo3d += "/***********************************************/\n"
 
