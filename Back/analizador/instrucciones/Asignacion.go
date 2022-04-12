@@ -140,7 +140,7 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	simbolo_id := scope.GetSimbolo(id)
 
 	/*********C3D del Simbolo***********/
-	codigo3d += "/********************************ACCESO A VECTOR*/\n"
+	codigo3d += "/********************************ACCESO A ARRAY*/\n"
 	idExp = expresiones.NewIdentificador(id, Ast.IDENTIFICADOR, 0, 0)
 	obj3d = idExp.GetValue(scope).Valor.(Ast.O3D)
 	referencia = obj3d.Referencia
@@ -301,11 +301,13 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				}
 
 				//Buscar la posición
-				resultadoAsignacion = fn_array.UpdateElemento(array.(expresiones.Array), prePos, posiciones, scope, valor)
+				resultadoAsignacion = fn_array.UpdateElemento(array.(expresiones.Array), prePos, posiciones, scope, obj3dValor, referencia)
+				objtemp = resultadoAsignacion.Valor.(Ast.O3D)
+				resultadoAsignacion = objtemp.Valor
 				if resultadoAsignacion.Tipo == Ast.ERROR {
 					return resultadoAsignacion
 				}
-
+				codigo3d += objtemp.Codigo
 				simbolo_id.Valor = Ast.TipoRetornado{Tipo: Ast.ARRAY, Valor: array}
 				scope.UpdateSimbolo(id, simbolo_id)
 			} else {

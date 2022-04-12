@@ -116,7 +116,7 @@ func (a Array) Clonar(scope *Ast.Scope) interface{} {
 	//Referencia del array
 	codigo3d += referenciaArrayOriginal + " = " + a.Referencia + "; //Copia de ref del array \n"
 	//Size del array
-	codigo3d += sizeArrayOriginal + " = heap[(int)" + referenciaArrayOriginal + "] //Get size \n"
+	codigo3d += sizeArrayOriginal + " = heap[(int)" + referenciaArrayOriginal + "]; //Get size \n"
 	//Iniciar contador del array original
 	codigo3d += contadorArrayOriginal + " = " + referenciaArrayOriginal + " + 1; //Get primera pos de array a clonar\n"
 	//Guardar posicion del nuevo array
@@ -124,8 +124,9 @@ func (a Array) Clonar(scope *Ast.Scope) interface{} {
 	//Guardar el size en la nueva pos
 	codigo3d += "heap[(int)" + posicionNuevoArray + "] = " + sizeArrayOriginal + "; //Agregar el size al nuevo array\n"
 	codigo3d += "H = H + 1; \n"
-	//Iniciar contador para el array nuevo
 	codigo3d += contadorArrayClone + " = H; //Iniciar contador para el array clone \n"
+	codigo3d += "H = H + " + sizeArrayOriginal + "; //Apartar espacio para el array clone\n"
+	//Iniciar contador para el array nuevo
 	/*********************************************************************/
 
 	for i := 0; i < a.Elementos.Len(); i++ {
@@ -158,13 +159,13 @@ func (a Array) Clonar(scope *Ast.Scope) interface{} {
 		/********************************************************************************/
 		nElementos.Add(nElemento)
 		/**********************AGREGAR ELEMENTO A ARRAY EN 3D****************************/
-		codigo3d += "heap[(int)" + contadorArrayClone + "] = " + elementoActual + "; Add nuevo elemento\n"
+		codigo3d += "heap[(int)" + contadorArrayClone + "] = " + elementoActual + "; //Add nuevo elemento\n"
 		/********************************************************************************/
 
 		/***************************ACTUALIZAR CONTADORES********************************/
-		codigo3d += tempContadorOriginal + " = " + contadorArrayOriginal + " + 1; Sig pos array original\n"
+		codigo3d += tempContadorOriginal + " = " + contadorArrayOriginal + " + 1; //Sig pos array original\n"
 		codigo3d += contadorArrayOriginal + " = " + tempContadorOriginal + "; \n"
-		codigo3d += tempContadorClone + " = " + contadorArrayClone + " + 1; Sig pos array clone \n"
+		codigo3d += tempContadorClone + " = " + contadorArrayClone + " + 1; //Sig pos array clone \n"
 		codigo3d += contadorArrayClone + " = " + tempContadorClone + "; \n"
 		/********************************************************************************/
 	}

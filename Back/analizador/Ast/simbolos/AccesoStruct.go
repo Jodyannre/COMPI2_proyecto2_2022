@@ -81,6 +81,8 @@ func (a AccesoStruct) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	_, tipoParticular = a.NombreStruct.(Ast.Abstracto).GetTipo()
 
 	if tipoParticular != Ast.IDENTIFICADOR {
+		//Verificar que no sea otro acceso a otro struct
+
 		//Verificar que sea un struct
 		if valor.Tipo != Ast.STRUCT {
 			//Error, se esperaba un identificador

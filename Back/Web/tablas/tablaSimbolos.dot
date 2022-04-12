@@ -15,7 +15,7 @@
 	
 <tr>
 <td cellpadding='4'>
-Persona
+Brazo
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -33,6 +33,24 @@ Persona
 
 <tr>
 <td cellpadding='4'>
+Persona
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+5
+</td>
+<td cellpadding='4'>
+7
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
 imprimir
 </td>
 <td cellpadding='4'>FUNCION
@@ -42,7 +60,7 @@ imprimir
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-7
+12
 </td>
 <td cellpadding='4'>
 0
@@ -51,19 +69,55 @@ imprimir
 
 <tr>
 <td cellpadding='4'>
-escribir
+arr1
 </td>
-<td cellpadding='4'>FUNCION
+<td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>VOID
+<td cellpadding='4'>ARRAY
 </td>
-<td cellpadding='4'>Global
-</td>
-<td cellpadding='4'>
-13
+<td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-0
+22
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+direccion
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+24
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nBrazo
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+23
+</td>
+<td cellpadding='4'>
+4
 </td>
 </tr>
 
@@ -78,7 +132,7 @@ nombre
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-20
+28
 </td>
 <td cellpadding='4'>
 8
@@ -96,7 +150,43 @@ edad
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-21
+29
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+lista
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+30
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+brazo
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+31
 </td>
 <td cellpadding='4'>
 8
@@ -114,7 +204,7 @@ nPersona
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-19
+27
 </td>
 <td cellpadding='4'>
 4
@@ -123,16 +213,16 @@ nPersona
 
 <tr>
 <td cellpadding='4'>
-arr1
+vector
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>ARRAY
+<td cellpadding='4'>VECTOR
 </td>
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-23
+33
 </td>
 <td cellpadding='4'>
 4
@@ -141,7 +231,7 @@ arr1
 
 <tr>
 <td cellpadding='4'>
-nPersona
+persona
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -150,28 +240,10 @@ nPersona
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-7
+12
 </td>
 <td cellpadding='4'>
 12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-numero
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>I64
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-7
-</td>
-<td cellpadding='4'>
-30
 </td>
 </tr>
 

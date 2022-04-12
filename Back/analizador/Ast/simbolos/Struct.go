@@ -240,7 +240,8 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 				listaEntrante := fn_array.ConcordanciaArray(attActual.Valor.(Ast.TipoRetornado).Valor.(expresiones.Array))
 				arrayDimension := arraylist.New()
 				for i := 0; i < listaPrePlantilla.Valor.(*arraylist.List).Len(); i++ {
-					arrayDimension.Add(listaPrePlantilla.Valor.(*arraylist.List).GetValue(i).(Ast.TipoRetornado).Valor)
+					preElemento := listaPrePlantilla.Valor.(*arraylist.List).GetValue(i).(Ast.TipoRetornado).Valor.(Ast.O3D)
+					arrayDimension.Add(preElemento.Valor.Valor)
 				}
 				split := strings.Split(listaEntrante, ",")
 				//Crear la lista con las posiciones
@@ -283,10 +284,23 @@ func (s StructInstancia) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			}
 		}
 
+		/*****************************CLONAR EL VALOR*******************************/
+
+		/*****************************CAMBIAR MUTABILIDAD DEL VALOR ENTRANTE*******/
+		/*
+			if attActual.Tipo == Ast.VECTOR {
+				valorTemp := attActual.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
+				valorTemp.Mutable = s.Mutable
+				attActual.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: valorTemp}
+			}
+		*/
+
+		/***************************************************************************/
+
 		//Todo bien ,entonces crear el atributo y agregarlo al struct
 		nuevoSimbolo := Ast.NewSimbolo(atributoActual.Nombre, attActual.Valor,
 			atributoActual.Fila, atributoActual.Columna,
-			attActual.TipoAtributo.Tipo, atributoActual.Mutable, atributoActual.Publico)
+			attActual.TipoAtributo.Tipo, s.Mutable, atributoActual.Publico)
 		nuevoSimbolo.Publico = attPlantilla.Publico
 		nuevoSimbolo.Direccion = newScope.Size
 		newScope.Size++

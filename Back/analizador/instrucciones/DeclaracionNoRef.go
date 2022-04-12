@@ -183,6 +183,7 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 	obj3dClone = valorRef.(Ast.TipoRetornado).Valor.(Ast.O3D)
 	codigo3d += obj3dClone.Codigo
 	valorRef = obj3dClone.Valor
+	valor = valorRef.(Ast.TipoRetornado)
 	/*
 		valor = Ast.TipoRetornado{
 			Tipo:  valor.Tipo,

@@ -52,20 +52,35 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 	var existe bool
 	var valor Ast.TipoRetornado
 	/**********VARIABLES 3D***************/
-	var codigo3d string
-	var obj3d, obj3dValor, objtemp Ast.O3D
+	var codigo3d, scopeAnterior string
+	var obj3d, obj3dValor, objtemp, obj3dTemp Ast.O3D
 	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 
 	if tipoIn == Ast.VALOR {
+		//existe = d.ScopeOriginal.Exist_actual(d.Id)
+		//valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		scopeAnterior = Ast.GetTemp()
+		/*********************SCOPE SIMULADO****************************/
+		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
+		/***************************************************************/
 		existe = d.ScopeOriginal.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
+		obj3dTemp = valor.Valor.(Ast.O3D)
+		valor = obj3dTemp.Valor
+		codigo3d += obj3dTemp.Codigo
+		/*********************RETORNO SCOPE ANTERIOR********************/
+		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
+		obj3dValor = obj3dTemp
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
 		obj3dValor = valor.Valor.(Ast.O3D)
 		valor = obj3dValor.Valor
 	}
+	tipoIn = valor.Tipo
 	dimension := d.Dimension.(Ast.Expresion).GetValue(scope)
 
 	if existe {

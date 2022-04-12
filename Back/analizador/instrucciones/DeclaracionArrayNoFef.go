@@ -53,7 +53,7 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	var valor Ast.TipoRetornado
 	/**********VARIABLES 3D***************/
 	var codigo3d string = ""
-	var obj3dValor, obj3d, obj3dTemp, obj3dClone Ast.O3D /*obj3dClone*/
+	var obj3dValor, obj3d, obj3dTemp, obj3dClone, obj3dDimension Ast.O3D /*obj3dClone*/
 	var scopeAnterior string
 	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
@@ -66,11 +66,14 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
 		/***************************************************************/
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
-		obj3dTemp = valor.Valor.(Ast.TipoRetornado).Valor.(Ast.O3D)
+		obj3dTemp = valor.Valor.(Ast.O3D)
 		valor = obj3dTemp.Valor
 		codigo3d += obj3dTemp.Codigo
 		/*********************RETORNO SCOPE ANTERIOR********************/
 		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
+		/***************************************************************/
+		/*********************ACTUALIZAR TIPO IN************************/
+		tipoIn = valor.Tipo
 		/***************************************************************/
 	} else {
 		existe = scope.Exist_actual(d.Id)
@@ -174,7 +177,8 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	//Get primitivos del array de dimension
 	arrayDimension := arraylist.New()
 	for i := 0; i < dimension.Valor.(*arraylist.List).Len(); i++ {
-		arrayDimension.Add(dimension.Valor.(*arraylist.List).GetValue(i).(Ast.TipoRetornado).Valor)
+		obj3dDimension = dimension.Valor.(*arraylist.List).GetValue(i).(Ast.TipoRetornado).Valor.(Ast.O3D)
+		arrayDimension.Add(obj3dDimension.Valor.Valor)
 	}
 
 	if !fn_array.CompararListas(listaDimensiones, arrayDimension) {
@@ -235,7 +239,7 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	//Clonar el array
 	nArray := valor.Valor.(Ast.Clones).Clonar(scope)
 	obj3dClone = nArray.(Ast.TipoRetornado).Valor.(Ast.O3D)
-	nArray = obj3dClone.Valor
+	nArray = obj3dClone.Valor.Valor
 	codigo3d += obj3dClone.Codigo
 	//Actualizar la mutabilidad de la instancia
 	mnArray := nArray.(expresiones.Array)

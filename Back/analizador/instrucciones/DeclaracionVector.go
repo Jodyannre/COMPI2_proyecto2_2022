@@ -58,6 +58,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 		/*********************RETORNO SCOPE ANTERIOR********************/
 		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
 		/***************************************************************/
+		obj3dValor = obj3dTemp
 	} else {
 		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)

@@ -462,7 +462,18 @@ func GetCod3dAccesoArray(ref string, pos int, estructura bool) Ast.O3D {
 	return obj3d
 }
 
-func UpdateElemento(array expresiones.Array, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope, objeto interface{}) Ast.TipoRetornado {
+func UpdateElemento(array expresiones.Array, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope, objeto interface{}, refVector string) Ast.TipoRetornado {
+	var obj3dValor, obj3d Ast.O3D
+	var resultado Ast.TipoRetornado
+	codigo3d := ""
+	posVector := refVector
+	sizeVector := ""
+	primeraPos := ""
+	sigVectorPos := ""
+	posAsignar := ""
+	sigVector := ""
+	var lt, lf, salto string
+
 	posicion := posiciones.GetValue(0).(int)
 	elemento := elementos.GetValue(0)
 	posiciones.RemoveAtIndex(0)
@@ -486,7 +497,12 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List, posicion
 	}
 	if posiciones.Len() == 0 {
 		//Actualizar el elemento simpre y cuando no este en un tipo array en la siguiente columna
+		/*********************************************************/
 		next := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
+		//obj3dValor = next.Valor.(Ast.O3D)
+		//next = obj3dValor.Valor
+		/*********************************************************/
+
 		if next.Tipo == Ast.ARRAY {
 			//No se puede guardar en esa posición porque es posición de array
 			fila := elemento.(Ast.Abstracto).GetFila()
@@ -509,16 +525,41 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List, posicion
 		for i := 0; i < array.Elementos.Len(); i++ {
 			if i == posicion {
 				//Reemplazar el elemento
-				nuevaLista.Add(objeto)
+				/*******************************************/
+				obj3dValor = objeto.(Ast.O3D)
+				codigo3d += obj3dValor.Codigo
+				valor := obj3dValor.Valor
+				nuevaLista.Add(valor)
+				/*******************************************/
 				continue
 			}
 			nuevaLista.Add(array.Elementos.GetValue(i))
 		}
+
+		sizeVector = Ast.GetTemp()
+		primeraPos = Ast.GetTemp()
+		posAsignar = Ast.GetTemp()
+		lt = Ast.GetLabel()
+		lf = Ast.GetLabel()
+		salto = Ast.GetLabel()
+		codigo3d += sizeVector + " = heap[(int)" + posVector + "]; //Get size array\n"
+		codigo3d += primeraPos + " = " + posVector + " + 1; //Primera pos \n"
+		codigo3d += posAsignar + " = " + primeraPos + " + " + strconv.Itoa(posicion) + "; //Pos asignar\n"
+		codigo3d += "if (" + strconv.Itoa(posicion) + " < " + sizeVector + ") goto " + lt + ";\n"
+		codigo3d += "goto " + lf + ";\n"
+		codigo3d += lt + ":\n"
+		codigo3d += "heap[(int)" + posAsignar + "] = " + obj3dValor.Referencia + "; //Add nuevo valor\n"
+		codigo3d += "goto " + salto + ";\n"
+		codigo3d += BoundsError(lf)
+		codigo3d += salto + ":\n"
 		array.Elementos.Clear()
 		for i := 0; i < nuevaLista.Len(); i++ {
 			array.Elementos.Add(nuevaLista.GetValue(i))
 		}
-		return Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
+		obj3d.Valor = Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
+		obj3d.Codigo = codigo3d
+		return Ast.TipoRetornado{Valor: obj3d, Tipo: Ast.EJECUTADO}
+		//return Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
 	}
 	if posiciones.Len() > 0 && array.TipoArray != Ast.ARRAY {
 		//Error, no hay más dimensiones
@@ -540,8 +581,34 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List, posicion
 	next := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
 	valorNext := next.Valor.(expresiones.Array)
 	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
-	return UpdateElemento(valorNext, elementos, posiciones, scope, objeto)
 
+	/***************************************************/
+	sizeVector = Ast.GetTemp()
+	primeraPos = Ast.GetTemp()
+	sigVectorPos = Ast.GetTemp()
+	sigVector = Ast.GetTemp()
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
+	salto = Ast.GetLabel()
+	codigo3d += sizeVector + " = heap[(int)" + posVector + "]; //Get size array\n"
+	codigo3d += primeraPos + " = " + posVector + " + 1; //Primera pos \n"
+	codigo3d += sigVectorPos + " = " + primeraPos + " + " + strconv.Itoa(posicion) + "; //Get posicion proxima dimension\n"
+	codigo3d += sigVector + " = " + "heap[(int)" + sigVectorPos + "]; //Get proxima dimension \n"
+	codigo3d += "if (" + strconv.Itoa(posicion) + " < " + sizeVector + ") goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	/***************************************************/
+	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
+	resultado = UpdateElemento(valorNext, elementos, posiciones, scope, objeto, sigVector)
+	/***************************************************/
+	codigo3d += resultado.Valor.(Ast.O3D).Codigo
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += BoundsError(lf)
+	codigo3d += salto + ":\n"
+	obj3d.Valor = Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
+	obj3d.Codigo = codigo3d
+	/***************************************************/
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: Ast.EJECUTADO}
 }
 
 func BoundsError(lf string) string {
