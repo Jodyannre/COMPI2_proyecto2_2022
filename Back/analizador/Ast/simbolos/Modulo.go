@@ -31,6 +31,10 @@ func NewModulo(id interface{}, instrucciones *arraylist.List, publico bool, fila
 }
 
 func (m Modulo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+
+	/******************VARIABLES 3D***************************/
+	var obj3d Ast.O3D
+	/*********************************************************/
 	//Variables de resultado de la ejecución de las instrucciones
 	var resultadoInstruccion Ast.TipoRetornado
 
@@ -90,9 +94,14 @@ func (m Modulo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	newScope.UpdateScopeGlobal()
 
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.MODULO,
 		Valor: m,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.MODULO,
+		Valor: obj3d,
 	}
 
 }

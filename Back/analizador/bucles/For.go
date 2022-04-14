@@ -32,6 +32,16 @@ func NewFor(variable interface{}, condicion interface{}, instrucciones *arraylis
 }
 
 func (f For) Run(scope *Ast.Scope) interface{} {
+	/**************************************VARIABLES 3D*************************************/
+	var obj3dRange, obj3dVariableFor, obj3dResultado, obj3d Ast.O3D
+	var codigo3d string
+	var codigo3dFor string
+	var direccion int
+	var lt, lf, salto string
+	var limiteSuperior, limiteInferior string
+	var iteracionPara3D bool = true
+	/**************************************************************************************/
+
 	var variable expresiones.Identificador
 	var nombreVariable string
 	var tipoGeneral Ast.TipoDato
@@ -47,6 +57,11 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	var resultadoInstruccion Ast.TipoRetornado
 	//var primeraIteracion bool
 	newScope := Ast.NewScope("For", scope)
+
+	//Inicializar algunas variables de 3d
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
+	salto = Ast.GetLabel()
 
 	//Verificar que la expresión sea un identificador o error
 	_, tipoParticular = f.Variable.(Ast.Abstracto).GetTipo()
@@ -76,7 +91,12 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	//error, identifier expected
 
 	//Ejecutar el range para obtener el vector que se va a iterar
-	rango = f.Range.(Ast.Expresion).GetValue(&newScope)
+	rango = f.Range.(Ast.Expresion).GetValue(scope)
+	obj3dRange = rango.Valor.(Ast.O3D)
+	codigo3d += obj3dRange.Codigo
+	limiteInferior = obj3dRange.Lt
+	limiteSuperior = obj3dRange.Lf
+	rango = obj3dRange.Valor
 	//Verificar error
 	if rango.Tipo == Ast.ERROR {
 		return rango
@@ -90,8 +110,10 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	//Get el primer elemento
 	if rango.Tipo == Ast.VECTOR {
 		primerValor = rango.Valor.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
+
 	} else {
 		primerValor = rango.Valor.(expresiones.Array).Elementos.GetValue(0).(Ast.TipoRetornado)
+
 	}
 
 	//Crear el símbolo de la variable que se va a utilizar en el for
@@ -105,8 +127,25 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 		Publico:       false,
 		Entorno:       &newScope,
 	}
+
+	/*******************************CODIGO 3D PARA CREAR EL SIMBOLO**************************/
+	codigo3d += "/*************CAMBIO A ENTORNO SIMULADO DEL FOR*/ \n"
+	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de entorno \n"
+	newScope.Posicion = scope.Size
+	codigo3d += "/***************DECLARACIÓN DE VARIABLE DEL FOR*/ \n"
+	temp2 := Ast.GetTemp()
+	direccion = newScope.Size
+	codigo3d += temp2 + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
+	codigo3d += "stack[(int)" + temp2 + "] = " + limiteInferior + ";\n"
+	newScope.Size++
+	codigo3d += "/***********************************************/\n"
+
+	nSimbolo.Direccion = direccion
+	nSimbolo.TipoDireccion = Ast.STACK
 	//Agregar el nuevo simbolo al scope del for
 	newScope.Add(nSimbolo)
+	/****************************************************************************************/
+
 	//primeraIteracion = true
 	if rango.Tipo == Ast.VECTOR {
 
@@ -124,6 +163,10 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 			nSimbolo.Valor = valorActual
 			newScope.UpdateSimbolo(nombreVariable, nSimbolo)
 
+			/********************************CODIGO 3D PARA ACTUALIZAR LA VARIABLE***********************/
+
+			/********************************************************************************************/
+
 			//Ejectuar todas las instrucciones dentro del for en la n iteración
 			for j := 0; j < f.Instrucciones.Len(); j++ {
 				instruccion = f.Instrucciones.GetValue(j)
@@ -134,11 +177,20 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				if tipoGeneral == Ast.INSTRUCCION {
 					//Ejecutar run
 					resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
+					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+					resultadoInstruccion = obj3dResultado.Valor
+					if iteracionPara3D {
+						codigo3dFor += obj3dResultado.Codigo
+					}
 
 				} else if tipoGeneral == Ast.EXPRESION {
 					//Ejecutar getvalue
 					resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
-
+					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+					resultadoInstruccion = obj3dResultado.Valor
+					for iteracionPara3D {
+						codigo3dFor += obj3dResultado.Codigo
+					}
 				}
 
 				//Verificar las instrucciones de transferencia
@@ -161,6 +213,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				}
 
 			}
+			iteracionPara3D = false
 			//primeraIteracion = false
 		}
 
@@ -177,6 +230,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 			nSimbolo.Valor = vector.(expresiones.Array).Elementos.GetValue(i)
 			//Verifico el valor antes de actualizar
 			nSimbolo.Valor = valorActual
+
 			newScope.UpdateSimbolo(nombreVariable, nSimbolo)
 
 			//Ejectuar todas las instrucciones dentro del for en la n iteración
@@ -189,11 +243,16 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				if tipoGeneral == Ast.INSTRUCCION {
 					//Ejecutar run
 					resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
+					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+					resultadoInstruccion = obj3dResultado.Valor
+					codigo3dFor += obj3dResultado.Codigo
 
 				} else if tipoGeneral == Ast.EXPRESION {
 					//Ejecutar getvalue
 					resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
-
+					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+					resultadoInstruccion = obj3dResultado.Valor
+					codigo3dFor += obj3dResultado.Codigo
 				}
 				//Verificar las instrucciones de transferencia
 				if Ast.EsTransferencia(resultadoInstruccion.Tipo) {
@@ -218,10 +277,39 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 			//primeraIteracion = false
 		}
 	}
+
+	posActualizacion := Ast.GetTemp()
+	nuevoValor := Ast.GetTemp()
+
+	codigo3d += salto + ":\n"
+	codigo3d += "/***********CONSEGUIR VALOR DE VARIABLE DEL FOR*/\n"
+	idExp := expresiones.NewIdentificador(nombreVariable, Ast.IDENTIFICADOR, 0, 0)
+	obj3dVariableFor = idExp.GetValue(&newScope).Valor.(Ast.O3D)
+	codigo3d += obj3dVariableFor.Codigo
+	codigo3d += "if (" + obj3dVariableFor.Referencia + " < " + limiteSuperior + ") goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += "/***********************************************/\n"
+	codigo3d += codigo3dFor
+	codigo3d += "/**********ACTUALIZAR VALOR DE VARIABLE DEL FOR*/\n"
+	codigo3d += posActualizacion + " = P + 0;\n"
+	codigo3d += nuevoValor + " = " + obj3dVariableFor.Referencia + " + 1;//Nuevo valor \n"
+	codigo3d += "stack[(int)" + posActualizacion + "] = " + nuevoValor + "; //Actualizar valor \n"
+	codigo3d += "goto " + salto + "; \n"
+	codigo3d += lf + ":\n"
+	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
+	codigo3d += "/***********************************************/\n"
+
 	newScope.UpdateScopeGlobal()
-	return Ast.TipoRetornado{
+
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+	obj3d.Codigo = codigo3d
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 

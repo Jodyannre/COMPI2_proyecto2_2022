@@ -30,9 +30,20 @@ func NewRange(tipo Ast.TipoDato, valInf, valSup interface{}, fila, columna int) 
 
 func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
+	/************************************VARIABLES 3D***********************************/
+	var obj3dValorSup, obj3dValorInf, obj3d Ast.O3D
+	var limInf3D, limSup3D string
+	var codigo3d string
+	/***********************************************************************************/
+
 	//Verificar el tipo de range
 	ValorSup := r.ValorSup.(Ast.Expresion).GetValue(scope)
+	obj3dValorSup = ValorSup.Valor.(Ast.O3D)
+	ValorSup = obj3dValorSup.Valor
 	ValorInf := r.ValorInf.(Ast.Expresion).GetValue(scope)
+	obj3dValorInf = ValorInf.Valor.(Ast.O3D)
+	ValorInf = obj3dValorInf.Valor
+
 	var numero int
 	listaElemento := arraylist.New()
 	var limInf, limSup int
@@ -78,7 +89,25 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			}
 
 		} else {
-			return ValorInf
+			size := Ast.GetTemp()
+			limInf3D = Ast.GetTemp()
+			limSup3D = Ast.GetTemp()
+
+			codigo3d += obj3dValorInf.Codigo
+			obj3d.Referencia = obj3dValorInf.Referencia
+			codigo3d += "/****************************CREACION DEL RANGE*/\n"
+			codigo3d += size + " = " + "heap[(int)" + obj3d.Referencia + "]; //Get size del vector \n"
+			codigo3d += limInf3D + " = " + obj3d.Referencia + " + 1; //Guardar inicio del vector \n"
+			codigo3d += limSup3D + " = " + size + " + " + limInf3D + "; //Guardar el limite superior \n"
+			codigo3d += "/***********************************************/\n"
+			obj3d.Lt = limInf3D
+			obj3d.Lf = limSup3D
+			obj3d.Codigo = codigo3d
+			obj3d.Valor = ValorInf
+			return Ast.TipoRetornado{
+				Valor: obj3d,
+				Tipo:  ValorInf.Tipo,
+			}
 		}
 
 	} else {
@@ -126,6 +155,19 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		//Todo bien, recuperar los int
 		limInf = ValorInf.Valor.(int)
 		limSup = ValorSup.Valor.(int)
+		/***************************************CODIGO 3D********************************************/
+		codigo3d += obj3dValorInf.Codigo
+		codigo3d += obj3dValorSup.Codigo
+		limInf3D = Ast.GetTemp()
+		limSup3D = Ast.GetTemp()
+		codigo3d += "/****************************CREACION DEL RANGE*/\n"
+		codigo3d += limInf3D + " = " + expresiones.Primitivo_To_String(limInf, Ast.I64) + "; //Get limite inferior \n"
+		codigo3d += limSup3D + " = " + expresiones.Primitivo_To_String(limSup, Ast.I64) + "; //Get limite superior \n"
+		codigo3d += "/***********************************************/\n"
+		obj3d.Lt = limInf3D
+		obj3d.Lf = limSup3D
+		obj3d.Codigo = codigo3d
+		/********************************************************************************************/
 
 		//Recorrer la lista e ir creando los elementos que se van a recorrer
 
@@ -140,9 +182,15 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 		vectorSalida = expresiones.NewVector(listaElemento, tipoVector, listaElemento.Len(),
 			listaElemento.Len(), false, r.Fila, r.Columna)
-		return Ast.TipoRetornado{
+
+		obj3d.Valor = Ast.TipoRetornado{
 			Tipo:  Ast.VECTOR,
 			Valor: vectorSalida,
+		}
+
+		return Ast.TipoRetornado{
+			Tipo:  Ast.VECTOR,
+			Valor: obj3d,
 		}
 
 	}

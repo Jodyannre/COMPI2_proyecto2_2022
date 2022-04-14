@@ -230,6 +230,7 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		Tipo:          valor.Tipo,
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
+		Entorno:       scope,
 	}
 
 	//Preparar la referencia del array original

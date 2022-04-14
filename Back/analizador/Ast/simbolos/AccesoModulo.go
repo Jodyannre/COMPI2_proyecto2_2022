@@ -27,6 +27,11 @@ func NewAccesoModulo(elementos *arraylist.List, fila, columna int) AccesoModulo 
 }
 
 func (a AccesoModulo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/******************************VARIABLES 3D**********************************/
+	var obj3d, obj3dValor Ast.O3D
+	var resultadoFuncion Ast.TipoRetornado
+	/****************************************************************************/
+
 	// FUNC::ID::ID
 	var idElementoGlobal interface{}
 	var idModuloGlobal string
@@ -338,14 +343,23 @@ func (a AccesoModulo) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			funcion := elementoActual.(LlamadaFuncion)
 			funcion.ScopeOriginal = scope
 			elementoActual = funcion
-			return elementoActual.(Ast.Expresion).GetValue(scopeValido)
+			resultadoFuncion = elementoActual.(Ast.Expresion).GetValue(scopeValido)
+			obj3dValor = resultadoFuncion.Valor.(Ast.O3D)
+			return Ast.TipoRetornado{
+				Tipo:  resultadoFuncion.Tipo,
+				Valor: obj3dValor,
+			}
 
 		}
 	}
 
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 

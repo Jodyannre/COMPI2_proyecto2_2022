@@ -34,6 +34,7 @@ type Funciones interface {
 
 type Identificadores interface {
 	GetNombre() string
+	//SetDireccion3D(direccion bool) interface{}
 }
 
 type AbstractoM interface {

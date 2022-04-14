@@ -26,10 +26,19 @@ func NewCast(valor Ast.Expresion, tipo Ast.TipoDato, tipoOb Ast.TipoDato, fila, 
 }
 
 func (c Cast) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+	/*******************************VARIABLES 3D*****************************/
+	var obj3d, obj3dValor Ast.O3D
+	var codigo3d string
+
+	/************************************************************************/
+
 	var nuevoTipo Ast.TipoDato
 	var nuevoValor Ast.TipoRetornado
 	//Primero conseguir el valor a convertir
 	valor := c.Valor.GetValue(scope)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	valor = obj3dValor.Valor
+	codigo3d += obj3dValor.Codigo
 
 	if valor.Tipo == Ast.ERROR {
 		return valor
@@ -72,7 +81,14 @@ func (c Cast) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	nuevoValor = c.convertir(nuevoTipo, valor, scope)
 
-	return nuevoValor
+	obj3d.Valor = nuevoValor
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = Primitivo_To_String(nuevoValor.Valor, nuevoValor.Tipo)
+
+	return Ast.TipoRetornado{
+		Tipo:  nuevoValor.Tipo,
+		Valor: obj3d,
+	}
 }
 
 func (c Cast) convertir(nuevoTipo Ast.TipoDato, valor Ast.TipoRetornado, scope *Ast.Scope) Ast.TipoRetornado {

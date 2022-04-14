@@ -7,18 +7,20 @@ import (
 )
 
 type Identificador struct {
-	Tipo    Ast.TipoDato
-	Valor   string
-	Fila    int
-	Columna int
+	Tipo        Ast.TipoDato
+	Valor       string
+	Fila        int
+	Columna     int
+	Direccion3D bool
 }
 
 func NewIdentificador(val string, tipo Ast.TipoDato, fila, columna int) Identificador {
-	return Identificador{Tipo: tipo, Valor: val, Fila: fila, Columna: columna}
+	return Identificador{Tipo: tipo, Valor: val, Fila: fila, Columna: columna, Direccion3D: false}
 }
 
 func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/*Variables para C3D*/
+	var guardarScope = Ast.GetTemp()
 	var temp string = Ast.GetTemp()
 	var tempValor string = Ast.GetTemp()
 	var codigo3d string = ""
@@ -40,12 +42,15 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/*Verificar si la variable viene del heap o del stack*/
 
 	if simbolo.TipoDireccion == Ast.STACK {
-		codigo3d = "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d += guardarScope + " = P; //Guardo scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(simbolo.Entorno.Posicion) + "; //Get entorno de variable \n"
+		codigo3d += "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
 		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
 		codigo3d += tempValor + " = stack[(int)" + temp + "];\n"
+		codigo3d += "P = " + guardarScope + "; //Retornar al entorno anterior \n"
 		codigo3d += "/***********************************************/\n"
 	} else {
-		codigo3d = "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
+		codigo3d += "/****************GET VARIABLE CON IDENTIFICADOR*/\n"
 		codigo3d += temp + " = " + strconv.Itoa(simbolo.Direccion) + ";\n"
 		codigo3d += tempValor + " = heap[(int)" + temp + "];\n"
 		codigo3d += "/***********************************************/\n"

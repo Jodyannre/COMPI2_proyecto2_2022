@@ -229,6 +229,7 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 		Tipo:          valor.Tipo,
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
+		Entorno:       scope,
 	}
 	//Actualizar la mutabilidad de la instancia
 	nArray := valor.Valor.(expresiones.Array)

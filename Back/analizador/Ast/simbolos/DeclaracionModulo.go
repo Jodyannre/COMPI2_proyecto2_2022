@@ -27,6 +27,9 @@ func NewDeclaracionModulo(modulo interface{}, publico bool, fila, columna int) D
 }
 
 func (d DeclaracionModulo) Run(scope *Ast.Scope) interface{} {
+	/*******************************VARIABLES 3D*********************************/
+	var obj3d, obj3dValor Ast.O3D
+	/***************************************************************************/
 	var existe bool
 	var identificador interface{}
 	var idString string
@@ -77,6 +80,8 @@ func (d DeclaracionModulo) Run(scope *Ast.Scope) interface{} {
 
 	//Get el valor del modulo
 	modulo = d.Modulo.(Ast.Expresion).GetValue(scope)
+	obj3dValor = modulo.Valor.(Ast.O3D)
+	modulo = obj3dValor.Valor
 
 	//Crear el nuevo símbolo
 
@@ -95,9 +100,14 @@ func (d DeclaracionModulo) Run(scope *Ast.Scope) interface{} {
 	//Agregar a la lista fms
 	scope.Addfms(newSimbolo)
 
-	return Ast.TipoRetornado{
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 

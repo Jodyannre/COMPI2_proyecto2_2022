@@ -112,6 +112,7 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	var resultadoAsignacion Ast.TipoRetornado
 	var valorPosicion Ast.TipoRetornado
 	posiciones := arraylist.New()
+	posiciones3D := arraylist.New()
 	var array interface{}
 
 	/*************VARIABLES 3D*************/
@@ -160,6 +161,10 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	var preValor interface{}
 	if tipoIn == Ast.IF_EXPRESION || tipoIn == Ast.MATCH_EXPRESION || tipoIn == Ast.LOOP_EXPRESION {
 		preValor = a.Valor.(Ast.Instruccion).Run(scope)
+		/*} else if tipoIn == Ast.IDENTIFICADOR {
+		preId := a.Valor.(Ast.Identificadores).SetDireccion3D(true)
+		a.Valor = preId
+		preValor = a.Valor.(Ast.Expresion).GetValue(scope)*/
 	} else {
 		preValor = a.Valor.(Ast.Expresion).GetValue(scope)
 	}
@@ -287,6 +292,7 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 					valorPosicion = posicion.(Ast.Expresion).GetValue(scope)
 					obj3dPosicion = valorPosicion.Valor.(Ast.O3D)
 					valorPosicion = obj3dPosicion.Valor
+					codigo3d += obj3dPosicion.Codigo
 					/*******************************************************/
 					_, tipoParticular := posicion.(Ast.Abstracto).GetTipo()
 					if valorPosicion.Tipo == Ast.ERROR {
@@ -298,10 +304,11 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 						return resultado
 					}
 					posiciones.Add(valorPosicion.Valor)
+					posiciones3D.Add(obj3dPosicion.Referencia)
 				}
 
 				//Buscar la posición
-				resultadoAsignacion = fn_array.UpdateElemento(array.(expresiones.Array), prePos, posiciones, scope, obj3dValor, referencia)
+				resultadoAsignacion = fn_array.UpdateElemento(array.(expresiones.Array), prePos, posiciones, scope, obj3dValor, referencia, posiciones3D)
 				objtemp = resultadoAsignacion.Valor.(Ast.O3D)
 				resultadoAsignacion = objtemp.Valor
 				if resultadoAsignacion.Tipo == Ast.ERROR {
@@ -421,14 +428,18 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 					}
 
 				}
-
-				prePos := a.Id.(fn_array.AccesoArray).Posiciones
+				//////////////////////////////////////////////////////////////////////////
+				//Otro error, estoy copiando el puntero y lo modifico más adelante
+				puntero := a.Id.(fn_array.AccesoArray).Posiciones
+				prePos := puntero.Clone()
+				//prePos := a.Id.(fn_array.AccesoArray).Posiciones
 				//Get las posiciones
 				for i := 0; i < prePos.Len(); i++ {
 					posicion = prePos.GetValue(i)
 					valorPosicion = posicion.(Ast.Expresion).GetValue(scope)
 					objtemp = valorPosicion.Valor.(Ast.O3D)
 					valorPosicion = objtemp.Valor
+					codigo3d += objtemp.Codigo
 					_, tipoParticular := posicion.(Ast.Abstracto).GetTipo()
 					if valorPosicion.Tipo == Ast.ERROR {
 						return posicion.(Ast.TipoRetornado)
@@ -439,12 +450,13 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 						return resultado
 					}
 					posiciones.Add(valorPosicion.Valor)
+					posiciones3D.Add(objtemp.Referencia)
 				}
 
 				//Buscar la posición
 				//Crear un nuevo valor
 				//nuevoValor := valor
-				resultadoAsignacion = fn_vectores.UpdateElemento(array.(expresiones.Vector), prePos, posiciones, scope, obj3dValor, referencia)
+				resultadoAsignacion = fn_vectores.UpdateElemento(array.(expresiones.Vector), prePos, posiciones, scope, obj3dValor, referencia, posiciones3D)
 				objtemp = resultadoAsignacion.Valor.(Ast.O3D)
 				resultadoAsignacion = objtemp.Valor
 				if resultadoAsignacion.Tipo == Ast.ERROR {
@@ -517,6 +529,7 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 	simbolo_id := scope.GetSimbolo(id)
 	//Obtener el código 3d de conseguir la variable
 	obj3d = GenerarC3DGetSimbolo(simbolo_id)
+
 	//Verificar que los tipos sean correctos
 	//Primero verificar que no es un if expresion
 	_, tipoIn := a.Valor.(Ast.Abstracto).GetTipo()
@@ -944,6 +957,7 @@ func CopiarArray(arrayGuardado expresiones.Array, arrayEntrante expresiones.Arra
 func GenerarC3DGetSimbolo(simbolo Ast.Simbolo) Ast.O3D {
 	/*Variables para C3D*/
 	var obj3d Ast.O3D
+	var guardarScope string = Ast.GetTemp()
 	var temp string = Ast.GetTemp()
 	//var tempValor string = Ast.GetTemp()
 	var codigo3d string = ""
@@ -951,9 +965,11 @@ func GenerarC3DGetSimbolo(simbolo Ast.Simbolo) Ast.O3D {
 
 	if simbolo.TipoDireccion == Ast.STACK {
 		codigo3d = "/***********GET VALOR VARIABLE CON IDENTIFICADOR*/\n"
-
+		codigo3d += guardarScope + " = P; //Guardar scope anterior \n"
+		codigo3d += "P = " + strconv.Itoa(simbolo.Entorno.Posicion) + "; //Entorno simulado \n"
 		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
 		//codigo3d += tempValor + " = stack[(int)" + temp + "];\n"
+		codigo3d += "P = " + guardarScope + "; //Retornar al scope anterior\n"
 		codigo3d += "/***********************************************/\n"
 	} else {
 		codigo3d = "/***********GET VALOR VARIABLE CON IDENTIFICADOR*/\n"

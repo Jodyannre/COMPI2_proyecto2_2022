@@ -217,7 +217,8 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 }
 
-func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posiciones *arraylist.List, scope *Ast.Scope, objeto interface{}, refVector string) Ast.TipoRetornado {
+func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posiciones *arraylist.List,
+	scope *Ast.Scope, objeto interface{}, refVector string, posiciones3D *arraylist.List) Ast.TipoRetornado {
 	var obj3dValor, obj3d Ast.O3D
 	var resultado Ast.TipoRetornado
 	codigo3d := ""
@@ -230,9 +231,11 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 	var lt, lf, salto string
 
 	posicion := posiciones.GetValue(0).(int)
+	posicion3D := posiciones3D.GetValue(0).(string)
 	elemento := elementos.GetValue(0)
 	posiciones.RemoveAtIndex(0)
 	elementos.RemoveAtIndex(0)
+	posiciones3D.RemoveAtIndex(0)
 	if posicion >= array.Size || posicion < 0 {
 		//Error, out of bounds
 		fila := elemento.(Ast.Abstracto).GetFila()
@@ -297,8 +300,8 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 		salto = Ast.GetLabel()
 		codigo3d += sizeVector + " = heap[(int)" + posVector + "]; //Get size vector\n"
 		codigo3d += primeraPos + " = " + posVector + " + 1; //Primera pos \n"
-		codigo3d += posAsignar + " = " + primeraPos + " + " + strconv.Itoa(posicion) + "; //Pos asignar\n"
-		codigo3d += "if (" + strconv.Itoa(posicion) + " < " + sizeVector + ") goto " + lt + ";\n"
+		codigo3d += posAsignar + " = " + primeraPos + " + " + posicion3D + "; //Pos asignar\n"
+		codigo3d += "if (" + posicion3D + " < " + sizeVector + ") goto " + lt + ";\n"
 		codigo3d += "goto " + lf + ";\n"
 		codigo3d += lt + ":\n"
 		codigo3d += "heap[(int)" + posAsignar + "] = " + obj3dValor.Referencia + "; //Add nuevo valor\n"
@@ -343,14 +346,14 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 	salto = Ast.GetLabel()
 	codigo3d += sizeVector + " = heap[(int)" + posVector + "]; //Get size vector\n"
 	codigo3d += primeraPos + " = " + posVector + " + 1; //Primera pos \n"
-	codigo3d += sigVectorPos + " = " + primeraPos + " + " + strconv.Itoa(posicion) + "; //Get posicion proxima dimension\n"
+	codigo3d += sigVectorPos + " = " + primeraPos + " + " + posicion3D + "; //Get posicion proxima dimension\n"
 	codigo3d += sigVector + " = " + "heap[(int)" + sigVectorPos + "]; //Get proxima dimension \n"
-	codigo3d += "if (" + strconv.Itoa(posicion) + " < " + sizeVector + ") goto " + lt + ";\n"
+	codigo3d += "if (" + posicion3D + " < " + sizeVector + ") goto " + lt + ";\n"
 	codigo3d += "goto " + lf + ";\n"
 	codigo3d += lt + ":\n"
 	/***************************************************/
 	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
-	resultado = UpdateElemento(valorNext, elementos, posiciones, scope, objeto, sigVector)
+	resultado = UpdateElemento(valorNext, elementos, posiciones, scope, objeto, sigVector, posiciones3D)
 	/***************************************************/
 	codigo3d += resultado.Valor.(Ast.O3D).Codigo
 	codigo3d += "goto " + salto + ";\n"
