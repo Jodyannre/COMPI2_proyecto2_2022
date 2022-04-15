@@ -231,6 +231,28 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				valor.Valor = !valorIzq.(bool)
 				valor.Tipo = Ast.BOOLEAN
 
+				/************VERIFICAR QUE SEA UN IDENTIFICADOR************************/
+				var opAbstracto interface{} = op.operando_izq
+				_, tipoParticular := opAbstracto.(Ast.Abstracto).GetTipo()
+				if tipoParticular == Ast.IDENTIFICADOR {
+					var objTemp Ast.O3D
+					var codTemp string = tipo_izq.Valor.(Ast.O3D).Codigo
+					var referencia string = tipo_izq.Valor.(Ast.O3D).Referencia
+					var objEnviar Ast.TipoRetornado
+					objTemp = GenerarCod3DLogicaEspecial(referencia)
+					codTemp += objTemp.Codigo
+					objTemp.Codigo = codTemp
+					objEnviar.Valor = objTemp
+					obj := Ast.ActualizarCodigoLogica(objEnviar, objEnviar, op.operador, true)
+					obj.Valor = valor
+					return Ast.TipoRetornado{
+						Tipo:  Ast.LOGICA,
+						Valor: obj,
+					}
+				}
+
+				/**********************************************************************/
+
 				//Actualizar el código y conseguir el obj O3D
 				obj := Ast.ActualizarCodigoLogica(tipo_izq, tipo_izq, op.operador, true)
 				obj.Valor = valor

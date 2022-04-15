@@ -219,7 +219,7 @@ func ActualizarCodigoRelacional(op1 TipoRetornado, op2 TipoRetornado, operador s
 	lt = GetLabel()
 	lf = GetLabel()
 
-	codigo += "if " + codIzq.Referencia + " " + operador + " " + codDer.Referencia + " goto " + lt + ";\n"
+	codigo += "if (" + codIzq.Referencia + " " + operador + " " + codDer.Referencia + ") goto " + lt + ";\n"
 	codigo += "goto " + lf + ";\n"
 
 	codigo += "/***********************************************/\n"
@@ -253,8 +253,8 @@ func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador strin
 			codigo += codDer.Codigo
 			/*Actualizar los labels*/
 			lt += codDer.Lt
-			lf += codIzq.Lt + ":\n"
-			lf += codDer.Lt
+			lf += codIzq.Lf + ":\n"
+			lf += codDer.Lf
 		} else {
 			/*OR*/
 			codigo += codIzq.Codigo

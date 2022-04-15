@@ -217,6 +217,7 @@ type TipoRetornado struct {
 type O3D struct {
 	Lt         string
 	Lf         string
+	Salto      string
 	Valor      TipoRetornado
 	Codigo     string
 	Referencia string

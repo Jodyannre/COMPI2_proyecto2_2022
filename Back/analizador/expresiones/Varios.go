@@ -229,3 +229,18 @@ func EsCadena(tipo Ast.TipoDato) bool {
 		return false
 	}
 }
+
+func GenerarCod3DLogicaEspecial(referencia string) Ast.O3D {
+	var codigo3d string
+	var lt, lf string
+	var obj3d Ast.O3D
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
+	codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	obj3d.Referencia = referencia
+	obj3d.Codigo = codigo3d
+	obj3d.Lt = lt
+	obj3d.Lf = lf
+	return obj3d
+}
