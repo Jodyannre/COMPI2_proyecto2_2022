@@ -215,12 +215,17 @@ type TipoRetornado struct {
 }
 
 type O3D struct {
-	Lt         string
-	Lf         string
-	Salto      string
-	Valor      TipoRetornado
-	Codigo     string
-	Referencia string
+	Lt                   string
+	Lf                   string
+	Salto                string
+	Valor                TipoRetornado
+	Codigo               string
+	Referencia           string
+	TranferenciaAgregada bool
+	SaltoBreak           string
+	SaltoReturn          string
+	SaltoContinue        string
+	SaltoTranferencia    string
 }
 
 func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {

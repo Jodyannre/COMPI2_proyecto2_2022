@@ -4,6 +4,7 @@ import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
 	"strconv"
+	"strings"
 
 	"github.com/colegno/arraylist"
 )
@@ -32,16 +33,34 @@ func NewWhile(tipo Ast.TipoDato, condicion Ast.Expresion, instrucciones *arrayli
 }
 
 func (w While) Run(scope *Ast.Scope) interface{} {
+	/******************************VARIABLES 3D*********************************/
+	var obj3d, obj3dcondicion, obj3dresultadoInstruccion Ast.O3D
+	var codigo3d, lt, lf, saltoWhile string
+	var saltoContinue, saltoBreak, saltoReturn string
+	/***************************************************************************/
+
 	newScope := Ast.NewScope("Loop", scope)
-	var contadorSeguridad int = 0
-	var condicion = true
+	newScope.Posicion = scope.Size
+
 	var condicionResultado Ast.TipoRetornado
 	var instruccion, resultado interface{}
 	var tipoGeneral Ast.TipoDato
 	var i int = 0
-
+	saltoWhile = Ast.GetLabel()
 	//Validar la condición de inicio
+	codigo3d += "/***********CAMBIO A ENTORNO SIMULADO DEL WHILE*/ \n"
+	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de entorno \n"
+	codigo3d += "//#aquiVaElSaltoContinue\n"
+	codigo3d += "/*******************************EJECUCION WHILE*/ \n"
+	codigo3d += saltoWhile + " :\n"
 	condicionResultado = w.Condicion.GetValue(&newScope)
+	obj3dcondicion = condicionResultado.Valor.(Ast.O3D)
+	condicionResultado = obj3dcondicion.Valor
+	lt = obj3dcondicion.Lt
+	lf = obj3dcondicion.Lf
+
+	codigo3d += obj3dcondicion.Codigo
+
 	if condicionResultado.Tipo == Ast.ERROR {
 		newScope.UpdateScopeGlobal()
 		return condicionResultado
@@ -61,83 +80,35 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			Tipo:  Ast.ERROR,
 			Valor: nError,
 		}
-	} else {
-		condicion = condicionResultado.Valor.(bool)
 	}
 
-	for condicion {
+	codigo3d += lt + ":\n"
+	//Ejecutar las instrucciones
+	for i = 0; i < w.Instrucciones.Len(); i++ {
+		instruccion = w.Instrucciones.GetValue(i)
+		//Recuperar el tipo de la instrucción
+		tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
+		//Verificar tipos
 
-		if contadorSeguridad == 1000 {
-			msg := "Semantic error, infinite loop." +
-				" -- Line:" + strconv.Itoa(w.Fila) + " Column: " +
-				strconv.Itoa(w.Columna)
-			nError := errores.NewError(w.Fila, w.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			newScope.Errores.Add(nError)
-			newScope.Consola += msg + "\n"
-			newScope.UpdateScopeGlobal()
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
+		if tipoGeneral == Ast.INSTRUCCION {
+			//Declarar variables globales
+			resultado = instruccion.(Ast.Instruccion).Run(&newScope)
+			obj3dresultadoInstruccion = resultado.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			codigo3d += obj3dresultadoInstruccion.Codigo
+			resultado = obj3dresultadoInstruccion.Valor
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
+				return resultado
+			}
+		} else if tipoGeneral == Ast.EXPRESION {
+			resultado = instruccion.(Ast.Expresion).GetValue(&newScope)
+			obj3dresultadoInstruccion = resultado.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			codigo3d += obj3dresultadoInstruccion.Codigo
+			resultado = obj3dresultadoInstruccion.Valor
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
+				return resultado
 			}
 		}
-
-		//Ejecutar las instrucciones
-		for i = 0; i < w.Instrucciones.Len(); i++ {
-			instruccion = w.Instrucciones.GetValue(i)
-			//Recuperar el tipo de la instrucción
-			tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
-			//Verificar tipos
-
-			/*
-				if tipoGeneral == Ast.EXPRESION {
-					//Error, no pueden existir expresiones aisladas
-					msg := "Semantic error, an instruction was expected." +
-						" -- Line:" + strconv.Itoa(instruccion.(Ast.Abstracto).GetFila()) + " Column: " +
-						strconv.Itoa(instruccion.(Ast.Abstracto).GetColumna())
-					nError := errores.NewError(instruccion.(Ast.Abstracto).GetFila(),
-						instruccion.(Ast.Abstracto).GetColumna(), msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					newScope.Errores.Add(nError)
-					newScope.Consola += msg + "\n"
-					newScope.UpdateScopeGlobal()
-					return Ast.TipoRetornado{
-						Valor: nError,
-						Tipo:  Ast.ERROR,
-					}
-				}
-			*/
-			/*
-				if tipoGeneral == Ast.INSTRUCCION {
-
-					//Ejecutar la instrucción
-					resultado = instruccion.(Ast.Instruccion).Run(scope)
-
-				}
-			*/
-			if tipoGeneral == Ast.INSTRUCCION {
-				//Declarar variables globales
-				resultado = instruccion.(Ast.Instruccion).Run(&newScope)
-				if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
-					return resultado
-				}
-			} else if tipoGeneral == Ast.EXPRESION {
-				resultado = instruccion.(Ast.Expresion).GetValue(&newScope)
-				if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
-					return resultado
-				}
-			}
-			/*
-				if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR ||
-					resultado.(Ast.TipoRetornado).Tipo == Ast.EJECUTADO {
-					//Siguiente instrucción
-					newScope.UpdateScopeGlobal()
-					newScope.Errores.Clear()
-					newScope.Consola = ""
-					continue
-				}
-			*/
+		/*
 			if resultado.(Ast.TipoRetornado).Tipo == Ast.CONTINUE {
 				//Siguiente iteración
 				newScope.UpdateScopeGlobal()
@@ -145,30 +116,39 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 				newScope.Consola = ""
 				break
 			}
+		*/
 
-			if Ast.EsTransferencia(resultado.(Ast.TipoRetornado).Tipo) {
-				if resultado.(Ast.TipoRetornado).Tipo == Ast.CONTINUE {
-					newScope.UpdateScopeGlobal()
-					newScope.Errores.Clear()
-					newScope.Consola = ""
-					break
-				}
-				if resultado.(Ast.TipoRetornado).Tipo == Ast.BREAK {
-					newScope.UpdateScopeGlobal()
-					return Ast.TipoRetornado{
-						Tipo:  Ast.EJECUTADO,
-						Valor: true,
-					}
-				}
-				//Terminar el loop
-				return resultado
+		if resultado.(Ast.TipoRetornado).Tipo == Ast.CONTINUE ||
+			resultado.(Ast.TipoRetornado).Tipo == Ast.BREAK ||
+			resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN {
+			//Siguiente iteración
+			newScope.UpdateScopeGlobal()
+			newScope.Errores.Clear()
+			newScope.Consola = ""
+
+			if !obj3dresultadoInstruccion.TranferenciaAgregada {
+				codigo3d += "goto " + obj3dresultadoInstruccion.Salto + ";\n"
 			}
+			saltoContinue += obj3dresultadoInstruccion.SaltoContinue
+			saltoContinue = strings.Replace(saltoContinue, ",", ":\n", -1)
 
+			saltoBreak += obj3dresultadoInstruccion.SaltoBreak
+			//println(saltoBreak)
+			saltoBreak = strings.Replace(saltoBreak, ",", ":\n", -1)
+
+			saltoReturn += obj3dresultadoInstruccion.SaltoReturn
+			saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+
+			continue
 		}
-		contadorSeguridad++
-		newScope.UpdateScopeGlobal()
-		newScope.Errores.Clear()
-		newScope.Consola = ""
+
+	}
+	codigo3d += "goto " + saltoWhile + "; \n"
+	codigo3d += lf + ":\n"
+	newScope.UpdateScopeGlobal()
+	newScope.Errores.Clear()
+	newScope.Consola = ""
+	/*
 		condicionResultado = w.Condicion.GetValue(&newScope)
 
 		if condicionResultado.Tipo == Ast.ERROR {
@@ -193,10 +173,39 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 		} else {
 			condicion = condicionResultado.Valor.(bool)
 		}
+	*/
+
+	if saltoBreak != "" {
+		codigo3d += saltoBreak
 	}
-	return Ast.TipoRetornado{
+
+	if saltoContinue != "" {
+		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", saltoContinue, -1)
+	} else {
+		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", "", -1)
+	}
+
+	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
+	codigo3d += "/***********************************************/\n"
+
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+
+	if saltoReturn != "" {
+		obj3d.SaltoReturn = saltoReturn
+		obj3d.Valor.Tipo = Ast.RETURN
+		return Ast.TipoRetornado{
+			Tipo:  Ast.RETURN,
+			Valor: obj3d,
+		}
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 

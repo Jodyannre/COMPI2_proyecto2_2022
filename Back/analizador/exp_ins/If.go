@@ -37,12 +37,27 @@ func (i IF) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 }
 
 func (i IF) Run(scope *Ast.Scope) interface{} {
+	/*************************OBJETOS 3D******************************/
+	var obj3dTransferencia Ast.O3D
+
+	/****************************************************************/
 	//Crear el nuevo scope
 	newScope := Ast.NewScope("if", scope)
 	newScope.Posicion = scope.Size
 	//Inicializar la lista de respuestas
 	//Ejecutar la instrucción if
 	resultado := GetResultado3D(i, &newScope, -1, i.Expresion)
+
+	if Ast.EsTransferencia(resultado.Tipo) {
+		obj3dTransferencia = resultado.Valor.(Ast.O3D)
+		//saltos := obj3dTransferencia.SaltoTranferencia
+		//saltos = strings.Replace(saltos, ",", ":\n", -1)
+		//saltos += ":\n"
+		//obj3dTransferencia.SaltoTranferencia = saltos
+		obj3dTransferencia.TranferenciaAgregada = true
+		obj3dTransferencia.Valor.Tipo = resultado.Tipo
+		resultado.Valor = obj3dTransferencia
+	}
 
 	//actualizar el scope global con los resultados
 	newScope.UpdateScopeGlobal()
@@ -226,6 +241,11 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 	var salto string
 	var saltosFin string
 	var ultimoFalso string
+	var resultadoTranferencia Ast.TipoRetornado
+	var hayTranferencia bool = false
+	//var saltosTransferencia string
+	var saltosContinue string
+	var saltosBreak string
 	/*****************************************************************************/
 	codigo3d += "/********************************CONDICIONAL IF*/\n"
 	var condicion1 Ast.TipoRetornado
@@ -327,8 +347,28 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				}
 			}
 			if Ast.EsTransferencia(resultado.Tipo) {
-				//Si es transferencia, terminar con el if y retornarlo
-				return resultado
+				//Si es transferencia, agregar el salto y guardar el resultado para retornarlo
+				resultadoTranferencia = resultado
+				if !objResultadoInstruccion.TranferenciaAgregada {
+					codigo3d += "goto " + objResultadoInstruccion.SaltoTranferencia + ";\n"
+					switch resultado.Tipo {
+					case Ast.BREAK:
+						saltosBreak += objResultadoInstruccion.SaltoBreak + ","
+					case Ast.CONTINUE:
+						saltosContinue += objResultadoInstruccion.SaltoContinue + ","
+					}
+					//saltosTransferencia += objResultadoInstruccion.SaltoTranferencia + ","
+				} else {
+					switch resultado.Tipo {
+					case Ast.BREAK:
+						saltosBreak += objResultadoInstruccion.SaltoBreak
+					case Ast.CONTINUE:
+						saltosContinue += objResultadoInstruccion.SaltoContinue
+					}
+					//saltosTransferencia += objResultadoInstruccion.SaltoTranferencia
+				}
+				hayTranferencia = true
+				//return resultado
 			}
 			n++
 		}
@@ -386,7 +426,15 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 
 			if Ast.EsTransferencia(resultado.Tipo) {
 				newScope.UpdateScopeGlobal()
-				return resultado
+				resultadoTranferencia = resultado
+				switch resultado.Tipo {
+				case Ast.BREAK:
+					saltosBreak += objResultadoIfs.SaltoBreak
+				case Ast.CONTINUE:
+					saltosContinue += objResultadoIfs.SaltoContinue
+				}
+				//saltosTransferencia += objResultadoIfs.SaltoBreak
+				hayTranferencia = true
 			}
 
 			if resultado.Tipo != Ast.EJECUTADO && (i.Tipo == Ast.IF_EXPRESION ||
@@ -397,14 +445,6 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			faltaActual = objResultadoIfs.Lf
 			ultimoFalso = faltaActual
 			saltosFin += objResultadoIfs.Salto
-			/*
-				if faltaActual != "" && j+1 < i.Lista_if_else.Len() {
-					ultimoFalso = faltaActual
-					//salto = Ast.GetLabel()
-					//codigo3d += "goto " + salto + ";\n"
-					//saltosFin += salto + ":\n"
-				}
-			*/
 			newScope.UpdateScopeGlobal()
 		}
 		///////////////////////////////FALSAS//////////////////////////////////////
@@ -423,6 +463,17 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 		}
 		obj3d.Lt = obj3dCondicion.Lt
 		obj3d.Lf = obj3dCondicion.Lf
+
+		if hayTranferencia {
+			obj3d.SaltoBreak = saltosBreak
+			obj3d.SaltoContinue = saltosContinue
+			obj3d.Valor.Tipo = resultadoTranferencia.Tipo
+			return Ast.TipoRetornado{
+				Valor: obj3d,
+				Tipo:  resultadoTranferencia.Tipo,
+			}
+		}
+
 		return Ast.TipoRetornado{
 			Valor: obj3d,
 			Tipo:  Ast.EJECUTADO,

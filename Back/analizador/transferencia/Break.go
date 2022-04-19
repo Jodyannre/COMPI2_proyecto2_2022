@@ -27,17 +27,30 @@ func NewBreak(tipo Ast.TipoDato, expresion Ast.Expresion, fila, columna int) Bre
 
 func (b Break) Run(scope *Ast.Scope) interface{} {
 
+	/**********************VARIABLES 3D*****************************/
+	var obj3d, obj3dValor Ast.O3D
+	var salto string = Ast.GetLabel()
+	var codigo3d string
+	/***************************************************************/
+	obj3d.SaltoTranferencia = salto
+	obj3d.SaltoBreak = salto
+	obj3d.Valor = Ast.TipoRetornado{
+		Tipo:  Ast.BREAK,
+		Valor: b,
+	}
+	obj3d.TranferenciaAgregada = false
 	if b.Tipo == Ast.BREAK {
 
 		return Ast.TipoRetornado{
-			Tipo: Ast.BREAK,
-			Valor: Ast.TipoRetornado{
-				Tipo:  Ast.BREAK,
-				Valor: b,
-			},
+			Tipo:  Ast.BREAK,
+			Valor: obj3d,
 		}
 	}
 	valor := b.Expresion.GetValue(scope)
+	obj3dValor = valor.Valor.(Ast.O3D)
+	codigo3d += obj3dValor.Codigo
+	valor = obj3dValor.Valor
+
 	if valor.Tipo == Ast.ERROR {
 		return valor
 	}
@@ -47,9 +60,15 @@ func (b Break) Run(scope *Ast.Scope) interface{} {
 		Valor: valor.Valor,
 	}
 
+	obj3d.Valor = valorRetornar
+	obj3d.Codigo = codigo3d
+	obj3d.SaltoTranferencia = salto
+	obj3d.SaltoBreak = salto
+	obj3d.Referencia = obj3dValor.Referencia
+
 	return Ast.TipoRetornado{
 		Tipo:  b.Tipo,
-		Valor: valorRetornar,
+		Valor: obj3d,
 	}
 }
 

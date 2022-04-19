@@ -15,11 +15,11 @@
 	
 <tr>
 <td cellpadding='4'>
-condicion
+numero
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>BOOLEAN
+<td cellpadding='4'>I64
 </td>
 <td cellpadding='4'>Local
 </td>
