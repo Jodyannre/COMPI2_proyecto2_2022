@@ -523,6 +523,9 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		lt := Ast.GetLabel()
 		lf := Ast.GetLabel()
 		salto := Ast.GetLabel()
+		if obj3d.RelacionalExp != "" {
+			codigo3d += obj3d.RelacionalExp
+		}
 		codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
 		codigo3d += "goto " + lf + ";\n"
 		codigo3d += lt + ":\n"

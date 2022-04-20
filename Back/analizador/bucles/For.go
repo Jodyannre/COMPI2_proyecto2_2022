@@ -5,6 +5,7 @@ import (
 	"Back/analizador/errores"
 	"Back/analizador/expresiones"
 	"strconv"
+	"strings"
 
 	"github.com/colegno/arraylist"
 )
@@ -40,6 +41,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	var lt, lf, salto string
 	var limiteSuperior, limiteInferior string
 	var iteracionPara3D bool = true
+	var saltoBreak, saltoContinue, saltoReturn, saltoReturnExp string
 	/**************************************************************************************/
 
 	var variable expresiones.Identificador
@@ -109,7 +111,14 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 
 	//Get el primer elemento
 	if rango.Tipo == Ast.VECTOR {
-		primerValor = rango.Valor.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
+		if rango.Valor.(expresiones.Vector).Valor.Len() > 0 {
+			primerValor = rango.Valor.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
+		} else {
+			primerValor = Ast.TipoRetornado{
+				Tipo:  Ast.I64,
+				Valor: 0,
+			}
+		}
 
 	} else {
 		primerValor = rango.Valor.(expresiones.Array).Elementos.GetValue(0).(Ast.TipoRetornado)
@@ -131,12 +140,21 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	/*******************************CODIGO 3D PARA CREAR EL SIMBOLO**************************/
 	codigo3d += "/*************CAMBIO A ENTORNO SIMULADO DEL FOR*/ \n"
 	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de entorno \n"
-	newScope.Posicion = scope.Size
+	newScope.Posicion = scope.Size + scope.Posicion
 	codigo3d += "/***************DECLARACIÓN DE VARIABLE DEL FOR*/ \n"
 	temp2 := Ast.GetTemp()
 	direccion = newScope.Size
 	codigo3d += temp2 + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
-	codigo3d += "stack[(int)" + temp2 + "] = " + limiteInferior + ";\n"
+	_, tipoParticular = f.Range.(Range).ValorInf.(Ast.Abstracto).GetTipo()
+
+	if expresiones.EsArray(tipoParticular) == Ast.ARRAY {
+		temp := Ast.GetTemp()
+		codigo3d += temp + " = " + "heap[(int)" + limiteInferior + "]; //Get elemento desde el heap \n"
+		codigo3d += "stack[(int)" + temp2 + "] = " + temp + ";\n"
+	} else {
+		codigo3d += "stack[(int)" + temp2 + "] = " + limiteInferior + ";\n"
+	}
+
 	newScope.Size++
 	codigo3d += "/***********************************************/\n"
 
@@ -149,138 +167,153 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	//primeraIteracion = true
 	if rango.Tipo == Ast.VECTOR {
 
-		for i := 0; i < vector.(expresiones.Vector).Valor.Len(); i++ {
-			//Hasta que sea verdadero y termine de iterar toda la lista
-			//Actualizar el valor de la variable al siguiente elemento
-			//Verificar la variable por si fue modifica en la iteración anterior
+		//for i := 0; i < vector.(expresiones.Vector).Valor.Len(); i++ {
+		//Hasta que sea verdadero y termine de iterar toda la lista
+		//Actualizar el valor de la variable al siguiente elemento
+		//Verificar la variable por si fue modifica en la iteración anterior
 
-			//Recupero la variable tal como esta luego de la iteracion
-			valorActual = vector.(expresiones.Vector).Valor.GetValue(i).(Ast.TipoRetornado)
-			//simboloTemp = newScope.GetSimbolo(nombreVariable)
-			//variableTemp = simboloTemp.Valor.(Ast.TipoRetornado)
-			nSimbolo.Valor = vector.(expresiones.Vector).Valor.GetValue(i)
-			//Verifico el valor antes de actualizar
-			nSimbolo.Valor = valorActual
-			newScope.UpdateSimbolo(nombreVariable, nSimbolo)
+		//Recupero la variable tal como esta luego de la iteracion
+		//valorActual = vector.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
 
-			/********************************CODIGO 3D PARA ACTUALIZAR LA VARIABLE***********************/
-
-			/********************************************************************************************/
-
-			//Ejectuar todas las instrucciones dentro del for en la n iteración
-			for j := 0; j < f.Instrucciones.Len(); j++ {
-				instruccion = f.Instrucciones.GetValue(j)
-
-				//Verificar los tipos para saber que comportamiento tiene que tener
-				tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
-
-				if tipoGeneral == Ast.INSTRUCCION {
-					//Ejecutar run
-					resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
-					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
-					resultadoInstruccion = obj3dResultado.Valor
-					if iteracionPara3D {
-						codigo3dFor += obj3dResultado.Codigo
-					}
-
-				} else if tipoGeneral == Ast.EXPRESION {
-					//Ejecutar getvalue
-					resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
-					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
-					resultadoInstruccion = obj3dResultado.Valor
-					for iteracionPara3D {
-						codigo3dFor += obj3dResultado.Codigo
-					}
-				}
-
-				//Verificar las instrucciones de transferencia
-				if Ast.EsTransferencia(resultadoInstruccion.Tipo) {
-
-					//Primero verificar que no sea un return normal, el cual si es permitido
-					if resultadoInstruccion.Tipo == Ast.CONTINUE {
-						//Rompemos y vamos a la siguiente iteración del for
-						break
-					}
-					switch resultadoInstruccion.Tipo {
-					case Ast.BREAK_EXPRESION, Ast.RETURN_EXPRESION, Ast.RETURN:
-						return resultadoInstruccion
-					case Ast.BREAK:
-						return Ast.TipoRetornado{
-							Tipo:  Ast.EJECUTADO,
-							Valor: true,
-						}
-					}
-				}
-
+		if rango.Valor.(expresiones.Vector).Valor.Len() > 0 {
+			valorActual = rango.Valor.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
+		} else {
+			valorActual = Ast.TipoRetornado{
+				Tipo:  Ast.I64,
+				Valor: 0,
 			}
-			iteracionPara3D = false
-			//primeraIteracion = false
 		}
+		//simboloTemp = newScope.GetSimbolo(nombreVariable)
+		//variableTemp = simboloTemp.Valor.(Ast.TipoRetornado)
+		nSimbolo.Valor = vector.(expresiones.Vector).Valor.GetValue(0)
+		//Verifico el valor antes de actualizar
+		nSimbolo.Valor = valorActual
+		newScope.UpdateSimbolo(nombreVariable, nSimbolo)
+
+		/********************************CODIGO 3D PARA ACTUALIZAR LA VARIABLE***********************/
+
+		/********************************************************************************************/
+
+		//Ejectuar todas las instrucciones dentro del for en la n iteración
+		for j := 0; j < f.Instrucciones.Len(); j++ {
+			instruccion = f.Instrucciones.GetValue(j)
+
+			//Verificar los tipos para saber que comportamiento tiene que tener
+			tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
+
+			if tipoGeneral == Ast.INSTRUCCION {
+				//Ejecutar run
+				resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
+				obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+				resultadoInstruccion = obj3dResultado.Valor
+				if iteracionPara3D {
+					codigo3dFor += obj3dResultado.Codigo
+				}
+
+			} else if tipoGeneral == Ast.EXPRESION {
+				//Ejecutar getvalue
+				resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
+				obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+				resultadoInstruccion = obj3dResultado.Valor
+				for iteracionPara3D {
+					codigo3dFor += obj3dResultado.Codigo
+				}
+			}
+
+			//Verificar las instrucciones de transferencia
+			if resultadoInstruccion.Tipo == Ast.CONTINUE ||
+				resultadoInstruccion.Tipo == Ast.BREAK ||
+				resultadoInstruccion.Tipo == Ast.RETURN {
+				//Siguiente iteración
+				newScope.UpdateScopeGlobal()
+				newScope.Errores.Clear()
+				newScope.Consola = ""
+
+				if !obj3dResultado.TranferenciaAgregada {
+					codigo3d += "goto " + obj3dResultado.Salto + ";\n"
+				}
+				saltoContinue += obj3dResultado.SaltoContinue
+				saltoContinue = strings.Replace(saltoContinue, ",", ":\n", -1)
+
+				saltoBreak += obj3dResultado.SaltoBreak
+				//println(saltoBreak)
+				saltoBreak = strings.Replace(saltoBreak, ",", ":\n", -1)
+
+				saltoReturn += obj3dResultado.SaltoReturn
+				saltoReturnExp += obj3dResultado.SaltoReturnExp
+				//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+			}
+
+		}
+		iteracionPara3D = false
+		//primeraIteracion = false
+		//}
 
 	} else {
-		for i := 0; i < vector.(expresiones.Array).Elementos.Len(); i++ {
-			//Hasta que sea verdadero y termine de iterar toda la lista
-			//Actualizar el valor de la variable al siguiente elemento
-			//Verificar la variable por si fue modifica en la iteración anterior
+		//for i := 0; i < vector.(expresiones.Array).Elementos.Len(); i++ {
+		//Hasta que sea verdadero y termine de iterar toda la lista
+		//Actualizar el valor de la variable al siguiente elemento
+		//Verificar la variable por si fue modifica en la iteración anterior
 
-			//Recupero la variable tal como esta luego de la iteracion
-			valorActual = vector.(expresiones.Array).Elementos.GetValue(i).(Ast.TipoRetornado)
-			//simboloTemp = newScope.GetSimbolo(nombreVariable)
-			//variableTemp = simboloTemp.Valor.(Ast.TipoRetornado)
-			nSimbolo.Valor = vector.(expresiones.Array).Elementos.GetValue(i)
-			//Verifico el valor antes de actualizar
-			nSimbolo.Valor = valorActual
+		//Recupero la variable tal como esta luego de la iteracion
+		valorActual = vector.(expresiones.Array).Elementos.GetValue(0).(Ast.TipoRetornado)
+		//simboloTemp = newScope.GetSimbolo(nombreVariable)
+		//variableTemp = simboloTemp.Valor.(Ast.TipoRetornado)
+		nSimbolo.Valor = vector.(expresiones.Array).Elementos.GetValue(0)
+		//Verifico el valor antes de actualizar
+		nSimbolo.Valor = valorActual
 
-			newScope.UpdateSimbolo(nombreVariable, nSimbolo)
+		newScope.UpdateSimbolo(nombreVariable, nSimbolo)
 
-			//Ejectuar todas las instrucciones dentro del for en la n iteración
-			for j := 0; j < f.Instrucciones.Len(); j++ {
-				instruccion = f.Instrucciones.GetValue(j)
+		//Ejectuar todas las instrucciones dentro del for en la n iteración
+		for j := 0; j < f.Instrucciones.Len(); j++ {
+			instruccion = f.Instrucciones.GetValue(j)
 
-				//Verificar los tipos para saber que comportamiento tiene que tener
-				tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
+			//Verificar los tipos para saber que comportamiento tiene que tener
+			tipoGeneral, _ = instruccion.(Ast.Abstracto).GetTipo()
 
-				if tipoGeneral == Ast.INSTRUCCION {
-					//Ejecutar run
-					resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
-					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
-					resultadoInstruccion = obj3dResultado.Valor
-					codigo3dFor += obj3dResultado.Codigo
+			if tipoGeneral == Ast.INSTRUCCION {
+				//Ejecutar run
+				resultadoInstruccion = instruccion.(Ast.Instruccion).Run(&newScope).(Ast.TipoRetornado)
+				obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+				resultadoInstruccion = obj3dResultado.Valor
+				codigo3dFor += obj3dResultado.Codigo
 
-				} else if tipoGeneral == Ast.EXPRESION {
-					//Ejecutar getvalue
-					resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
-					obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
-					resultadoInstruccion = obj3dResultado.Valor
-					codigo3dFor += obj3dResultado.Codigo
-				}
-				//Verificar las instrucciones de transferencia
-				if Ast.EsTransferencia(resultadoInstruccion.Tipo) {
-
-					//Primero verificar que no sea un return normal, el cual si es permitido
-					if resultadoInstruccion.Tipo == Ast.CONTINUE {
-						//Rompemos y vamos a la siguiente iteración del for
-						break
-					}
-					switch resultadoInstruccion.Tipo {
-					case Ast.BREAK_EXPRESION, Ast.RETURN_EXPRESION, Ast.RETURN:
-						return resultadoInstruccion
-					case Ast.BREAK:
-						return Ast.TipoRetornado{
-							Tipo:  Ast.EJECUTADO,
-							Valor: true,
-						}
-					}
-				}
-
+			} else if tipoGeneral == Ast.EXPRESION {
+				//Ejecutar getvalue
+				resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
+				obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
+				resultadoInstruccion = obj3dResultado.Valor
+				codigo3dFor += obj3dResultado.Codigo
 			}
-			//primeraIteracion = false
+			//Verificar las instrucciones de transferencia
+			if Ast.EsTransferencia(resultadoInstruccion.Tipo) {
+
+				//Primero verificar que no sea un return normal, el cual si es permitido
+				if resultadoInstruccion.Tipo == Ast.CONTINUE {
+					//Rompemos y vamos a la siguiente iteración del for
+					break
+				}
+				switch resultadoInstruccion.Tipo {
+				case Ast.BREAK_EXPRESION, Ast.RETURN_EXPRESION, Ast.RETURN:
+					return resultadoInstruccion
+				case Ast.BREAK:
+					return Ast.TipoRetornado{
+						Tipo:  Ast.EJECUTADO,
+						Valor: true,
+					}
+				}
+			}
+
 		}
+		//primeraIteracion = false
+		//}
 	}
 
 	posActualizacion := Ast.GetTemp()
 	nuevoValor := Ast.GetTemp()
-
+	codigo3d += "/*********************************EJECUCION FOR*/ \n"
+	codigo3d += "//#aquiVaElSaltoContinue\n"
 	codigo3d += salto + ":\n"
 	codigo3d += "/***********CONSEGUIR VALOR DE VARIABLE DEL FOR*/\n"
 	idExp := expresiones.NewIdentificador(nombreVariable, Ast.IDENTIFICADOR, 0, 0)
@@ -297,6 +330,17 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	codigo3d += "stack[(int)" + posActualizacion + "] = " + nuevoValor + "; //Actualizar valor \n"
 	codigo3d += "goto " + salto + "; \n"
 	codigo3d += lf + ":\n"
+
+	if saltoBreak != "" {
+		codigo3d += saltoBreak
+	}
+
+	if saltoContinue != "" {
+		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", saltoContinue, -1)
+	} else {
+		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", "", -1)
+	}
+
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
 	codigo3d += "/***********************************************/\n"
 
@@ -307,6 +351,16 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 		Valor: true,
 	}
 	obj3d.Codigo = codigo3d
+
+	if saltoReturn != "" {
+		obj3d.SaltoReturn = saltoReturn
+		obj3d.Valor.Tipo = Ast.RETURN
+		return Ast.TipoRetornado{
+			Tipo:  Ast.RETURN,
+			Valor: obj3d,
+		}
+	}
+
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: obj3d,

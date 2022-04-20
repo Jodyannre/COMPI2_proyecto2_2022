@@ -122,6 +122,21 @@ func (d DeclaracionSinTipo) Run(scope *Ast.Scope) interface{} {
 	if d.Stack {
 		//Agregar el código anterior
 		cod3D += obj3DValor.Codigo
+
+		if valor.Tipo == Ast.BOOLEAN {
+			if obj3DValor.Lt != "" {
+				salto := Ast.GetLabel()
+				cod3D += "/*************************CAMBIO VALOR BOOLEANO*/ \n"
+				cod3D += obj3DValor.Lt + ": \n"
+				cod3D += obj3DValor.Referencia + " = 1;\n"
+				cod3D += "goto " + salto + ";\n"
+				cod3D += obj3DValor.Lf + ": \n"
+				cod3D += obj3DValor.Referencia + " = 0;\n"
+				cod3D += salto + ":\n"
+				cod3D += "/***********************************************/ \n"
+			}
+		}
+
 		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
@@ -141,8 +156,24 @@ func (d DeclaracionSinTipo) Run(scope *Ast.Scope) interface{} {
 		obj3D.Codigo = cod3D
 		obj3D.Valor = valor
 	} else {
+
 		//Agregar el código anterior
 		cod3D += obj3DValor.Codigo
+
+		if valor.Tipo == Ast.BOOLEAN {
+			if obj3DValor.Lt != "" {
+				salto := Ast.GetLabel()
+				cod3D += "/*************************CAMBIO VALOR BOOLEANO*/ \n"
+				cod3D += obj3DValor.Lt + ": \n"
+				cod3D += obj3DValor.Referencia + " = 1;\n"
+				cod3D += "goto " + salto + ";\n"
+				cod3D += obj3DValor.Lf + ": \n"
+				cod3D += obj3DValor.Referencia + " = 0;\n"
+				cod3D += salto + ":\n"
+				cod3D += "/***********************************************/ \n"
+			}
+		}
+
 		cod3D += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()

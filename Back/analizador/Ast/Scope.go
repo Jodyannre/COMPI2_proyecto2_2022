@@ -442,6 +442,20 @@ func (s *Scope) UpdateScopeGlobal() {
 
 }
 
+func (s *Scope) GetEntornoPadreReturn() *Scope {
+	var scopePadre *Scope
+	if s.prev != nil {
+		for scopePadre = s; scopePadre.prev != nil; scopePadre = scopePadre.prev {
+			//Buscando el scope padre
+			if scopePadre.Nombre == "funcion" {
+				break
+			}
+		}
+	}
+
+	return scopePadre
+}
+
 func (entorno *Scope) Clonar(scope *Scope) interface{} {
 	nTablaFunciones := make(map[string]interface{})
 	nTablaSimbolos := make(map[string]interface{})

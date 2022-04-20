@@ -15,7 +15,7 @@
 	
 <tr>
 <td cellpadding='4'>
-numero
+a
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -24,7 +24,169 @@ numero
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-2
+3
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+aux
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+21
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+index
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+56
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+output
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+122
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+123
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+j
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+126
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+k
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+130
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+arr
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>ARRAY
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+142
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+143
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+e
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+151
 </td>
 <td cellpadding='4'>
 4

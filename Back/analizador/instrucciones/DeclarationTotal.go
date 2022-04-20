@@ -158,6 +158,20 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		if tipoIn != Ast.VALOR {
 			codigo3d += obj3DValor.Codigo
 		}
+		if valor.Tipo == Ast.BOOLEAN {
+			if obj3DValor.Lt != "" {
+				salto := Ast.GetLabel()
+				codigo3d += "/*************************CAMBIO VALOR BOOLEANO*/ \n"
+				codigo3d += obj3DValor.Lt + ": \n"
+				codigo3d += obj3DValor.Referencia + " = 1;\n"
+				codigo3d += "goto " + salto + ";\n"
+				codigo3d += obj3DValor.Lf + ": \n"
+				codigo3d += obj3DValor.Referencia + " = 0;\n"
+				codigo3d += salto + ":\n"
+				codigo3d += "/***********************************************/ \n"
+			}
+		}
+
 		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
@@ -182,6 +196,21 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		if tipoIn != Ast.VALOR {
 			codigo3d += obj3DValor.Codigo
 		}
+
+		if valor.Tipo == Ast.BOOLEAN {
+			if obj3DValor.Lt != "" {
+				salto := Ast.GetLabel()
+				codigo3d += "/*************************CAMBIO VALOR BOOLEANO*/ \n"
+				codigo3d += obj3DValor.Lt + ": \n"
+				codigo3d += obj3DValor.Referencia + " = 1;\n"
+				codigo3d += "goto " + salto + ";\n"
+				codigo3d += obj3DValor.Lf + ": \n"
+				codigo3d += obj3DValor.Referencia + " = 0;\n"
+				codigo3d += salto + ":\n"
+				codigo3d += "/***********************************************/ \n"
+			}
+		}
+
 		codigo3d += "/***********************DECLARACIÓN DE VARIABLE*/ \n"
 
 		/*Get el nuevo temporal*/

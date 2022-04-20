@@ -43,6 +43,11 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 	var obj3d, obj3dValor Ast.O3D
 	var codigo3d string
 	var codigoFuncion string
+	var saltoReturn string
+	var saltoReturnExp string
+	var valorReturn string
+	var posicionReturn string
+	var algunValorParaRetornar interface{}
 	/*******************************************************/
 
 	var actual interface{}
@@ -77,101 +82,35 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 			}
 			codigo3d += obj3dValor.Codigo
 		}
+
+		if obj3dValor.SaltoReturn != "" {
+			if !obj3dValor.TranferenciaAgregada {
+				codigo3d += "goto " + obj3dValor.Salto + ";\n"
+			}
+			if !obj3dValor.TranferenciaAgregada {
+				saltoReturn += obj3dValor.SaltoReturn + ","
+			} else {
+				saltoReturn += obj3dValor.SaltoReturn
+			}
+			saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+			saltoReturnExp += obj3dValor.SaltoReturnExp
+			algunValorParaRetornar = respuesta
+			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+
+		}
+
 		//scope.UpdateReferencias()
-
-		if Ast.EsTransferencia(respuesta.(Ast.TipoRetornado).Tipo) {
-			if respuesta.(Ast.TipoRetornado).Tipo == Ast.BREAK ||
-				respuesta.(Ast.TipoRetornado).Tipo == Ast.BREAK_EXPRESION ||
-				respuesta.(Ast.TipoRetornado).Tipo == Ast.CONTINUE {
-				//Error de break, break_expresion y continue
-				valor := actual.(Ast.Abstracto)
-				fila := valor.GetFila()
-				columna := valor.GetColumna()
-				msg := "Semantic error," + Ast.ValorTipoDato[respuesta.(Ast.TipoRetornado).Tipo] +
-					" statement not allowed outside a loop." +
-					" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
-				nError := errores.NewError(fila, columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
-			}
-			if f.Retorno.Tipo == Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
-				//Error de break, break_expresion
-				valor := actual.(Ast.Abstracto)
-				fila := valor.GetFila()
-				columna := valor.GetColumna()
-				msg := "Semantic error, this function can't return a value." +
-					" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
-				nError := errores.NewError(fila, columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
-			}
-			if f.Retorno.Tipo != Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN {
-				//Error, la función espera retornar algo y no esta retornando nada
-				valor := actual.(Ast.Abstracto)
-				fila := valor.GetFila()
-				columna := valor.GetColumna()
-				msg := "Semantic error, this function is not returning any value." +
-					" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
-				nError := errores.NewError(fila, columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
-			}
-
-			if f.Retorno.Tipo != Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
-				//Verificar que los tipos sean correctos
-				var tipoEntrante Ast.TipoRetornado
-				var valorRespueta Ast.TipoRetornado = respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)
-				if valorRespueta.Tipo == Ast.STRUCT {
-					tipoEntrante.Tipo = Ast.STRUCT
-					tipoEntrante.Valor = valorRespueta.Valor.(StructInstancia).GetPlantilla(scope)
-				} else {
-					if valorRespueta.Tipo == Ast.VECTOR {
-						tipoEntrante = Ast.TipoRetornado{
-							Tipo:  Ast.VECTOR,
-							Valor: valorRespueta.Valor.(expresiones.Vector).TipoVector,
-						}
-					}
-					if valorRespueta.Tipo == Ast.ARRAY {
-						tipoEntrante = Ast.TipoRetornado{
-							Tipo:  Ast.ARRAY,
-							Valor: valorRespueta.Valor.(expresiones.Array).TipoDelArray,
-						}
-					}
-				}
-				if f.Retorno.Tipo == Ast.DIMENSION_ARRAY && tipoEntrante.Tipo == Ast.ARRAY {
-					//Comparar las dimensiones solicitadas con el array de salida
-					//Tengo que comparar el dimension de retorno y el valorRespuesta del array
-					resultado := instrucciones.CompararDimensiones(f.Retorno.Valor.(expresiones.DimensionArray),
-						valorRespueta.Valor.(expresiones.Array), scope)
-					if resultado.Tipo == Ast.ERROR {
-						return resultado
-					}
-
-				} else if !CompararTipos(f.Retorno, tipoEntrante) {
-					//Error, retorna un tipo diferente
+		/*
+			if Ast.EsTransferencia(respuesta.(Ast.TipoRetornado).Tipo) {
+				if respuesta.(Ast.TipoRetornado).Tipo == Ast.BREAK ||
+					respuesta.(Ast.TipoRetornado).Tipo == Ast.BREAK_EXPRESION ||
+					respuesta.(Ast.TipoRetornado).Tipo == Ast.CONTINUE {
+					//Error de break, break_expresion y continue
 					valor := actual.(Ast.Abstracto)
 					fila := valor.GetFila()
 					columna := valor.GetColumna()
-					msg := "Semantic error, expected" + expresiones.Tipo_String(f.Retorno) + " found " +
-						expresiones.Tipo_String(respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)) +
+					msg := "Semantic error," + Ast.ValorTipoDato[respuesta.(Ast.TipoRetornado).Tipo] +
+						" statement not allowed outside a loop." +
 						" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
 					nError := errores.NewError(fila, columna, msg)
 					nError.Tipo = Ast.ERROR_SEMANTICO
@@ -183,30 +122,131 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 						Valor: nError,
 					}
 				}
-				//Ejecutar el return y retornar el valor que trae
-				return respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)
+				if f.Retorno.Tipo == Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+					//Error de break, break_expresion
+					valor := actual.(Ast.Abstracto)
+					fila := valor.GetFila()
+					columna := valor.GetColumna()
+					msg := "Semantic error, this function can't return a value." +
+						" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+					nError := errores.NewError(fila, columna, msg)
+					nError.Tipo = Ast.ERROR_SEMANTICO
+					nError.Ambito = scope.GetTipoScope()
+					scope.Errores.Add(nError)
+					scope.Consola += msg + "\n"
+					return Ast.TipoRetornado{
+						Tipo:  Ast.ERROR,
+						Valor: nError,
+					}
+				}
+				if f.Retorno.Tipo != Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN {
+					//Error, la función espera retornar algo y no esta retornando nada
+					valor := actual.(Ast.Abstracto)
+					fila := valor.GetFila()
+					columna := valor.GetColumna()
+					msg := "Semantic error, this function is not returning any value." +
+						" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+					nError := errores.NewError(fila, columna, msg)
+					nError.Tipo = Ast.ERROR_SEMANTICO
+					nError.Ambito = scope.GetTipoScope()
+					scope.Errores.Add(nError)
+					scope.Consola += msg + "\n"
+					return Ast.TipoRetornado{
+						Tipo:  Ast.ERROR,
+						Valor: nError,
+					}
+				}
+
+				if f.Retorno.Tipo != Ast.VOID && respuesta.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+					//Verificar que los tipos sean correctos
+					var tipoEntrante Ast.TipoRetornado
+					var valorRespueta Ast.TipoRetornado = respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)
+					if valorRespueta.Tipo == Ast.STRUCT {
+						tipoEntrante.Tipo = Ast.STRUCT
+						tipoEntrante.Valor = valorRespueta.Valor.(StructInstancia).GetPlantilla(scope)
+					} else {
+						if valorRespueta.Tipo == Ast.VECTOR {
+							tipoEntrante = Ast.TipoRetornado{
+								Tipo:  Ast.VECTOR,
+								Valor: valorRespueta.Valor.(expresiones.Vector).TipoVector,
+							}
+						}
+						if valorRespueta.Tipo == Ast.ARRAY {
+							tipoEntrante = Ast.TipoRetornado{
+								Tipo:  Ast.ARRAY,
+								Valor: valorRespueta.Valor.(expresiones.Array).TipoDelArray,
+							}
+						}
+					}
+					if f.Retorno.Tipo == Ast.DIMENSION_ARRAY && tipoEntrante.Tipo == Ast.ARRAY {
+						//Comparar las dimensiones solicitadas con el array de salida
+						//Tengo que comparar el dimension de retorno y el valorRespuesta del array
+						resultado := instrucciones.CompararDimensiones(f.Retorno.Valor.(expresiones.DimensionArray),
+							valorRespueta.Valor.(expresiones.Array), scope)
+						if resultado.Tipo == Ast.ERROR {
+							return resultado
+						}
+
+					} else if !CompararTipos(f.Retorno, tipoEntrante) {
+						//Error, retorna un tipo diferente
+						valor := actual.(Ast.Abstracto)
+						fila := valor.GetFila()
+						columna := valor.GetColumna()
+						msg := "Semantic error, expected" + expresiones.Tipo_String(f.Retorno) + " found " +
+							expresiones.Tipo_String(respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)) +
+							" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+						nError := errores.NewError(fila, columna, msg)
+						nError.Tipo = Ast.ERROR_SEMANTICO
+						nError.Ambito = scope.GetTipoScope()
+						scope.Errores.Add(nError)
+						scope.Consola += msg + "\n"
+						return Ast.TipoRetornado{
+							Tipo:  Ast.ERROR,
+							Valor: nError,
+						}
+					}
+					//Ejecutar el return y retornar el valor que trae
+					return respuesta.(Ast.TipoRetornado).Valor.(Ast.TipoRetornado)
+				}
 			}
-		}
+		*/
 	}
 
 	//Verificar que la funcion no sea de return y no este retornando nada
-	if f.Retorno.Tipo != Ast.VOID {
-		//Error la funcion debe retornar algo
-		valor := actual.(Ast.Abstracto)
-		fila := valor.GetFila()
-		columna := valor.GetColumna()
-		msg := "Semantic error, expected " + expresiones.Tipo_String(f.Retorno) + " , found ()." +
-			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
+	/*
+		if f.Retorno.Tipo != Ast.VOID {
+			//Error la funcion debe retornar algo
+			valor := actual.(Ast.Abstracto)
+			fila := valor.GetFila()
+			columna := valor.GetColumna()
+			msg := "Semantic error, expected " + expresiones.Tipo_String(f.Retorno) + " , found ()." +
+				" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+			nError := errores.NewError(fila, columna, msg)
+			nError.Tipo = Ast.ERROR_SEMANTICO
+			nError.Ambito = scope.GetTipoScope()
+			scope.Errores.Add(nError)
+			scope.Consola += msg + "\n"
+		}
+	*/
+
+	if saltoReturn != "" {
+		codigo3d += saltoReturn
+	}
+
+	if saltoReturnExp != "" {
+		posicionReturn = Ast.GetTemp()
+		valorReturn = Ast.GetTemp()
+		//Recuperar el valor de la variable que se va a retornar
+		codigo3d += "/*****************RECUPERAR EL VALOR DEL RETURN*/\n"
+		codigo3d += posicionReturn + " = P + 0; //Posicion return \n"
+		codigo3d += valorReturn + " = stack[(int)" + posicionReturn + "]; //Valor return \n"
+		codigo3d += "/***********************************************/\n"
 	}
 
 	//Crear el código de la función
 	codigoFuncion += "void " + f.Nombre + "(){\n"
 	codigoFuncion += Ast.Indentar(scope.GetNivel(), codigo3d)
+	codigoFuncion += Ast.Indentar(scope.GetNivel(), "return; \n")
 	codigoFuncion += "}\n"
 	codigo3d = f.Nombre + "();\n"
 
@@ -219,6 +259,17 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		Valor: true,
 	}
 	obj3d.Codigo = codigo3d
+	if saltoReturnExp != "" {
+		obj3d.Valor = Ast.TipoRetornado{
+			Tipo:  f.Retorno.Tipo,
+			Valor: algunValorParaRetornar.(Ast.TipoRetornado).Valor,
+		}
+		obj3d.Referencia = valorReturn
+		return Ast.TipoRetornado{
+			Tipo:  f.Retorno.Tipo,
+			Valor: obj3d,
+		}
+	}
 
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
@@ -573,4 +624,22 @@ func EsAVelementos(tipo Ast.TipoDato) bool {
 	default:
 		return false
 	}
+}
+
+func GetValorPredeterminado(tipo Ast.TipoDato) interface{} {
+	switch tipo {
+	case Ast.I64:
+		return 0
+	case Ast.F64:
+		return 1.1
+	case Ast.BOOLEAN:
+		return true
+	case Ast.CHAR:
+		return "a"
+	case Ast.STRING, Ast.STR:
+		return "cadena"
+	default:
+		return true
+	}
+
 }

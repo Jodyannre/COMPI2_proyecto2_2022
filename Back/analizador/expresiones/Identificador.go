@@ -25,7 +25,6 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var tempValor string = Ast.GetTemp()
 	var codigo3d string = ""
 	var obj3D Ast.O3D
-
 	//Buscar el símbolo en la tabla de símbolos y retornar el valor
 
 	if !scope.Exist(p.Valor) {
@@ -58,6 +57,8 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	/*Inicializar el obj3d*/
 	obj3D.Referencia = tempValor
+
+	obj3D.DireccionID = ""
 	obj3D.Valor = simbolo.Valor.(Ast.TipoRetornado)
 	obj3D.Codigo = codigo3d
 

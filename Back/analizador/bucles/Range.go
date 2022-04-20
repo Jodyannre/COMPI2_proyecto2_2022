@@ -161,8 +161,8 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		limInf3D = Ast.GetTemp()
 		limSup3D = Ast.GetTemp()
 		codigo3d += "/****************************CREACION DEL RANGE*/\n"
-		codigo3d += limInf3D + " = " + expresiones.Primitivo_To_String(limInf, Ast.I64) + "; //Get limite inferior \n"
-		codigo3d += limSup3D + " = " + expresiones.Primitivo_To_String(limSup, Ast.I64) + "; //Get limite superior \n"
+		codigo3d += limInf3D + " = " + obj3dValorInf.Referencia + "; //Get limite inferior \n"
+		codigo3d += limSup3D + " = " + obj3dValorSup.Referencia + "; //Get limite superior \n"
 		codigo3d += "/***********************************************/\n"
 		obj3d.Lt = limInf3D
 		obj3d.Lf = limSup3D

@@ -113,6 +113,8 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		funcion = simbolo.Valor.(Ast.TipoRetornado).Valor.(Funcion)
 		//newScope.Posicion = simbolo.Direccion
 		newScope.Posicion = scope.Size
+		//Primera posicion para el return
+		newScope.Size++
 		simbolo.Direccion = scope.Size
 	}
 

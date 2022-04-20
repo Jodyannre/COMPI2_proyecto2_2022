@@ -246,6 +246,8 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 	//var saltosTransferencia string
 	var saltosContinue string
 	var saltosBreak string
+	var saltosReturn string
+	var saltoReturnExp string
 	/*****************************************************************************/
 	codigo3d += "/********************************CONDICIONAL IF*/\n"
 	var condicion1 Ast.TipoRetornado
@@ -350,12 +352,18 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				//Si es transferencia, agregar el salto y guardar el resultado para retornarlo
 				resultadoTranferencia = resultado
 				if !objResultadoInstruccion.TranferenciaAgregada {
-					codigo3d += "goto " + objResultadoInstruccion.SaltoTranferencia + ";\n"
+
 					switch resultado.Tipo {
 					case Ast.BREAK:
+						codigo3d += "goto " + objResultadoInstruccion.SaltoBreak + ";\n"
 						saltosBreak += objResultadoInstruccion.SaltoBreak + ","
 					case Ast.CONTINUE:
+						codigo3d += "goto " + objResultadoInstruccion.SaltoContinue + ";\n"
 						saltosContinue += objResultadoInstruccion.SaltoContinue + ","
+					case Ast.RETURN:
+						codigo3d += "goto " + objResultadoInstruccion.SaltoReturn + ";\n"
+						saltosReturn += objResultadoInstruccion.SaltoReturn + ","
+						saltoReturnExp += objResultadoInstruccion.SaltoReturnExp
 					}
 					//saltosTransferencia += objResultadoInstruccion.SaltoTranferencia + ","
 				} else {
@@ -364,6 +372,9 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 						saltosBreak += objResultadoInstruccion.SaltoBreak
 					case Ast.CONTINUE:
 						saltosContinue += objResultadoInstruccion.SaltoContinue
+					case Ast.RETURN:
+						saltosReturn += objResultadoInstruccion.SaltoReturn
+						saltoReturnExp += objResultadoInstruccion.SaltoReturnExp
 					}
 					//saltosTransferencia += objResultadoInstruccion.SaltoTranferencia
 				}
@@ -432,6 +443,9 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 					saltosBreak += objResultadoIfs.SaltoBreak
 				case Ast.CONTINUE:
 					saltosContinue += objResultadoIfs.SaltoContinue
+				case Ast.RETURN:
+					saltosReturn += objResultadoIfs.SaltoReturn
+					saltoReturnExp += objResultadoIfs.SaltoReturnExp
 				}
 				//saltosTransferencia += objResultadoIfs.SaltoBreak
 				hayTranferencia = true
@@ -467,6 +481,8 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 		if hayTranferencia {
 			obj3d.SaltoBreak = saltosBreak
 			obj3d.SaltoContinue = saltosContinue
+			obj3d.SaltoReturn = saltosReturn
+			obj3d.SaltoReturnExp = saltoReturnExp
 			obj3d.Valor.Tipo = resultadoTranferencia.Tipo
 			return Ast.TipoRetornado{
 				Valor: obj3d,

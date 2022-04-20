@@ -137,8 +137,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			saltoBreak = strings.Replace(saltoBreak, ",", ":\n", -1)
 
 			saltoReturn += obj3dresultadoInstruccion.SaltoReturn
-			saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
-
+			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 			continue
 		}
 

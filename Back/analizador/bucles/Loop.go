@@ -34,7 +34,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 	/*********************************VARIABLES 3D**********************************/
 	var obj3d, obj3dresultadoInstruccion Ast.O3D
 	var codigo3d string
-	var saltoBreak, saltoContinue, saltoReturn, saltoLoop string
+	var saltoBreak, saltoContinue, saltoReturn, saltoLoop, saltoReturnExp string
 	//var reemplazoContinue string
 	/*******************************************************************************/
 
@@ -169,7 +169,8 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 			saltoBreak = strings.Replace(saltoBreak, ",", ":\n", -1)
 
 			saltoReturn += obj3dresultadoInstruccion.SaltoReturn
-			saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+			saltoReturnExp += obj3dresultadoInstruccion.SaltoReturnExp
+			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 
 			continue
 		}
@@ -219,6 +220,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 
 	if saltoReturn != "" {
 		obj3d.SaltoReturn = saltoReturn
+		obj3d.SaltoReturnExp = saltoReturnExp
 		obj3d.Valor.Tipo = Ast.RETURN
 		return Ast.TipoRetornado{
 			Tipo:  Ast.RETURN,

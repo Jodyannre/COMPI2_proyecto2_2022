@@ -177,11 +177,32 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			}
 			/////////////////////////////////////////// SUMA DE STRINGS PENDIENTE ///////////////////////
 		} else if result_dominante == Ast.STRING || result_dominante == Ast.STRING_OWNED {
-			cadena_izq := fmt.Sprintf("%v", tipo_izq.Valor)
-			cadena_der := fmt.Sprintf("%v", tipo_der.Valor)
-			return Ast.TipoRetornado{
+			//Get los valores
+			var obj3dValorIzq, obj3dValorDer, obj3d Ast.O3D
+			var codigo3d string
+			valorIzq := tipo_izq.Valor.(Ast.O3D).Valor.Valor
+			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
+			obj3dValorIzq = tipo_izq.Valor.(Ast.O3D)
+			obj3dValorDer = tipo_der.Valor.(Ast.O3D)
+
+			codigo3d += obj3dValorIzq.Codigo
+			codigo3d += obj3dValorDer.Codigo
+
+			obj3d = Ast.SumaStrings(obj3dValorIzq, obj3dValorDer)
+			codigo3d += obj3d.Codigo
+			obj3d.Codigo = codigo3d
+
+			cadena_izq := fmt.Sprintf("%v", valorIzq)
+			cadena_der := fmt.Sprintf("%v", valorDer)
+
+			obj3d.Valor = Ast.TipoRetornado{
 				Tipo:  result_dominante,
 				Valor: cadena_izq + cadena_der,
+			}
+
+			return Ast.TipoRetornado{
+				Tipo:  result_dominante,
+				Valor: obj3d,
 			}
 		} else if result_dominante == Ast.NULL {
 			//////////////////////////ERROR////////////////////////////////
@@ -230,11 +251,11 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				valorIzq = tipo_izq.Valor.(Ast.O3D).Valor.Valor
 				valor.Valor = !valorIzq.(bool)
 				valor.Tipo = Ast.BOOLEAN
-
 				/************VERIFICAR QUE SEA UN IDENTIFICADOR************************/
 				var opAbstracto interface{} = op.operando_izq
 				_, tipoParticular := opAbstracto.(Ast.Abstracto).GetTipo()
-				if tipoParticular == Ast.IDENTIFICADOR {
+				if tipoParticular == Ast.IDENTIFICADOR || tipoParticular == Ast.PRIMITIVO &&
+					tipo_izq.Tipo != Ast.LOGICA {
 					var objTemp Ast.O3D
 					var codTemp string = tipo_izq.Valor.(Ast.O3D).Codigo
 					var referencia string = tipo_izq.Valor.(Ast.O3D).Referencia
@@ -245,6 +266,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 					objEnviar.Valor = objTemp
 					obj := Ast.ActualizarCodigoLogica(objEnviar, objEnviar, op.operador, true)
 					obj.Valor = valor
+					obj.Referencia = referencia
 					return Ast.TipoRetornado{
 						Tipo:  Ast.LOGICA,
 						Valor: obj,
@@ -256,6 +278,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 				//Actualizar el código y conseguir el obj O3D
 				obj := Ast.ActualizarCodigoLogica(tipo_izq, tipo_izq, op.operador, true)
 				obj.Valor = valor
+				obj.Referencia = tipo_izq.Valor.(Ast.O3D).Referencia
 				return Ast.TipoRetornado{
 					Tipo:  Ast.LOGICA,
 					Valor: obj,
@@ -387,6 +410,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			valorDer := tipo_der.Valor.(Ast.O3D).Valor.Valor
 			var valor Ast.TipoRetornado
 			var valIzq, valDer float64
+			var obj Ast.O3D
 
 			if result_dominante == Ast.I64 {
 				if tipo_der.Valor.(Ast.O3D).Valor.Valor.(int) == 0 {
@@ -427,7 +451,7 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			valor.Tipo = result_dominante
 
 			//Actualizar el código y conseguir el obj O3D
-			obj := Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
+			obj = Ast.ActualizarCodigoAritmetica(tipo_izq, tipo_der, op.operador, false)
 			obj.Valor = valor
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ARITMETICA,
