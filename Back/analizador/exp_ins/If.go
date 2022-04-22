@@ -484,6 +484,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			obj3d.SaltoReturn = saltosReturn
 			obj3d.SaltoReturnExp = saltoReturnExp
 			obj3d.Valor.Tipo = resultadoTranferencia.Tipo
+			obj3d.Valor = resultadoTranferencia
 			return Ast.TipoRetornado{
 				Valor: obj3d,
 				Tipo:  resultadoTranferencia.Tipo,

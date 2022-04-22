@@ -30,16 +30,38 @@ func NewVecFactorial(elementos *arraylist.List, fila, columna int) VecFactorial 
 }
 
 func (v VecFactorial) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
+
+	/********************VARIABLES 3D*******************************/
+	var obj3d, obj3dValor, obj3dCantidad Ast.O3D
+	var codigo3d string
+	var inicioVector string = Ast.GetTemp()
+	var contadorArray string = Ast.GetTemp()
+	/***************************************************************/
+
 	//Se crea como factorial
 	//Crear la cantidad de elementos que se solicita
 	//conseguir la cantidad de veces que se va a repetir el valor
 	elementoVeces := v.Elementos.GetValue(1)
 	_, tipoParticular := elementoVeces.(Ast.Abstracto).GetTipo()
+
 	cantidad := elementoVeces.(Ast.Expresion).GetValue(scope)
+	obj3dCantidad = cantidad.Valor.(Ast.O3D)
+	cantidad = obj3dCantidad.Valor
+
 	elemento := v.Elementos.GetValue(0).(Ast.Expresion).GetValue(scope)
+	obj3dValor = elemento.Valor.(Ast.O3D)
+	elemento = obj3dValor.Valor
+
 	sizeVector := 0
 	tipoDelVector := Ast.TipoRetornado{Valor: true, Tipo: Ast.INDEFINIDO}
 	vacio := true
+
+	codigo3d += obj3dCantidad.Codigo
+	codigo3d += obj3dValor.Codigo
+	codigo3d += "/*****************************CREACION DE ARRAY*/\n"
+	codigo3d += "/***********************************************/\n"
+	codigo3d += inicioVector + " = H; //Guardar inicio del array \n"
+	codigo3d += contadorArray + " = 0; //Inicio contador \n"
 
 	if cantidad.Tipo == Ast.ERROR {
 		return cantidad
@@ -88,9 +110,40 @@ func (v VecFactorial) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 	vector := expresiones.NewVector(elementos, tipoDelVector, sizeVector, sizeVector, vacio, v.Fila, v.Columna)
 	vector.TipoVector = tipoDelVector
-	return Ast.TipoRetornado{
+
+	/******************CODIGO 3D***********************/
+	lt := Ast.GetLabel()
+	lf := Ast.GetLabel()
+	salto := Ast.GetLabel()
+	preContadorArray := Ast.GetTemp()
+	codigo3d += "/********************GUARDAR EL SIZE DEL VECTOR*/\n"
+	codigo3d += "heap[(int)" + inicioVector + "] = " + strconv.Itoa(vector.Size) + ";\n"
+	codigo3d += "/*************************GUARDAR LOS ELEMENTOS*/\n"
+	codigo3d += salto + ":\n"
+	codigo3d += "if (" + contadorArray + " <= " + strconv.Itoa(vector.Size) + ") goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+	codigo3d += lt + ":\n"
+	codigo3d += "heap[(int)H] = " + obj3dValor.Referencia + "; //Copiar elemento\n"
+	codigo3d += "H = H + 1;"
+	Ast.GetH()
+	codigo3d += preContadorArray + " = " + contadorArray + " + 1;\n"
+	codigo3d += contadorArray + " = " + preContadorArray + "; //Actualizar contador \n"
+	codigo3d += "goto " + salto + ";\n"
+	codigo3d += lf + ":\n"
+	codigo3d += "/***********************************************/\n"
+	codigo3d += "/***********************************************/\n"
+	/**************************************************/
+
+	obj3d.Codigo = codigo3d
+	obj3d.Referencia = inicioVector
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.VECTOR,
 		Valor: vector,
+	}
+
+	return Ast.TipoRetornado{
+		Tipo:  Ast.VECTOR,
+		Valor: obj3d,
 	}
 }
 
