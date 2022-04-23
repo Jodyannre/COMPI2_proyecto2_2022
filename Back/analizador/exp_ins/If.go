@@ -42,8 +42,10 @@ func (i IF) Run(scope *Ast.Scope) interface{} {
 
 	/****************************************************************/
 	//Crear el nuevo scope
-	newScope := Ast.NewScope("if", scope)
+	newScope := Ast.NewScope("IF_I", scope)
 	newScope.Posicion = scope.Size
+	//Aumento el size para apartar un espacio para el posible valor retornado
+	newScope.Size++
 	//Inicializar la lista de respuestas
 	//Ejecutar la instrucción if
 	resultado := GetResultado3D(i, &newScope, -1, i.Expresion)
@@ -56,7 +58,28 @@ func (i IF) Run(scope *Ast.Scope) interface{} {
 		//obj3dTransferencia.SaltoTranferencia = saltos
 		obj3dTransferencia.TranferenciaAgregada = true
 		obj3dTransferencia.Valor.Tipo = resultado.Tipo
+
 		resultado.Valor = obj3dTransferencia
+	} else {
+		obj3dTransferencia = resultado.Valor.(Ast.O3D)
+		if obj3dTransferencia.RetornoIf != "" {
+			//RECUPERAR EL POSIBLE VALOR GUARDADO DEL BREAK
+			entornoAnterior := Ast.GetTemp()
+			posicionBreak := Ast.GetTemp()
+			valorIf := Ast.GetTemp()
+			codigo3d := ""
+			//Recuperar el valor de la variable que se va a retornar
+			codigo3d += "/*********RECUPERAR EL VALOR DEL RETORNO DEL IF*/\n"
+			codigo3d += entornoAnterior + " = P; //guardar entorno anterior \n"
+			codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de entorno \n"
+			codigo3d += posicionBreak + " = P + 0; //Posicion valor \n"
+			codigo3d += valorIf + " = stack[(int)" + posicionBreak + "]; //Valor del retorno \n"
+			codigo3d += "P = P - " + entornoAnterior + "; //Regresar al entorno anterior \n"
+			codigo3d += "/***********************************************/\n"
+			obj3dTransferencia.Codigo += codigo3d
+			obj3dTransferencia.Referencia = valorIf
+			resultado.Valor = obj3dTransferencia
+		}
 	}
 
 	//actualizar el scope global con los resultados
@@ -243,11 +266,17 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 	var ultimoFalso string
 	var resultadoTranferencia Ast.TipoRetornado
 	var hayTranferencia bool = false
+	var hayRetornoIf bool = false
 	//var saltosTransferencia string
 	var saltosContinue string
 	var saltosBreak string
+	var saltosBreakExp string
 	var saltosReturn string
 	var saltoReturnExp string
+	var guardarScope string
+	var posicionGuardar string
+	var scopeOrigen *Ast.Scope
+	var posCorrectaNoElse bool = false
 	/*****************************************************************************/
 	codigo3d += "/********************************CONDICIONAL IF*/\n"
 	var condicion1 Ast.TipoRetornado
@@ -350,29 +379,35 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			}
 			if Ast.EsTransferencia(resultado.Tipo) {
 				//Si es transferencia, agregar el salto y guardar el resultado para retornarlo
-				resultadoTranferencia = resultado
+				if condicion1.Valor == true {
+					if !posCorrectaNoElse {
+						resultadoTranferencia = resultado
+						posCorrectaNoElse = true
+					}
+				}
 				if !objResultadoInstruccion.TranferenciaAgregada {
-
 					switch resultado.Tipo {
 					case Ast.BREAK:
 						codigo3d += "goto " + objResultadoInstruccion.SaltoBreak + ";\n"
 						saltosBreak += objResultadoInstruccion.SaltoBreak + ","
+						saltosBreakExp += objResultadoInstruccion.SaltoBreakExp + ","
 					case Ast.CONTINUE:
 						codigo3d += "goto " + objResultadoInstruccion.SaltoContinue + ";\n"
 						saltosContinue += objResultadoInstruccion.SaltoContinue + ","
-					case Ast.RETURN:
+					case Ast.RETURN, Ast.RETURN_EXPRESION:
 						codigo3d += "goto " + objResultadoInstruccion.SaltoReturn + ";\n"
 						saltosReturn += objResultadoInstruccion.SaltoReturn + ","
-						saltoReturnExp += objResultadoInstruccion.SaltoReturnExp
+						saltoReturnExp += objResultadoInstruccion.SaltoReturnExp + ","
 					}
 					//saltosTransferencia += objResultadoInstruccion.SaltoTranferencia + ","
 				} else {
 					switch resultado.Tipo {
 					case Ast.BREAK:
 						saltosBreak += objResultadoInstruccion.SaltoBreak
+						saltosBreakExp += objResultadoInstruccion.SaltoBreakExp
 					case Ast.CONTINUE:
 						saltosContinue += objResultadoInstruccion.SaltoContinue
-					case Ast.RETURN:
+					case Ast.RETURN, Ast.RETURN_EXPRESION:
 						saltosReturn += objResultadoInstruccion.SaltoReturn
 						saltoReturnExp += objResultadoInstruccion.SaltoReturnExp
 					}
@@ -380,6 +415,22 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				}
 				hayTranferencia = true
 				//return resultado
+			} else if resultado.Tipo != Ast.EJECUTADO && (i.Tipo == Ast.IF_EXPRESION ||
+				i.Tipo == Ast.ELSE_EXPRESION || i.Tipo == Ast.ELSEIF_EXPRESION) {
+				scope.UpdateScopeGlobal()
+				guardarScope = Ast.GetTemp()
+				posicionGuardar = Ast.GetTemp()
+				scopeOrigen = scope.GetEntornoPadreIF()
+				resultadoTranferencia = resultado
+				codigo3d += "/***********************GUARDAR EL VALOR DEL IF*/\n"
+				codigo3d += guardarScope + " = P; //Guardar scope anterior \n"
+				codigo3d += "P = " + strconv.Itoa(scopeOrigen.Posicion) + "; //Cambio a entorno simulado \n"
+				codigo3d += posicionGuardar + " = P + 0; //Pos para el valor del if \n"
+				codigo3d += "stack[(int)" + posicionGuardar + "] = " + objResultadoInstruccion.Referencia + "; //Guardar valor \n"
+				codigo3d += "P = " + guardarScope + "; //Retornar al entorno anterior \n"
+				codigo3d += "/***********************************************/\n"
+				//return resultado
+				hayRetornoIf = true
 			}
 			n++
 		}
@@ -398,10 +449,13 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				Tipo:  Ast.ERROR,
 			}
 
-		} else if expresion && ultimoTipo == Ast.EXPRESION {
+		}
+
+		/*else if expresion && ultimoTipo == Ast.EXPRESION {
 			//Si esta retornado algún valor
 			return resultado
 		}
+		*/
 
 		////////////////////////////VERDADERAS//////////////////////////////////////
 		if obj3dCondicion.Lf != "" {
@@ -437,7 +491,12 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 
 			if Ast.EsTransferencia(resultado.Tipo) {
 				newScope.UpdateScopeGlobal()
-				resultadoTranferencia = resultado
+				//resultadoTranferencia = resultado
+				if !posCorrectaNoElse && objResultadoIfs.IfCorrecto {
+					resultadoTranferencia = resultado
+					posCorrectaNoElse = true
+				}
+
 				switch resultado.Tipo {
 				case Ast.BREAK:
 					saltosBreak += objResultadoIfs.SaltoBreak
@@ -451,18 +510,32 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				hayTranferencia = true
 			}
 
-			if resultado.Tipo != Ast.EJECUTADO && (i.Tipo == Ast.IF_EXPRESION ||
-				i.Tipo == Ast.ELSE_EXPRESION || i.Tipo == Ast.ELSEIF_EXPRESION) {
-				scope.UpdateScopeGlobal()
-				return resultado
-			}
+			/*
+				else if resultado.Tipo != Ast.EJECUTADO && (i.Tipo == Ast.IF_EXPRESION ||
+					i.Tipo == Ast.ELSE_EXPRESION || i.Tipo == Ast.ELSEIF_EXPRESION) {
+					scope.UpdateScopeGlobal()
+					guardarScope = Ast.GetTemp()
+					posicionGuardar = Ast.GetTemp()
+					scopeOrigen = scope.GetEntornoPadreIF()
+					resultadoTranferencia = resultado*/
+			//codigo3d += "/***********************GUARDAR EL VALOR DEL IF*/\n"
+			//codigo3d += guardarScope + " = P; //Guardar scope anterior \n"
+			//codigo3d += "P = " + strconv.Itoa(scopeOrigen.Posicion) + "; //Cambio a entorno simulado \n"
+			//codigo3d += posicionGuardar + " = P + 0; //Pos para el valor del if \n"
+			//codigo3d += "stack[(int)" + posicionGuardar + "] = " + objResultadoIfs.Referencia + "; //Guardar valor \n"
+			//codigo3d += "P = " + guardarScope + "; //Retornar al entorno anterior \n"
+			//codigo3d += "/***********************************************/\n"
+			//return resultado
+			//hayRetornoIf = true
+			//}
+
 			faltaActual = objResultadoIfs.Lf
 			ultimoFalso = faltaActual
 			saltosFin += objResultadoIfs.Salto
 			newScope.UpdateScopeGlobal()
 		}
 		///////////////////////////////FALSAS//////////////////////////////////////
-		if i.Tipo == Ast.IF {
+		if i.Tipo == Ast.IF || i.Tipo == Ast.IF_EXPRESION {
 			if ultimoFalso != "" {
 				codigo3d += ultimoFalso + ":\n"
 			}
@@ -480,14 +553,29 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 
 		if hayTranferencia {
 			obj3d.SaltoBreak = saltosBreak
+			obj3d.SaltoBreakExp = saltosBreakExp
 			obj3d.SaltoContinue = saltosContinue
 			obj3d.SaltoReturn = saltosReturn
 			obj3d.SaltoReturnExp = saltoReturnExp
 			obj3d.Valor.Tipo = resultadoTranferencia.Tipo
 			obj3d.Valor = resultadoTranferencia
+			if posCorrectaNoElse {
+				obj3d.IfCorrecto = true
+			}
 			return Ast.TipoRetornado{
 				Valor: obj3d,
 				Tipo:  resultadoTranferencia.Tipo,
+			}
+		} else if hayRetornoIf {
+			obj3d.Valor = resultadoTranferencia
+			obj3d.Valor.Tipo = resultadoTranferencia.Tipo
+			obj3d.RetornoIf = "Si hay"
+			if posCorrectaNoElse {
+				obj3d.IfCorrecto = true
+			}
+			return Ast.TipoRetornado{
+				Tipo:  resultadoTranferencia.Tipo,
+				Valor: obj3d,
 			}
 		}
 

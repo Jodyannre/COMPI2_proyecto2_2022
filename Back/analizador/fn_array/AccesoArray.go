@@ -655,6 +655,6 @@ func BoundsError(lf string) string {
 	codigo3d += "printf(\"%%c\", 114);\n"
 	codigo3d += "printf(\"%%c\", 111);\n"
 	codigo3d += "printf(\"%%c\", 114);\n"
-	codigo3d += "printf(\"\\n\");\n"
+	codigo3d += "printf(\"%%c\",10);\n"
 	return codigo3d
 }

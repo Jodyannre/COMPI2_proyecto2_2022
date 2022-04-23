@@ -24,7 +24,7 @@ StructArr
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-1
+3
 </td>
 <td cellpadding='4'>
 7
@@ -42,7 +42,7 @@ CentroTuristico
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-5
+7
 </td>
 <td cellpadding='4'>
 7
@@ -60,7 +60,7 @@ Carro
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-9
+11
 </td>
 <td cellpadding='4'>
 7
@@ -78,7 +78,7 @@ Personaje
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-15
+17
 </td>
 <td cellpadding='4'>
 7
@@ -96,7 +96,25 @@ creandoPersonaje
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-71
+89
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+creandoStruct
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>Carro
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+113
 </td>
 <td cellpadding='4'>
 0
@@ -114,82 +132,10 @@ v
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-28
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-nombre
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>STRING
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-30
-</td>
-<td cellpadding='4'>
-27
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-nombre
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>STRING
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-31
-</td>
-<td cellpadding='4'>
-27
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-nombre
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>STRING
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
 32
 </td>
 <td cellpadding='4'>
-27
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-nombre
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>STRING
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-33
-</td>
-<td cellpadding='4'>
-27
+4
 </td>
 </tr>
 
@@ -231,6 +177,78 @@ nombre
 
 <tr>
 <td cellpadding='4'>
+nombre
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+36
+</td>
+<td cellpadding='4'>
+27
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nombre
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+37
+</td>
+<td cellpadding='4'>
+27
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nombre
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+38
+</td>
+<td cellpadding='4'>
+27
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nombre
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+39
+</td>
+<td cellpadding='4'>
+27
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
 i
 </td>
 <td cellpadding='4'>VARIABLE
@@ -240,7 +258,7 @@ i
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-37
+43
 </td>
 <td cellpadding='4'>
 4
@@ -258,7 +276,7 @@ datos
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-44
+53
 </td>
 <td cellpadding='4'>
 8
@@ -276,7 +294,7 @@ da
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-43
+52
 </td>
 <td cellpadding='4'>
 4
@@ -294,7 +312,7 @@ nombre
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-54
+62
 </td>
 <td cellpadding='4'>
 8
@@ -312,7 +330,7 @@ edad
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-55
+63
 </td>
 <td cellpadding='4'>
 8
@@ -330,7 +348,7 @@ descripcion
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-56
+64
 </td>
 <td cellpadding='4'>
 8
@@ -348,7 +366,7 @@ placa
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-57
+65
 </td>
 <td cellpadding='4'>
 24
@@ -366,7 +384,7 @@ color
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-58
+66
 </td>
 <td cellpadding='4'>
 24
@@ -384,7 +402,7 @@ tipo
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-59
+67
 </td>
 <td cellpadding='4'>
 24
@@ -402,7 +420,7 @@ carro_
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-57
+65
 </td>
 <td cellpadding='4'>
 8
@@ -420,7 +438,7 @@ numeros
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-62
+70
 </td>
 <td cellpadding='4'>
 8
@@ -438,7 +456,403 @@ p1
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-53
+61
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+anio
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+89
+</td>
+<td cellpadding='4'>
+21
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+color
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+89
+</td>
+<td cellpadding='4'>
+32
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+mecanico
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>BOOLEAN
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+89
+</td>
+<td cellpadding='4'>
+44
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+datos
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>ARRAY
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+92
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+datos
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+91
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+anio
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+113
+</td>
+<td cellpadding='4'>
+19
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+color
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+113
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+mecanico
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>BOOLEAN
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+113
+</td>
+<td cellpadding='4'>
+42
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+placa_
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+115
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+colorAuto
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+135
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+tipo
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+144
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+placa
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+152
+</td>
+<td cellpadding='4'>
+19
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+color
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+153
+</td>
+<td cellpadding='4'>
+20
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+tipo
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+154
+</td>
+<td cellpadding='4'>
+20
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+car
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+97
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+nombre
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+102
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+edad
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+103
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+descripcion
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+104
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+carro_
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+numeros
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+106
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+p1
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+101
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+per1
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+75
 </td>
 <td cellpadding='4'>
 4

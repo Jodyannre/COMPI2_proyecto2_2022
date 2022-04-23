@@ -406,13 +406,16 @@ func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador strin
 func MathError(refIzq, refDer, refActual, operador string) string {
 	lT := GetLabel()
 	lF := GetLabel()
+	salto := GetLabel()
 	//ident := "    "
 	p := "%%"
 	c := "c"
 	if operador == "%" {
 		operador = p
 	}
-	salida := "if (" + refDer + " != 0) goto " + lT + ";\n"
+	salida := "if (" + refDer + " == 0) goto " + lT + ";\n"
+	salida += "goto " + lF + ";\n"
+	salida += lT + ":\n"
 	salida += "printf(\"" + p + c + "\",  77);\n"
 	salida += "printf(\"" + p + c + "\",  97);\n"
 	salida += "printf(\"" + p + c + "\", 116);\n"
@@ -422,11 +425,12 @@ func MathError(refIzq, refDer, refActual, operador string) string {
 	salida += "printf(\"" + p + c + "\", 114);\n"
 	salida += "printf(\"" + p + c + "\", 111);\n"
 	salida += "printf(\"" + p + c + "\", 114);\n"
-	salida += refActual + " = 0;\n"
-	salida += "goto " + lF + ";\n"
-	salida += lT + ":\n"
+	salida += "printf(\"" + p + c + "\", 10);\n"
+	salida += refActual + " = 0; //Valor de error 0 \n"
+	salida += "goto " + salto + ";\n"
+	salida += lF + ":\n"
 	salida += refActual + " = (int)" + refIzq + " " + operador + " (int)" + refDer + ";\n"
-	salida += lF + ":"
+	salida += salto + ":"
 	return salida
 }
 

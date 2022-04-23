@@ -27,6 +27,7 @@ type Scope struct {
 	Posicion             int
 	Size                 int
 	Stack                bool
+	ContadorDeclaracion  int
 }
 
 func (scope *Scope) GetTablaModulos() map[string]interface{} {
@@ -47,6 +48,7 @@ func NewScope(name string, prev *Scope) Scope {
 	nuevo.Codigo = ""
 	nuevo.Consola = ""
 	nuevo.Stack = true
+	nuevo.ContadorDeclaracion = 0
 	return nuevo
 }
 
@@ -448,6 +450,35 @@ func (s *Scope) GetEntornoPadreReturn() *Scope {
 		for scopePadre = s; scopePadre.prev != nil; scopePadre = scopePadre.prev {
 			//Buscando el scope padre
 			if scopePadre.Nombre == "funcion" {
+				break
+			}
+		}
+	}
+
+	return scopePadre
+}
+
+func (s *Scope) GetEntornoPadreBreak() *Scope {
+	var scopePadre *Scope
+	scopePadre = s
+	if s.prev != nil {
+		for scopePadre = s; scopePadre.prev != nil; scopePadre = scopePadre.prev {
+			//Buscando el scope padre
+			if scopePadre.Nombre == "Case" {
+				break
+			}
+		}
+	}
+
+	return scopePadre
+}
+
+func (s *Scope) GetEntornoPadreIF() *Scope {
+	var scopePadre *Scope
+	if s.prev != nil {
+		for scopePadre = s; scopePadre.prev != nil; scopePadre = scopePadre.prev {
+			//Buscando el scope padre
+			if scopePadre.Nombre == "IF_I" {
 				break
 			}
 		}

@@ -141,13 +141,13 @@ func (d DeclaracionSinTipo) Run(scope *Ast.Scope) interface{} {
 		/*Get el nuevo temporal*/
 		temp = Ast.GetTemp()
 		/*Get la dirección donde se guardara */
-		direccion = scope.Size
+		direccion = scope.ContadorDeclaracion
 		//Conseguir la dirección del stack donde se va a guardar la nueva variable
 		cod3D += temp + " = " + " P + " + strconv.Itoa(direccion) + ";\n"
 		//Se guarda la nueva variable en el stack
 		cod3D += "stack[(int)" + temp + "] = " + obj3DValor.Referencia + ";\n"
 		//Aumentar el SP
-		scope.Size++
+		scope.ContadorDeclaracion++
 		cod3D += "/***********************************************/\n"
 		//Agregar la dirección al símbolo
 		nSimbolo.Direccion = direccion
@@ -188,7 +188,7 @@ func (d DeclaracionSinTipo) Run(scope *Ast.Scope) interface{} {
 		cod3D += "/***********************************************/\n"
 
 		//Aumentar el scope
-		scope.Size++
+		scope.ContadorDeclaracion++
 		//Agregar la dirección al símbolo
 		nSimbolo.Direccion = direccion
 		nSimbolo.TipoDireccion = Ast.HEAP

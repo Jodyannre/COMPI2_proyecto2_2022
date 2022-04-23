@@ -111,11 +111,10 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	} else {
 		//simbolo = newScope.GetSimbolo(l.Identificador.(Identificador).Valor)
 		funcion = simbolo.Valor.(Ast.TipoRetornado).Valor.(Funcion)
-		//newScope.Posicion = simbolo.Direccion
-		newScope.Posicion = scope.Size
+		newScope.Posicion = scope.Size + scope.Posicion
 		//Primera posicion para el return
 		newScope.Size++
-		simbolo.Direccion = scope.Size
+		simbolo.Direccion = scope.Size + scope.Posicion
 	}
 
 	//Verificar que la función reciba o no parámetros y se estén enviando parámetros
@@ -161,7 +160,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "/*******************************LLAMADA FUNCION*/\n"
 	codigo3d += "/*********************DECLARACION DE PARAMETROS*/\n"
 	/********************************CAMBIO DE AMBITO PARA DECLARAR PARAMENTROS********************/
-	codigo3d += "P = P + " + strconv.Itoa(simbolo.Direccion) + "; //Set direccion ambito simulado \n"
+	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Set direccion ambito simulado \n"
 	/**********************************************************************************************/
 	//Crear los parámetros de las funciones
 	parametrosCreados = funcion.RunParametros(&newScope, l.ScopeOriginal, l.Parametros)
@@ -182,7 +181,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigoTemp += "/***********************************************/\n"
 	codigo3d += codigoTemp
 	/********************************RETORNO AL AMBITO ANTERIOR************************************/
-	codigo3d += "P = P - " + strconv.Itoa(simbolo.Direccion) + "; //Retorno al ambito anterior \n"
+	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Retorno al ambito anterior \n"
 	/**********************************************************************************************/
 	codigo3d += "/***********************************************/\n"
 	codigo3d += "/***********************************************/\n"

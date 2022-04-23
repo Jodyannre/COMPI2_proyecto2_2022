@@ -61,10 +61,9 @@ func (c Case) GetTipo() (Ast.TipoDato, Ast.TipoDato) {
 func (m Match) Run(scope *Ast.Scope) interface{} {
 	/*******************************VARIABLES 3D*********************************/
 	var codigo3d string
-	var lt, lf, salto string
 	var obj3d, obj3dvalor, obj3dExpresion, obj3dResultadoExpresion Ast.O3D
 	var referenciaExpresion, referenciaExpCase string
-	var labelsTrue, labelsFalse, saltos, salto string
+	var labelsTrue, saltos, salto string
 	var falsoAnterior string = ""
 	var resultadoTranferencia Ast.TipoRetornado
 	var hayTranferencia bool = false
@@ -73,6 +72,8 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 	var saltosReturn string
 	var saltoReturnExp string
 	var resultado Ast.TipoRetornado
+	pos_correcta := false
+	pos_correta_no_default := false
 	/****************************************************************************/
 
 	//Primero conseguir el exp_match de la expresion
@@ -84,8 +85,9 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 	exp_match = obj3dExpresion.Valor
 	codigo3d += obj3dExpresion.Codigo
 	referenciaExpresion = obj3dExpresion.Referencia
+	var hayRetornoCase bool = false
 	//////////////////////////////////////////////////////////////////////////
-	pos_expresion_correcta := -1
+	//pos_expresion_correcta := -1
 	var i, j int
 
 	//Validar si es un boolean y si tiene todos los casos
@@ -113,9 +115,9 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 		//Recorrer la lista de cases y verificar que los exp_matches de las expresiones concuerdan
 		caso := m.Cases.GetValue(i).(Case)
 		listaExpresiones := caso.Expresion
-
+		var expresion Ast.TipoRetornado
 		for j = 0; j < listaExpresiones.Len(); j++ {
-			expresion := listaExpresiones.GetValue(j).(Ast.Expresion).GetValue(scope)
+			expresion = listaExpresiones.GetValue(j).(Ast.Expresion).GetValue(scope)
 			obj3dExpresion = expresion.Valor.(Ast.O3D)
 			expresion = obj3dExpresion.Valor
 			referenciaExpCase = obj3dExpresion.Referencia
@@ -141,10 +143,15 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 			labelsTrue += obj3dResultadoExpresion.Lt + ":\n"
 			codigo3d += falsoAnterior
 			codigo3d += obj3dResultadoExpresion.Codigo
-			falsoAnterior += obj3dResultadoExpresion.Lf + ": \n"
+			falsoAnterior = obj3dResultadoExpresion.Lf + ": \n"
 			if exp_match.Valor == expresion.Valor {
-				pos_expresion_correcta = i
-				println(pos_expresion_correcta)
+				if !pos_correta_no_default {
+					pos_correcta = true
+					pos_correta_no_default = true
+				}
+			}
+			if j == listaExpresiones.Len()-1 && !pos_correta_no_default {
+				pos_correcta = true
 			}
 		}
 		//Verificar si viene default
@@ -177,27 +184,37 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 		codigo3d += labelsTrue
 		labelsTrue = ""
 		codigo3d += obj3dvalor.Codigo
-		salto = Ast.GetTemp()
+		salto = Ast.GetLabel()
 		codigo3d += "goto " + salto + ";\n"
 		saltos += salto + ","
-		codigo3d += falsoAnterior + ":\n"
+		codigo3d += falsoAnterior
 		falsoAnterior = ""
 
 		switch resultado.Tipo {
 		case Ast.BREAK:
 			saltosBreak += obj3dvalor.SaltoBreak + ","
 			hayTranferencia = true
-			resultadoTranferencia = resultado
+			//resultadoTranferencia = resultado
 		case Ast.CONTINUE:
 			saltosContinue += obj3dvalor.SaltoContinue + ","
 			hayTranferencia = true
-			resultadoTranferencia = resultado
+			//resultadoTranferencia = resultado
 		case Ast.RETURN:
 			saltosReturn += obj3dvalor.SaltoReturn + ","
 			saltoReturnExp += obj3dvalor.SaltoReturnExp
 			hayTranferencia = true
-			resultadoTranferencia = resultado
+			//resultadoTranferencia = resultado
 		}
+
+		if obj3dvalor.RetornoMatch != "" {
+			hayRetornoCase = true
+		}
+		if pos_correcta {
+			resultadoTranferencia = resultado
+			pos_correcta = false
+		}
+
+		///////////////////////////////////////////////////////////////////////////////
 
 	}
 
@@ -270,6 +287,8 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 		}
 	*/
 
+	obj3d.Codigo = codigo3d
+
 	if hayTranferencia {
 		obj3d.SaltoBreak = saltosBreak
 		obj3d.SaltoContinue = saltosContinue
@@ -281,11 +300,36 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 			Valor: obj3d,
 			Tipo:  resultadoTranferencia.Tipo,
 		}
+	} else if hayRetornoCase {
+		entornoAnterior := Ast.GetTemp()
+		posicionBreak := Ast.GetTemp()
+		valorCase := Ast.GetTemp()
+		codigo3d := ""
+		//Recuperar el valor de la variable que se va a retornar
+		codigo3d += "/******RECUPERAR EL VALOR DEL RETORNO DEL MATCH*/\n"
+		codigo3d += entornoAnterior + " = P; //guardar entorno anterior \n"
+		codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de entorno \n"
+		codigo3d += posicionBreak + " = P + 0; //Posicion valor \n"
+		codigo3d += valorCase + " = stack[(int)" + posicionBreak + "]; //Valor del retorno \n"
+		codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
+		codigo3d += "/***********************************************/\n"
+		obj3d.Codigo += codigo3d
+		obj3d.Referencia = valorCase
+		obj3d.Valor = resultadoTranferencia
+		return Ast.TipoRetornado{
+			Valor: obj3d,
+			Tipo:  obj3dvalor.Valor.Tipo,
+		}
+	}
+
+	obj3d.Valor = Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: true,
 	}
 
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
-		Valor: true,
+		Valor: obj3d,
 	}
 }
 
@@ -297,6 +341,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 	var resultadoTranferencia Ast.TipoRetornado
 	var saltosBreak, saltosContinue, saltosReturn, saltoReturnExp string
 	var hayTranferencia bool
+	var hayRetornoCase bool
 	/****************************************************************************/
 
 	//Crear un nuevo scope y otras variables
@@ -304,6 +349,9 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 
 	//Direccion del nuevo entorno
 	newScope.Posicion = scope.Size
+	//Aumentar +1 por el posible retorno
+
+	newScope.Size++
 	codigo3d += "/******************************************CASE*/\n"
 	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Cambio de ambito \n"
 
@@ -375,6 +423,21 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 			//saltosTransferencia += objResultadoIfs.SaltoBreak
 			hayTranferencia = true
 			//return resultado
+		} else if resultado.Tipo != Ast.EJECUTADO && c.Tipo == Ast.CASE_EXPRESION {
+			scope.UpdateScopeGlobal()
+			guardarScope := Ast.GetTemp()
+			posicionGuardar := Ast.GetTemp()
+			//scopeOrigen := scope.GetEntornoPadreBreak()
+			resultadoTranferencia = resultado
+			codigo3d += "/*********************GUARDAR EL VALOR DEL CASE*/\n"
+			codigo3d += guardarScope + " = P; //Guardar scope anterior \n"
+			codigo3d += "P = " + strconv.Itoa(scope.Posicion+scope.Size) + "; //Cambio a entorno simulado \n"
+			codigo3d += posicionGuardar + " = P + 0; //Pos para el valor del case \n"
+			codigo3d += "stack[(int)" + posicionGuardar + "] = " + obj3dValor.Referencia + "; //Guardar valor \n"
+			codigo3d += "P = " + guardarScope + "; //Retornar al entorno anterior \n"
+			codigo3d += "/***********************************************/\n"
+			//return resultado
+			hayRetornoCase = true
 		}
 	}
 
@@ -393,11 +456,14 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 			Valor: nError,
 			Tipo:  Ast.ERROR,
 		}
-	} else if expresion && ultimoTipo == Ast.EXPRESION {
-		//Si esta retornado algún valor
-		newScope.UpdateScopeGlobal()
-		return resultado
 	}
+	/*
+		else if expresion && ultimoTipo == Ast.EXPRESION {
+			//Si esta retornado algún valor
+			newScope.UpdateScopeGlobal()
+			return resultado
+		}
+	*/
 
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Retornar al ambito anterior \n"
 	codigo3d += "/***********************************************/\n"
@@ -420,6 +486,14 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 			Valor: obj3d,
 			Tipo:  resultadoTranferencia.Tipo,
 		}
+	} else if hayRetornoCase {
+		obj3d.Valor = resultadoTranferencia
+		obj3d.Valor.Tipo = resultadoTranferencia.Tipo
+		obj3d.RetornoMatch = "Si hay"
+		return Ast.TipoRetornado{
+			Tipo:  resultadoTranferencia.Tipo,
+			Valor: obj3d,
+		}
 	}
 
 	newScope.UpdateScopeGlobal()
@@ -440,6 +514,8 @@ func CrearOpRelacional3D(refExp, refExpCase string) Ast.O3D {
 	var lt, lf string
 	var codigo3d string
 	var obj3d Ast.O3D
+	lt = Ast.GetLabel()
+	lf = Ast.GetLabel()
 
 	codigo3d += "/********************************CONDICION CASE*/\n"
 	codigo3d += "if (" + refExp + " == " + refExpCase + ") goto " + lt + "; \n"

@@ -227,8 +227,12 @@ type O3D struct {
 	SaltoContinue        string
 	SaltoTranferencia    string
 	SaltoReturnExp       string
+	SaltoBreakExp        string
 	RelacionalExp        string
 	DireccionID          string
+	RetornoIf            string
+	RetornoMatch         string
+	IfCorrecto           bool
 }
 
 func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {

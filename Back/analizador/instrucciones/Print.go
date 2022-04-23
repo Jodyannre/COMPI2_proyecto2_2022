@@ -66,6 +66,9 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 	obj3dValor = resultado_expresion.Valor.(Ast.O3D)
 	resultado_expresion = obj3dValor.Valor
 	valor := ""
+	var nuevaLinea string = "10"
+	c := "c"
+	porcentaje := "%%"
 	//Verificar que no sea un identificador
 	_, tipoParticular := p.Expresiones.(Ast.Abstracto).GetTipo()
 
@@ -121,7 +124,8 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 	codigo3d += obj3dExp.Codigo
 	preCodigo3d, _ = GetC3DExpresion(obj3dExp)
 	codigo3d += preCodigo3d
-	codigo3d += "printf (\"\\n\");\n"
+	//codigo3d += "printf (\"\\n\");\n"
+	codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + nuevaLinea + "); //Imprimir nueva linea\n"
 	/************************************************/
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.PRINT, Valor: true}
@@ -139,6 +143,10 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	var obj3dValor Ast.O3D
 	var codigo3d string
 	var preCodigo3d string
+	//var retornoImpresion string = "13"
+	var nuevaLinea string = "10"
+	c := "c"
+	porcentaje := "%%"
 	regex, _ := regexp.Compile("{ *}|{:[\x3F]}")
 	posiciones_regex := regex.FindAllStringIndex(p.Cadena, -1)
 	encontrados := regex.MatchString(p.Cadena)    //Formato para encontrar los {} y {:?}
@@ -260,7 +268,9 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	}
 	//scope.Consola += salida + "\n"
 	scope.AgregarPrint(salida + "\n")
-	codigo3d += "printf (\"\\n\");\n"
+	//codigo3d += "printf (\"\\n\");\n"
+	codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + nuevaLinea + "); //Imprimir nueva linea\n"
+	//codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + retornoImpresion + "); //Imprimir retorno carro\n"
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.STRING, Valor: "true"}
 	return Ast.TipoRetornado{
@@ -490,6 +500,11 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 	d := "d"
 	f := "f"
 	p := "%%"
+	corcheteIzq := "91"
+	corcheteDer := "93"
+	coma := "44"
+	comillaDoble := "34"
+	comillaSimple := "44"
 	switch valor.Tipo {
 	case Ast.STRING, Ast.STR:
 		temp := Ast.GetTemp()
@@ -556,10 +571,12 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		contador = temp
 		referencia = temp
 		codigo3d += posicionEnVector + " = " + referencia + "; //Guardar posicion de vec actual \n"
-		codigo3d += "printf(\"[\");\n"
+		//codigo3d += "printf(\"[\");\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + corcheteIzq + "); //Imprimir corchete\n"
 		for i := 0; i < lista.Len(); i++ {
 			if i != 0 && tipoAnterior != Ast.LIBRE {
-				codigo3d += "printf(\",\");\n"
+				//codigo3d += "printf(\",\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + coma + "); //Imprimir coma\n"
 			}
 			elemento = lista.GetValue(i).(Ast.TipoRetornado)
 			if elemento.Tipo != Ast.STRING && elemento.Tipo != Ast.STR && elemento.Tipo != Ast.VECTOR {
@@ -592,17 +609,21 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 			if elemento.Tipo == Ast.STRING ||
 				elemento.Tipo == Ast.STR ||
 				elemento.Tipo == Ast.STRING_OWNED {
-				codigo3d += "printf(\"\\\"\");\n"
+				//codigo3d += "printf(\"\\\"\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaDoble + "); //Imprimir comillas\n"
 				codigo3d += resultado
-				codigo3d += "printf(\"\\\"\");\n"
+				//codigo3d += "printf(\"\\\"\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaDoble + "); //Imprimir comillas\n"
 				siguientePos = referencia
 				codigo3d += posicionEnVector + " = " + posicionEnVector + " + 1; //sig pos vec\n"
 				siguientePos = posicionEnVector
 				primeraPos = true
 			} else if elemento.Tipo == Ast.CHAR {
-				codigo3d += "printf(\"'\");\n"
+				//codigo3d += "printf(\"'\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaSimple + "); //Imprimir comilla\n"
 				codigo3d += resultado
-				codigo3d += "printf(\"'\");\n"
+				//codigo3d += "printf(\"'\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaSimple + "); //Imprimir comilla\n"
 			} else {
 				codigo3d += resultado
 			}
@@ -631,7 +652,8 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 			codigo3d += "/***********************************************/\n"
 
 		}
-		codigo3d += "printf(\"]\");\n"
+		//codigo3d += "printf(\"]\");\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + corcheteDer + "); //Imprimir corchete\n"
 		codigo3d += "/***********************************************/\n"
 	case Ast.ARRAY:
 		//De momento no tengo idea, pendiente
@@ -646,10 +668,12 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		codigo3d += temp + " = " + referencia + " + 1;//Subir una pos por el size del array\n"
 		contador = temp
 		referencia = temp
-		codigo3d += "printf(\"[\");\n"
+		//codigo3d += "printf(\"[\");\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + corcheteIzq + "); //Imprimir corchete\n"
 		for i := 0; i < lista.Len(); i++ {
 			if i != 0 && tipoAnterior != Ast.LIBRE {
-				codigo3d += "printf(\",\");\n"
+				//codigo3d += "printf(\",\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + coma + "); //Imprimir coma\n"
 			}
 			elemento = lista.GetValue(i).(Ast.TipoRetornado)
 			if elemento.Tipo != Ast.STRING && elemento.Tipo != Ast.STR && elemento.Tipo != Ast.ARRAY {
@@ -681,14 +705,18 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 			if elemento.Tipo == Ast.STRING ||
 				elemento.Tipo == Ast.STR ||
 				elemento.Tipo == Ast.STRING_OWNED {
-				codigo3d += "printf(\"\\\"\");\n"
+				//codigo3d += "printf(\"\\\"\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaDoble + "); //Imprimir comillas\n"
 				codigo3d += resultado
-				codigo3d += "printf(\"\\\"\");\n"
+				//codigo3d += "printf(\"\\\"\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaDoble + "); //Imprimir comillas\n"
 				siguientePos = referencia
 			} else if elemento.Tipo == Ast.CHAR {
-				codigo3d += "printf(\"'\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaSimple + "); //Imprimir comilla\n"
+				//codigo3d += "printf(\"'\");\n"
 				codigo3d += resultado
-				codigo3d += "printf(\"'\");\n"
+				codigo3d += "printf(\"" + p + c + "\",(int)" + comillaSimple + "); //Imprimir comilla\n"
+				//codigo3d += "printf(\"'\");\n"
 			} else {
 				codigo3d += resultado
 			}
@@ -712,7 +740,8 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 			codigo3d += "/***********************************************/\n"
 
 		}
-		codigo3d += "printf(\"]\");\n"
+		//codigo3d += "printf(\"]\");\n"
+		codigo3d += "printf(\"" + p + c + "\",(int)" + corcheteDer + "); //Imprimir corchete\n"
 		codigo3d += "/***********************************************/\n"
 	}
 	return codigo3d, siguientePos

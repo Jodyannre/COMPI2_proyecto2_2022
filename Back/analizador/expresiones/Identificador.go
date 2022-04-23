@@ -35,7 +35,6 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	//Existe el identificar y retornar el valor
 	simbolo := scope.GetSimbolo(p.Valor)
-
 	/*Generar codigo 3d*/
 
 	/*Verificar si la variable viene del heap o del stack*/

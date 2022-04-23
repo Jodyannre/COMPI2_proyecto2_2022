@@ -1,6 +1,9 @@
 package transferencia
 
-import "Back/analizador/Ast"
+import (
+	"Back/analizador/Ast"
+	"strconv"
+)
 
 type Break struct {
 	Tipo      Ast.TipoDato
@@ -31,6 +34,8 @@ func (b Break) Run(scope *Ast.Scope) interface{} {
 	var obj3d, obj3dValor Ast.O3D
 	var salto string = Ast.GetLabel()
 	var codigo3d string
+	var guardarScope, posicionGuardar string
+	var scopeOrigen *Ast.Scope
 	/***************************************************************/
 	obj3d.SaltoTranferencia = salto
 	obj3d.SaltoBreak = salto
@@ -60,10 +65,22 @@ func (b Break) Run(scope *Ast.Scope) interface{} {
 		Valor: valor.Valor,
 	}
 
+	guardarScope = Ast.GetTemp()
+	posicionGuardar = Ast.GetTemp()
+	scopeOrigen = scope.GetEntornoPadreBreak()
+	codigo3d += "/********************GUARDAR EL VALOR DEL BREAK*/\n"
+	codigo3d += guardarScope + " = P; //Guardar scope anterior \n"
+	codigo3d += "P = " + strconv.Itoa(scopeOrigen.Posicion) + "; //Cambio a entorno simulado \n"
+	codigo3d += posicionGuardar + " = P + 0; //Pos del break \n"
+	codigo3d += "stack[(int)" + posicionGuardar + "] = " + obj3dValor.Referencia + "; //Guardar valor \n"
+	codigo3d += "P = " + guardarScope + "; //Retornar al entorno anterior \n"
+	codigo3d += "/***********************************************/\n"
+
 	obj3d.Valor = valorRetornar
 	obj3d.Codigo = codigo3d
 	obj3d.SaltoTranferencia = salto
 	obj3d.SaltoBreak = salto
+	obj3d.SaltoBreakExp = salto
 	obj3d.Referencia = obj3dValor.Referencia
 
 	return Ast.TipoRetornado{

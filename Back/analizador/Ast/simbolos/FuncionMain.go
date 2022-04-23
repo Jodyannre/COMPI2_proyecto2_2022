@@ -29,6 +29,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var obj3dRespuestaInstruccion Ast.O3D
 	var saltoReturn string
 	var codigo3d string
+	var contadorDeclaraciones int
 	/****************************************************************************************/
 
 	//Primero crear el nuevo scope main
@@ -41,6 +42,21 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var respuesta interface{}
 	codigo3d += Ast.Indentar(newScope.GetNivel(), "P = 0; //Volver p a 0 para ejecutar el main \n")
 	//Recorrer y ejecutar todas las instrucciones
+
+	for i := 0; i < f.Instrucciones.Len(); i++ {
+		actual = f.Instrucciones.GetValue(i)
+		if actual != nil {
+			_, tipoParticular := actual.(Ast.Abstracto).GetTipo()
+			if tipoParticular == Ast.DECLARACION {
+				contadorDeclaraciones++
+			}
+		} else {
+			continue
+		}
+	}
+
+	newScope.EspacioReservado = contadorDeclaraciones
+
 	for i := 0; i < f.Instrucciones.Len(); i++ {
 		actual = f.Instrucciones.GetValue(i)
 		if actual != nil {
