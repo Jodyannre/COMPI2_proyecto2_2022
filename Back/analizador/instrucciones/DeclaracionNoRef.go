@@ -193,7 +193,7 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 
 	/*******************************CODIGO 3D*************************************/
 	posicionAguardar = Ast.GetTemp()
-	codigo3d += posicionAguardar + " = P + " + strconv.Itoa(scope.Size) + "; //Get pos para guardar\n"
+	codigo3d += posicionAguardar + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + "; //Get pos para guardar\n"
 	codigo3d += "stack[(int)" + posicionAguardar + "] = " + obj3dClone.Referencia + "; //Guardar nuevo valor\n"
 
 	nSimbolo := Ast.Simbolo{
@@ -212,8 +212,8 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 	}
 
 	//Agregar la direccion
-	nSimbolo.Direccion = scope.Size
-	scope.Size++
+	nSimbolo.Direccion = scope.ContadorDeclaracion
+	scope.ContadorDeclaracion++
 	nSimbolo.TipoDireccion = Ast.STACK
 
 	//Verificar si es array, vector o struct, para clonarlos

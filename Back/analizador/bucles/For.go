@@ -215,7 +215,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				resultadoInstruccion = instruccion.(Ast.Expresion).GetValue(&newScope)
 				obj3dResultado = resultadoInstruccion.Valor.(Ast.O3D)
 				resultadoInstruccion = obj3dResultado.Valor
-				for iteracionPara3D {
+				if iteracionPara3D {
 					codigo3dFor += obj3dResultado.Codigo
 				}
 			}

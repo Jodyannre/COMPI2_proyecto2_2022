@@ -48,6 +48,7 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 	var valorReturn string
 	var posicionReturn string
 	var algunValorParaRetornar interface{}
+
 	/*******************************************************/
 
 	var actual interface{}
@@ -476,7 +477,7 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 	var verificacionDeReferencia Ast.TipoRetornado
 
 	/***********************REINICIO EL SIZE DEL SCOPE*********/
-	scope.Size = 1
+	//scope.Size = 1
 	/**********************************************************/
 	for iterador = 0; iterador < parametros.Len(); iterador++ {
 		parametro = parametros.GetValue(iterador)

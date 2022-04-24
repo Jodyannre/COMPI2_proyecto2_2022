@@ -233,6 +233,8 @@ type O3D struct {
 	RetornoIf            string
 	RetornoMatch         string
 	IfCorrecto           bool
+	EsReferencia         string
+	EsContains           string
 }
 
 func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {

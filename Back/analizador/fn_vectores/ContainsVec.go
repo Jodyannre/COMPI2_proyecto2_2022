@@ -173,11 +173,20 @@ func (p ContainsVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		Tipo:  Ast.BOOLEAN,
 		Valor: resultado,
 	}
+
+	lt := Ast.GetLabel()
+	lf := Ast.GetLabel()
+	codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
+	codigo3d += "goto " + lf + ";\n"
+
 	obj3d.Codigo = codigo3d
 	obj3d.Referencia = referencia
+	obj3d.Lt = lt
+	obj3d.Lf = lf
+	obj3d.EsContains = "si"
 
 	return Ast.TipoRetornado{
-		Tipo:  Ast.VEC_CONTAINS,
+		Tipo:  Ast.BOOLEAN,
 		Valor: obj3d,
 	}
 }

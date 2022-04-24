@@ -3,6 +3,7 @@ package simbolos
 import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
+	"Back/analizador/expresiones"
 	"strconv"
 )
 
@@ -32,6 +33,7 @@ func (v Valor) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var obj3dValor, obj3d Ast.O3D
 	var codigo3d string
 	var referencia string
+	var abstracto interface{}
 	/**********************************************************/
 
 	//Verificar que los valores de referencia sean correctos
@@ -43,6 +45,14 @@ func (v Valor) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	obj3d.Valor = valor
 	obj3d.Codigo = codigo3d
 	obj3d.Referencia = referencia
+
+	/**********PARA REFERENCIAS*****************/
+	abstracto = v.Valor
+	_, tipoParticular := abstracto.(Ast.Abstracto).GetTipo()
+	if tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.VECTOR {
+		obj3d.EsReferencia = v.Valor.(expresiones.Identificador).Valor
+	}
+	/*******************************************/
 
 	if !EsPosibleReferencia(valor.Tipo) && v.Referencia {
 		//Error, ese tipo de valor no se puede enviar como referencia

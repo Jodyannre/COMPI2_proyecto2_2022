@@ -203,13 +203,21 @@ func (p Push) Run(scope *Ast.Scope) interface{} {
 	if simbolo.TipoDireccion == Ast.STACK {
 		/*ESTA GUARDADO EN EL STACK*/
 		temp := Ast.GetTemp()
+		tempRef := Ast.GetTemp()
 		codigo3d += "/*********************REGISTRAR EL NUEVO VECTOR*/\n"
 		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
-		referencia = temp
+
+		if simbolo.Referencia {
+			codigo3d += tempRef + " = stack[(int)" + temp + "];\n"
+			referencia = tempRef
+		} else {
+			referencia = temp
+		}
+
 		codigo3d += "stack[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
-		nuevaDireccion, _ := strconv.Atoi(nReferencia)
-		simbolo.Direccion = nuevaDireccion
+		//nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		//simbolo.Direccion = nuevaDireccion
 	} else {
 		/*ESTA GUARDANDO EN EL HEAP*/
 		temp := Ast.GetTemp()
@@ -218,11 +226,15 @@ func (p Push) Run(scope *Ast.Scope) interface{} {
 		referencia = temp
 		codigo3d += "heap[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
-		nuevaDireccion, _ := strconv.Atoi(nReferencia)
-		simbolo.Direccion = nuevaDireccion
+		//nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		//simbolo.Direccion = nuevaDireccion
 	}
 	/*Actualizar el simbolo en la tabla de símbolos*/
 	scope.UpdateSimbolo(id, simbolo)
+	if simbolo.Referencia {
+		id := simbolo.Referencia_puntero.Identificador
+		simbolo.Entorno.UpdateValor(id, simbolo.Valor)
+	}
 
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{

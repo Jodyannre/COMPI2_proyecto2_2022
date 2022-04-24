@@ -19,6 +19,8 @@ type Simbolo struct {
 	Direccion          int
 	TipoDireccion      TipoDato
 	Size               int
+	CodigoGenerado     bool
+	ReferenciaRetorno  string
 }
 
 type SimboloReporte struct {

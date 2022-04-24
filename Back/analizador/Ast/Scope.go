@@ -212,7 +212,6 @@ func (scope *Scope) Exist_fms_local(ident string) Simbolo {
 		}
 
 	}
-
 	return NewSimbolo("", nil, -1, -1, ERROR_NO_EXISTE, false, false)
 }
 
@@ -258,6 +257,47 @@ func buscarMap(id string, tipo TipoDato, scope *Scope, local *Scope) TipoRetorna
 	return TipoRetornado{
 		Valor: true,
 		Tipo:  NULL,
+	}
+}
+
+func (scope *Scope) Update_fms_local(ident string, simbolo Simbolo) {
+	//Buscar entodos los scopes desde un local
+	//Primero conseguir el scope global
+	scope_Actual := scope
+	var retorno TipoRetornado
+	id := strings.ToUpper(ident)
+	//Buscar el scope global
+
+	for scope_Actual = scope; scope_Actual != nil; scope_Actual = scope_Actual.prev {
+		//Buscar el módulo en los entornos locales
+		//Verificar que la fms exista y si puede ser accedida
+		retorno = ActualizarEnMap(id, FUNCION, scope_Actual, scope, simbolo)
+		if retorno.Valor == true {
+			break
+		}
+	}
+}
+
+func ActualizarEnMap(id string, tipo TipoDato, scope *Scope, local *Scope, simbolo Simbolo) TipoRetornado {
+	var encontrado = false
+
+	for key, _ := range scope.tablaFunciones {
+		if key == id {
+
+			encontrado = true
+			scope.tablaFunciones[key] = simbolo
+			break
+		}
+	}
+	if encontrado {
+		return TipoRetornado{
+			Tipo:  BOOLEAN,
+			Valor: true,
+		}
+	}
+	return TipoRetornado{
+		Valor: false,
+		Tipo:  BOOLEAN,
 	}
 }
 
@@ -346,6 +386,23 @@ func (scope *Scope) UpdateSimbolo(ident string, valorNuevo Simbolo) {
 		for key, _ := range scope_actual.tablaSimbolos {
 			if key == id {
 				scope_actual.tablaSimbolos[key] = valorNuevo
+				return
+			}
+		}
+	}
+
+}
+
+func (scope *Scope) UpdateValor(ident string, valorNuevo interface{}) {
+	id := strings.ToUpper(ident)
+	var simbolo Simbolo
+	for scope_actual := scope; scope_actual != nil; scope_actual = scope_actual.prev {
+
+		for key, value := range scope_actual.tablaSimbolos {
+			if key == id {
+				simbolo = value.(Simbolo)
+				simbolo.Valor = valorNuevo
+				scope_actual.tablaSimbolos[key] = simbolo
 				return
 			}
 		}

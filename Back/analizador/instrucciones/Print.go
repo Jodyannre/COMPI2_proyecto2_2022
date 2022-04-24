@@ -123,9 +123,15 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 	obj3dExp = resExp.Valor.(Ast.O3D)
 	codigo3d += obj3dExp.Codigo
 	preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+	if obj3dExp.Lf != "" {
+		codigo3d += obj3dExp.Lt + ":\n"
+	}
 	codigo3d += preCodigo3d
 	//codigo3d += "printf (\"\\n\");\n"
 	codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + nuevaLinea + "); //Imprimir nueva linea\n"
+	if obj3dExp.Lf != "" {
+		codigo3d += obj3dExp.Lf + ":\n"
+	}
 	/************************************************/
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{Tipo: Ast.PRINT, Valor: true}
@@ -143,6 +149,7 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	var obj3dValor Ast.O3D
 	var codigo3d string
 	var preCodigo3d string
+	var salto string
 	//var retornoImpresion string = "13"
 	var nuevaLinea string = "10"
 	c := "c"
@@ -201,7 +208,16 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				cadena := To_String(obj3dExp.Valor, scope)
 				codigo3d += obj3dExp.Codigo
 				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+				if obj3dExp.Lt != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lt + ":\n"
+					salto = Ast.GetLabel()
+					codigo3d += "goto " + salto + ";\n"
+				}
 				codigo3d += preCodigo3d
+				if obj3dExp.Lf != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lf + ":\n"
+					codigo3d += salto + ":\n"
+				}
 				/************************************************/
 				salida += cadena.(Ast.TipoRetornado).Valor.(string)
 			} else {
@@ -220,7 +236,16 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				obj3dExp := resExp.Valor.(Ast.O3D)
 				codigo3d += obj3dExp.Codigo
 				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
+				if obj3dExp.Lt != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lt + ":\n"
+					salto = Ast.GetLabel()
+					codigo3d += "goto " + salto + ";\n"
+				}
 				codigo3d += preCodigo3d
+				if obj3dExp.Lf != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lf + ":\n"
+					codigo3d += salto + ":\n"
+				}
 				/************************************************/
 			} else {
 				resultado := p.GetCompareValues(scope, i, posiciones_regex[i])
@@ -257,12 +282,30 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 				resExp := newExp.GetValue(scope)
 				obj3dExp := resExp.Valor.(Ast.O3D)
 				codigo3d += obj3dExp.Codigo
+				if obj3dExp.Lt != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lt + ":\n"
+					salto = Ast.GetLabel()
+					codigo3d += "goto " + salto + ";\n"
+				}
 				preCodigo3d, _ = GetC3DExpresion(obj3dExp)
 				codigo3d += preCodigo3d
+				if obj3dExp.Lf != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dExp.Lf + ":\n"
+					codigo3d += salto + ":\n"
+				}
 				/************************************************/
 				codigo3d += obj3dValor.Codigo
 				preCodigo3d, _ = GetC3DExpresion(obj3dValor)
+				if obj3dExp.Lt != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dValor.Lt + ":\n"
+					salto = Ast.GetLabel()
+					codigo3d += "goto " + salto + ";\n"
+				}
 				codigo3d += preCodigo3d
+				if obj3dExp.Lt != "" && obj3dExp.EsContains == "" {
+					codigo3d += obj3dValor.Lt + ":\n"
+					codigo3d += salto + ":\n"
+				}
 			}
 		}
 	}
@@ -535,21 +578,43 @@ func GetC3DExpresion(obj3d Ast.O3D) (string, string) {
 		codigo3d += "/***********************************************/\n"
 	case Ast.BOOLEAN:
 		codigo3d += "/********************************IMPRESION BOOL*/\n"
-		lt := Ast.GetLabel()
-		lf := Ast.GetLabel()
-		salto := Ast.GetLabel()
-		if obj3d.RelacionalExp != "" {
-			codigo3d += obj3d.RelacionalExp
+		if obj3d.Lt != "" {
+			salto := Ast.GetLabel()
+			if obj3d.RelacionalExp != "" {
+				codigo3d += obj3d.RelacionalExp
+			}
+			codigo3d += obj3d.Lt + ":\n"
+			codigo3d += "printf(\"" + p + c + "\",116); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",114); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",117); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",101); //Imprimir el booleano\n"
+			codigo3d += "goto " + salto + ";\n"
+			codigo3d += obj3d.Lf + ":\n"
+			codigo3d += "printf(\"" + p + c + "\",102); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",97); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",108); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",115); //Imprimir el booleano\n"
+			codigo3d += "printf(\"" + p + c + "\",101); //Imprimir el booleano\n"
+			codigo3d += salto + ":\n"
+			//codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
+		} else {
+			lt := Ast.GetLabel()
+			lf := Ast.GetLabel()
+			salto := Ast.GetLabel()
+			if obj3d.RelacionalExp != "" {
+				codigo3d += obj3d.RelacionalExp
+			}
+			codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
+			codigo3d += "goto " + lf + ";\n"
+			codigo3d += lt + ":\n"
+			codigo3d += "printf(\"true\"); //Imprimir el booleano\n"
+			codigo3d += "goto " + salto + ";\n"
+			codigo3d += lf + ":\n"
+			codigo3d += "printf(\"false\"); //Imprimir el booleano\n"
+			codigo3d += salto + ":\n"
+			//codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
 		}
-		codigo3d += "if (" + referencia + " == 1) goto " + lt + ";\n"
-		codigo3d += "goto " + lf + ";\n"
-		codigo3d += lt + ":\n"
-		codigo3d += "printf(\"true\"); //Imprimir el booleano\n"
-		codigo3d += "goto " + salto + ";\n"
-		codigo3d += lf + ":\n"
-		codigo3d += "printf(\"false\"); //Imprimir el booleano\n"
-		codigo3d += salto + ":\n"
-		//codigo3d += "printf(\"" + p + d + "\",(int)" + referencia + "); //Imprimir el numero\n"
+
 		codigo3d += "/***********************************************/\n"
 	case Ast.CHAR:
 		codigo3d += "/********************************IMPRESION CHAR*/\n"

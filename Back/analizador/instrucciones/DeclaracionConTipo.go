@@ -78,7 +78,7 @@ func (d DeclaracionConTipo) Run(scope *Ast.Scope) interface{} {
 
 	/*Aquí esta todo lo de C3D*/
 	if d.Stack {
-		direccion = scope.Size
+		direccion = scope.ContadorDeclaracion
 		nSimbolo.Direccion = direccion
 		nSimbolo.TipoDireccion = Ast.STACK
 		//Actualizar el obj3d

@@ -400,6 +400,13 @@ func ActualizarCodigoLogica(op1 TipoRetornado, op2 TipoRetornado, operador strin
 		Referencia: "",
 	}
 
+	if codIzq.EsContains != "" {
+		obj.EsContains = codIzq.EsContains
+	}
+	if codDer.EsContains != "" {
+		obj.EsContains = codDer.EsContains
+	}
+
 	return obj
 }
 

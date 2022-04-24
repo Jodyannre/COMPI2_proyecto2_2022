@@ -35,6 +35,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	var obj3dValor Ast.O3D
 	var obj3dTemp Ast.O3D
 	var codigoTemp string
+	var contadorDeclaraciones int
 	/*****************************************************************/
 
 	var simbolo Ast.Simbolo
@@ -111,9 +112,27 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	} else {
 		//simbolo = newScope.GetSimbolo(l.Identificador.(Identificador).Valor)
 		funcion = simbolo.Valor.(Ast.TipoRetornado).Valor.(Funcion)
+
+		for i := 0; i < funcion.Instrucciones.Len(); i++ {
+			actual := funcion.Instrucciones.GetValue(i)
+			if actual != nil {
+				_, tipoParticular := actual.(Ast.Abstracto).GetTipo()
+				if tipoParticular == Ast.DECLARACION {
+					contadorDeclaraciones++
+				}
+			} else {
+				continue
+			}
+		}
+
+		//Contar los parametros
+		contadorDeclaraciones += funcion.Parametros.Len()
+
 		newScope.Posicion = scope.Size + scope.Posicion
 		//Primera posicion para el return
+		newScope.Size = contadorDeclaraciones
 		newScope.Size++
+		newScope.ContadorDeclaracion++
 		simbolo.Direccion = scope.Size + scope.Posicion
 	}
 
@@ -187,6 +206,17 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "/***********************************************/\n"
 	obj3dTemp.Codigo = codigo3d
 	resultadoFuncion.Valor = obj3dTemp
+
+	/*********************************ACTUALIZAR SIMBOLO PARA QUE NO GENERE MÁS CODIGO3D***************/
+	if !simbolo.CodigoGenerado {
+		simbolo.CodigoGenerado = true
+		simbolo.ReferenciaRetorno = obj3dTemp.Referencia
+		scope.Update_fms_local(simbolo.Identificador, simbolo)
+	} else {
+		obj3dTemp.Referencia = simbolo.ReferenciaRetorno
+		resultadoFuncion.Valor = obj3dTemp
+	}
+	/**************************************************************************************************/
 
 	//newScope.Codigo += codigo3d
 	newScope.UpdateScopeGlobal()

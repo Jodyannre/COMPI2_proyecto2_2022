@@ -109,6 +109,7 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 	valor = p.Valor.(Ast.Expresion).GetValue(scope)
 	obj3dValor = valor.Valor.(Ast.O3D)
 	valor = obj3dValor.Valor
+	codigo3d += obj3dValor.Codigo
 
 	if valor.Tipo == Ast.ERROR {
 		return valor
@@ -193,7 +194,7 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 	posicion = p.Posicion.(Ast.Expresion).GetValue(scope)
 	obj3Temp = posicion.Valor.(Ast.O3D)
 	posicion = obj3Temp.Valor
-
+	codigo3d += obj3Temp.Codigo
 	_, tipoParticular = p.Posicion.(Ast.Abstracto).GetTipo()
 	if posicion.Tipo == Ast.ERROR {
 		return posicion
@@ -262,19 +263,27 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 
 	/*CODIGO 3D PARA AGREGAR EL ELEMENTO AL VECTOR*/
 	/* PRIMERO CREAR UN NUEVO VECTOR Y AGREGARLE EL ELEMENTO DE ÚLTIMO */
-	nReferencia, preCodigo3d := InsertarElemento3D(referencia, obj3dValor.Referencia, posicion.Valor.(int))
+	nReferencia, preCodigo3d := InsertarElemento3D(referencia, obj3dValor.Referencia, posicion.Valor.(int), obj3Temp.Referencia)
 	codigo3d += preCodigo3d
 	/*ACTUALIZAR LA POSICIÖN EN LA TABLA DE SÍMBOLOS*/
 	if simbolo.TipoDireccion == Ast.STACK {
 		/*ESTA GUARDADO EN EL STACK*/
 		temp := Ast.GetTemp()
+		tempRef := Ast.GetTemp()
 		codigo3d += "/*********************REGISTRAR EL NUEVO VECTOR*/\n"
 		codigo3d += temp + " = P + " + strconv.Itoa(simbolo.Direccion) + ";\n"
-		referencia = temp
+
+		if simbolo.Referencia {
+			codigo3d += tempRef + " = stack[(int)" + temp + "];\n"
+			referencia = tempRef
+		} else {
+			referencia = temp
+		}
+
 		codigo3d += "stack[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
-		nuevaDireccion, _ := strconv.Atoi(nReferencia)
-		simbolo.Direccion = nuevaDireccion
+		//nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		//simbolo.Direccion = nuevaDireccion
 	} else {
 		/*ESTA GUARDANDO EN EL HEAP*/
 		temp := Ast.GetTemp()
@@ -283,12 +292,17 @@ func (p InsertVec) Run(scope *Ast.Scope) interface{} {
 		referencia = temp
 		codigo3d += "heap[(int)" + referencia + "] = " + nReferencia + ";\n"
 		codigo3d += "/***********************************************/\n"
-		nuevaDireccion, _ := strconv.Atoi(nReferencia)
-		simbolo.Direccion = nuevaDireccion
+		//nuevaDireccion, _ := strconv.Atoi(nReferencia)
+		//simbolo.Direccion = nuevaDireccion
 	}
 
 	/*Actualizar el simbolo en la tabla de simbolos*/
 	scope.UpdateSimbolo(id, simbolo)
+	if simbolo.Referencia {
+		id := simbolo.Referencia_puntero.Identificador
+		simbolo.Entorno.UpdateValor(id, simbolo.Valor)
+	}
+
 	obj3d.Codigo = codigo3d
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
@@ -312,7 +326,7 @@ func (v InsertVec) GetColumna() int {
 	return v.Columna
 }
 
-func InsertarElemento3D(referencia, referenciaNuevoValor string, posicion int) (string, string) {
+func InsertarElemento3D(referencia, referenciaNuevoValor string, posicion int, pos3d string) (string, string) {
 	codigo3d := ""
 	inicioNuevoVec := Ast.GetTemp()
 	posVectorNuevo := Ast.GetTemp()
@@ -346,7 +360,8 @@ func InsertarElemento3D(referencia, referenciaNuevoValor string, posicion int) (
 	codigo3d += "goto " + lf + ";\n"
 	codigo3d += "/*********VERIFICAR POSICION DEL NUEVO ELEMENTO*/\n"
 	codigo3d += lt + ":\n"
-	codigo3d += "if (" + contador + " != " + strconv.Itoa(posicion) + ") goto " + lt2 + ";\n"
+	//codigo3d += "if (" + contador + " != " + strconv.Itoa(posicion) + ") goto " + lt2 + ";\n"
+	codigo3d += "if (" + contador + " != " + pos3d + ") goto " + lt2 + ";\n"
 	codigo3d += "goto " + lf2 + ";\n"
 	codigo3d += "/*******************COPIAR ELEMENTOS DEL VECTOR*/\n"
 	codigo3d += salto2 + ":\n"

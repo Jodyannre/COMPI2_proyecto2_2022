@@ -55,7 +55,7 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		}
 	}
 
-	newScope.EspacioReservado = contadorDeclaraciones
+	newScope.Size = contadorDeclaraciones
 
 	for i := 0; i < f.Instrucciones.Len(); i++ {
 		actual = f.Instrucciones.GetValue(i)

@@ -258,17 +258,17 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	codigo3d += obj3dValor.Codigo
 	codigo3d += "/**************************DECLARACION DE ARRAY*/\n"
 	if d.Stack {
-		codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
-		nSimbolo.Direccion = scope.Size
+		codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"
+		nSimbolo.Direccion = scope.ContadorDeclaracion
 		nSimbolo.TipoDireccion = Ast.STACK
-		scope.Size++
+		scope.ContadorDeclaracion++
 		codigo3d += "stack[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		Ast.GetP()
 	} else {
-		codigo3d += temp + " = P + " + strconv.Itoa(scope.Size) + ";\n"
-		nSimbolo.Direccion = scope.Size
+		codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"
+		nSimbolo.Direccion = scope.ContadorDeclaracion
 		nSimbolo.TipoDireccion = Ast.HEAP
-		scope.Size++
+		scope.ContadorDeclaracion++
 		codigo3d += "heap[(int)" + temp + "] = " + obj3dClone.Referencia + ";\n"
 		Ast.GetH()
 	}
