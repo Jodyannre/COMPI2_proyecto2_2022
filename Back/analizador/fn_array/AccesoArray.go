@@ -5,6 +5,7 @@ import (
 	"Back/analizador/errores"
 	"Back/analizador/expresiones"
 	"strconv"
+	"strings"
 
 	"github.com/colegno/arraylist"
 )
@@ -211,84 +212,51 @@ func (v AccesoArray) GetColumna() int {
 //p.Posiciones
 func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones *arraylist.List,
 	scope *Ast.Scope, ref string, posiciones3D *arraylist.List) Ast.TipoRetornado {
-	/***********VARIABLES 3D********/
 	var obj3d, obj3dValor Ast.O3D
-	var referencia string
+	//var referencia string
 	var codigo3d string
-	var lf string
-	referencia = ref
-	/*******************************/
-
-	posicion := posiciones.GetValue(0).(int)
-	elemento := elementos.GetValue(0)
-	posicion3D := posiciones3D.GetValue(0)
-	posiciones.RemoveAtIndex(0)
-	elementos.RemoveAtIndex(0)
-	posiciones3D.RemoveAtIndex(0)
-	if posicion >= array.Size || posicion < 0 {
-		//Error, out of bounds
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	}
-	if posiciones.Len() == 0 {
-		//Si es 0, entonces retornar la posición actual
-		valor := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
-		if valor.Tipo == Ast.VECTOR {
-			obj3dValor = GetCod3dAccesoArray(referencia, posicion, true, posicion3D.(Ast.O3D))
+	var referenciaActual string = ref
+	var saltos string
+	var falsos string
+	posicionesIN := posiciones3D.Clone()
+	for posiciones3D.Len() > 0 {
+		posicion := posiciones.GetValue(0).(int)
+		posicion3D := posiciones3D.GetValue(0)
+		if array.TipoArray == Ast.ARRAY {
+			obj3dValor = GetCod3dAccesoArray(referenciaActual, posicion, true, posicion3D.(Ast.O3D))
 		} else {
-			obj3dValor = GetCod3dAccesoArray(referencia, posicion, false, posicion3D.(Ast.O3D))
+			obj3dValor = GetCod3dAccesoArray(referenciaActual, posicion, false, posicion3D.(Ast.O3D))
 		}
 		codigo3d += obj3dValor.Codigo
-		codigo3d += obj3dValor.Lt + ":\n"
+		saltos += obj3dValor.Salto + ","
+		falsos += obj3dValor.Lf + ","
+		referenciaActual = obj3dValor.Referencia
 		codigo3d += "/***********************************************/\n"
-		obj3d.Codigo = codigo3d
-		obj3d.Valor = valor
-		obj3d.Referencia = obj3dValor.Referencia
-		return Ast.TipoRetornado{Valor: obj3d, Tipo: obj3d.Valor.Tipo}
+		posiciones.RemoveAtIndex(0)
+		posiciones3D.RemoveAtIndex(0)
 	}
-	if posiciones.Len() > 0 && array.TipoArray != Ast.ARRAY {
-		//Error, no hay más dimensiones
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	}
-	next := array.Elementos.GetValue(posicion).(Ast.TipoRetornado)
-	/*Codigo 3d para el siguiente elemento vector*/
-	obj3dValor = GetCod3dAccesoVector(referencia, posicion, true, posicion3D.(Ast.O3D))
-	codigo3d += obj3dValor.Codigo
-	lf = Ast.GetLabel()
-	codigo3d += "goto " + lf + ";\n"
-	codigo3d += obj3dValor.Lt + ":\n"
-	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
-	obj3d = GetElemento(next.Valor.(expresiones.Array), elementos, posiciones, scope, obj3dValor.Referencia, posiciones3D).Valor.(Ast.O3D)
-	codigo3d += obj3d.Codigo
-	codigo3d += lf + ":\n"
+	salto := Ast.GetTemp()
+	codigo3d += "goto " + salto + ";\n"
+	falsos = strings.Replace(falsos, ",", ":\n", -1)
+	codigo3d += BoundsError(falsos)
+	codigo3d += salto + ":\n"
 	codigo3d += "/***********************************************/\n"
+
+	/***************AVERIGUAR QUE ELEMENTO ES**********************/
+
+	obj3d.Referencia = obj3dValor.Referencia
 	obj3d.Codigo = codigo3d
-	return Ast.TipoRetornado{Tipo: Ast.ACCESO_ARRAY, Valor: obj3d}
+	arrayTp := Ast.TipoRetornado{
+		Tipo:  Ast.ARRAY,
+		Valor: array,
+	}
+	obj3d.Valor = GetValorDefecto(GetTipoElementoRetornoArray(posicionesIN, arrayTp))
+	if obj3d.Valor.Tipo == Ast.ARRAY {
+		obj3d.TipoEstructura = expresiones.GetTipoFinal(array.TipoDelArray)
+	} else {
+		obj3d.TipoEstructura = Ast.TipoRetornado{Valor: nil, Tipo: Ast.NULL}
+	}
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: obj3d.Valor.Tipo}
 }
 
 //Get elemento vector
@@ -296,82 +264,49 @@ func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones 
 func GetElementoVector(array expresiones.Vector, elementos *arraylist.List, posiciones *arraylist.List,
 	scope *Ast.Scope, ref string, posiciones3D *arraylist.List) Ast.TipoRetornado {
 	var obj3d, obj3dValor Ast.O3D
-	var referencia string
+	//var referencia string
 	var codigo3d string
-	var lf string
-	referencia = ref
-	posicion := posiciones.GetValue(0).(int)
-	elemento := elementos.GetValue(0)
-	posicion3D := posiciones3D.GetValue(0)
-	posiciones.RemoveAtIndex(0)
-	elementos.RemoveAtIndex(0)
-	posiciones3D.RemoveAtIndex(0)
-	if posicion >= array.Size || posicion < 0 {
-		//Error, out of bounds
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	}
-	if posiciones.Len() == 0 {
-		//Si es 0, entonces retornar la posición actual
-		valor := array.Valor.GetValue(posicion).(Ast.TipoRetornado)
-		if valor.Tipo == Ast.VECTOR {
-			obj3dValor = GetCod3dAccesoVector(referencia, posicion, true, posicion3D.(Ast.O3D))
+	var referenciaActual string = ref
+	var saltos string
+	var falsos string
+	posicionesIN := posiciones3D.Clone()
+	for posiciones3D.Len() > 0 {
+		posicion := posiciones.GetValue(0).(int)
+		posicion3D := posiciones3D.GetValue(0)
+		if array.TipoVector.Tipo == Ast.VECTOR {
+			obj3dValor = GetCod3dAccesoVector(referenciaActual, posicion, true, posicion3D.(Ast.O3D))
 		} else {
-			obj3dValor = GetCod3dAccesoVector(referencia, posicion, false, posicion3D.(Ast.O3D))
+			obj3dValor = GetCod3dAccesoVector(referenciaActual, posicion, false, posicion3D.(Ast.O3D))
 		}
 		codigo3d += obj3dValor.Codigo
-		codigo3d += obj3dValor.Lt + ":\n"
+		saltos += obj3dValor.Salto + ","
+		falsos += obj3dValor.Lf + ","
+		referenciaActual = obj3dValor.Referencia
 		codigo3d += "/***********************************************/\n"
-		obj3d.Codigo = codigo3d
-		obj3d.Valor = valor
-		obj3d.Referencia = obj3dValor.Referencia
-
-		return Ast.TipoRetornado{Valor: obj3d, Tipo: obj3d.Valor.Tipo}
+		posiciones.RemoveAtIndex(0)
+		posiciones3D.RemoveAtIndex(0)
 	}
-	if posiciones.Len() > 0 && array.TipoVector.Tipo != Ast.VECTOR {
-		//Error, no hay más dimensiones
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	}
-	/*Codigo 3d para el siguiente elemento vector*/
-
-	next := array.Valor.GetValue(posicion).(Ast.TipoRetornado)
-	obj3dValor = GetCod3dAccesoVector(referencia, posicion, true, posicion3D.(Ast.O3D))
-	codigo3d += obj3dValor.Codigo
-	lf = Ast.GetLabel()
-	codigo3d += "goto " + lf + ";\n"
-	codigo3d += obj3dValor.Lt + ":\n"
-	//Validar que el siguiente sea un array y que todavía existan posiciones que buscar
-	obj3d = GetElementoVector(next.Valor.(expresiones.Vector), elementos, posiciones, scope, obj3dValor.Referencia, posiciones3D).Valor.(Ast.O3D)
-	codigo3d += obj3d.Codigo
-	codigo3d += lf + ":\n"
+	salto := Ast.GetTemp()
+	codigo3d += "goto " + salto + ";\n"
+	falsos = strings.Replace(falsos, ",", ":\n", -1)
+	codigo3d += BoundsError(falsos)
+	codigo3d += salto + ":\n"
 	codigo3d += "/***********************************************/\n"
+
+	obj3d.Referencia = obj3dValor.Referencia
 	obj3d.Codigo = codigo3d
-	return Ast.TipoRetornado{Tipo: Ast.ACCESO_ARRAY, Valor: obj3d}
+	obj3d.Valor = GetValorDefecto(array.TipoVector.Tipo)
+	arrayTp := Ast.TipoRetornado{
+		Tipo:  Ast.VECTOR,
+		Valor: array,
+	}
+	obj3d.Valor = GetValorDefecto(GetTipoElementoRetornoVector(posicionesIN, arrayTp))
+
+	if obj3d.Valor.Tipo == Ast.STRUCT {
+		obj3d.Valor = array.Valor.GetValue(0).(Ast.TipoRetornado)
+	}
+	return Ast.TipoRetornado{Valor: obj3d, Tipo: obj3d.Valor.Tipo}
+
 }
 
 func GetCod3dAccesoVector(ref string, pos int, estructura bool, posRef Ast.O3D) Ast.O3D {
@@ -422,12 +357,12 @@ func GetCod3dAccesoVector(ref string, pos int, estructura bool, posRef Ast.O3D) 
 		codigo3d += temp5 + " = " + "heap[(int)" + temp4 + "];//Get posicion exacta de objeto\n"
 		obj3d.Referencia = temp5
 	}
-	codigo3d += "goto " + salto + ";\n"
-	codigo3d += BoundsError(lf)
+
 	//codigo3d += salto + ":\n"
 	/******************************************/
-	obj3d.Lt = salto
+	obj3d.Salto = salto
 	obj3d.Codigo = codigo3d
+	obj3d.Lf = lf
 	return obj3d
 }
 
@@ -479,12 +414,13 @@ func GetCod3dAccesoArray(ref string, pos int, estructura bool, posRef Ast.O3D) A
 		codigo3d += temp5 + " = " + "heap[(int)" + temp4 + "];//Get posicion exacta de objeto\n"
 		obj3d.Referencia = temp5
 	}
-	codigo3d += "goto " + salto + ";\n"
-	codigo3d += BoundsError(lf)
+	//codigo3d += "goto " + salto + ";\n"
+	//codigo3d += BoundsError(lf)
 	//codigo3d += salto + ":\n"
 	/******************************************/
-	obj3d.Lt = salto
+	obj3d.Salto = salto
 	obj3d.Codigo = codigo3d
+	obj3d.Lf = lf
 	return obj3d
 }
 
@@ -580,6 +516,7 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List,
 		codigo3d += lt + ":\n"
 		codigo3d += "heap[(int)" + posAsignar + "] = " + obj3dValor.Referencia + "; //Add nuevo valor\n"
 		codigo3d += "goto " + salto + ";\n"
+		lf = lf + ":\n"
 		codigo3d += BoundsError(lf)
 		codigo3d += salto + ":\n"
 		array.Elementos.Clear()
@@ -633,6 +570,7 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List,
 	/***************************************************/
 	codigo3d += resultado.Valor.(Ast.O3D).Codigo
 	codigo3d += "goto " + salto + ";\n"
+	lf = lf + ":\n"
 	codigo3d += BoundsError(lf)
 	codigo3d += salto + ":\n"
 	obj3d.Valor = Ast.TipoRetornado{Valor: true, Tipo: Ast.EJECUTADO}
@@ -643,7 +581,7 @@ func UpdateElemento(array expresiones.Array, elementos *arraylist.List,
 
 func BoundsError(lf string) string {
 	codigo3d := ""
-	codigo3d += lf + ":\n"
+	codigo3d += lf
 	codigo3d += "printf(\"%%c\", 66);\n"
 	codigo3d += "printf(\"%%c\", 111);\n"
 	codigo3d += "printf(\"%%c\", 117);\n"
@@ -657,4 +595,64 @@ func BoundsError(lf string) string {
 	codigo3d += "printf(\"%%c\", 114);\n"
 	codigo3d += "printf(\"%%c\",10);\n"
 	return codigo3d
+}
+
+func GetValorDefecto(tipo Ast.TipoDato) Ast.TipoRetornado {
+	var elemento interface{}
+	switch tipo {
+	case Ast.I64:
+		elemento = 1
+	case Ast.F64:
+		elemento = 1.1
+	case Ast.USIZE:
+		elemento = 1
+	case Ast.STRING:
+		elemento = "hola"
+	case Ast.STR:
+		elemento = "hola"
+	case Ast.CHAR:
+		elemento = "h"
+	case Ast.BOOLEAN:
+		elemento = true
+	case Ast.VECTOR:
+		elemento = expresiones.NewVector(arraylist.New(), Ast.TipoRetornado{Valor: 0, Tipo: Ast.I64}, 2, 10, false, 0, 0)
+	case Ast.ARRAY:
+		elemento = expresiones.NewArray(arraylist.New(), Ast.I64, 5, 0, 0)
+	}
+	return Ast.TipoRetornado{
+		Tipo:  tipo,
+		Valor: elemento,
+	}
+}
+
+func GetTipoElementoRetornoArray(lista *arraylist.List, array Ast.TipoRetornado) Ast.TipoDato {
+
+	if lista.Len() == 0 {
+		return array.Tipo
+	}
+	lista.RemoveAtIndex(0)
+
+	if array.Tipo != Ast.ARRAY {
+		return array.Tipo
+	} else {
+		next := array.Valor.(expresiones.Array).Elementos.GetValue(0).(Ast.TipoRetornado)
+		return GetTipoElementoRetornoArray(lista, next)
+	}
+
+}
+
+func GetTipoElementoRetornoVector(lista *arraylist.List, array Ast.TipoRetornado) Ast.TipoDato {
+
+	if lista.Len() == 0 {
+		return array.Tipo
+	}
+	lista.RemoveAtIndex(0)
+
+	if array.Tipo != Ast.VECTOR {
+		return array.Tipo
+	} else {
+		next := array.Valor.(expresiones.Vector).Valor.GetValue(0).(Ast.TipoRetornado)
+		return GetTipoElementoRetornoArray(lista, next)
+	}
+
 }

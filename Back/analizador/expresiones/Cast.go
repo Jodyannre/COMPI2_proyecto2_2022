@@ -83,8 +83,8 @@ func (c Cast) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	obj3d.Valor = nuevoValor
 	obj3d.Codigo = codigo3d
-	obj3d.Referencia = Primitivo_To_String(nuevoValor.Valor, nuevoValor.Tipo)
-
+	//obj3d.Referencia = Primitivo_To_String(nuevoValor.Valor, nuevoValor.Tipo)
+	obj3d.Referencia = obj3dValor.Referencia
 	return Ast.TipoRetornado{
 		Tipo:  nuevoValor.Tipo,
 		Valor: obj3d,

@@ -45,11 +45,13 @@ func (v Valor) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	obj3d.Valor = valor
 	obj3d.Codigo = codigo3d
 	obj3d.Referencia = referencia
+	obj3d.PosId = obj3dValor.PosId
 
 	/**********PARA REFERENCIAS*****************/
 	abstracto = v.Valor
 	_, tipoParticular := abstracto.(Ast.Abstracto).GetTipo()
-	if tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.VECTOR {
+	if tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.VECTOR ||
+		tipoParticular == Ast.IDENTIFICADOR && valor.Tipo == Ast.ARRAY {
 		obj3d.EsReferencia = v.Valor.(expresiones.Identificador).Valor
 	}
 	/*******************************************/

@@ -65,7 +65,16 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 	//Verificar de que sean identificadores
 
 	if tipoParticular != Ast.IDENTIFICADOR {
+
+		/*****************************GET C3D DESDE SIMBOLO*****************************/
+		codigo3d += "/********************************ACCESO A STRUCT*/\n"
 		resultadoAtributo = nombreStruct.(Ast.Expresion).GetValue(scope)
+		obj3d = resultadoAtributo.Valor.(Ast.O3D)
+		resultadoAtributo = obj3d.Valor
+		referenciaStruct = obj3d.Referencia
+		codigo3d += obj3d.Codigo
+		/*******************************************************************************/
+
 		_, tipoParticular = resultadoAtributo.Valor.(Ast.Abstracto).GetTipo()
 
 		if reflect.TypeOf(resultadoAtributo.Valor) != reflect.TypeOf(StructInstancia{}) {
@@ -109,8 +118,22 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		//Get el simbolo del atributo
 		simboloAtributo := structInstancia.Entorno.GetSimbolo(idAtributo)
 
+		/*****************************GET C3D DESDE SIMBOLO*****************************/
+		scopeActual := Ast.GetTemp()
+		posicionAtributo := Ast.GetTemp()
+		codigo3d += "/******************************ACCESO A ATRIBUTO*/\n"
+		codigo3d += scopeActual + " = " + referenciaStruct + "; //Scope simulado \n"
+		codigo3d += posicionAtributo + " = " + scopeActual + " + " + strconv.Itoa(simboloAtributo.Direccion) + "; //Get direccion del att\n"
+		/*******************************************************************************/
+
 		//Get el valor nuevo del atributo
+		/****************************GET C3D DE NUEVO VALOR*****************************/
 		newValue := a.Valor.(Ast.Expresion).GetValue(scope)
+		obj3dValor = newValue.Valor.(Ast.O3D)
+		newValue = obj3dValor.Valor
+		referenciaValor = obj3dValor.Referencia
+		codigo3d += obj3dValor.Codigo
+		/*******************************************************************************/
 
 		if newValue.Tipo == Ast.ERROR {
 			return newValue
@@ -197,6 +220,14 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		simboloAtributo.Valor = newValue
 
 		//Actualizar el valor del símbolo en el scope
+
+		/****************************GET C3D DEL UPDATE VALOR****************************/
+		codigo3d += "/********************ACTUALIZAR ATRIBUTO*/\n"
+		codigo3d += "heap[(int)" + posicionAtributo + "] = " + referenciaValor + "; //actualizar valor \n"
+		codigo3d += "/****************************************/\n"
+		codigo3d += "/****************************************/\n"
+		codigo3d += "/****************************************/\n"
+		/*******************************************************************************/
 
 		structInstancia.Entorno.UpdateSimbolo(idAtributo, simboloAtributo)
 

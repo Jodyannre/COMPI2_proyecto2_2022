@@ -348,7 +348,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 	newScope := Ast.NewScope("Case", scope)
 
 	//Direccion del nuevo entorno
-	newScope.Posicion = scope.Size
+	newScope.Posicion = scope.Size + scope.Posicion
 	//Aumentar +1 por el posible retorno
 
 	newScope.Size++

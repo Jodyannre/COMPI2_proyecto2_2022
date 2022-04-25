@@ -235,6 +235,8 @@ type O3D struct {
 	IfCorrecto           bool
 	EsReferencia         string
 	EsContains           string
+	PosId                string
+	TipoEstructura       TipoRetornado
 }
 
 func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {

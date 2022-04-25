@@ -51,6 +51,7 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 	var validacionDimensiones string
 	var existe bool
 	var valor Ast.TipoRetornado
+	var simboloArray Ast.Simbolo
 	/**********VARIABLES 3D***************/
 	var codigo3d, scopeAnterior string
 	var obj3d, obj3dValor, objtemp, obj3dTemp Ast.O3D
@@ -65,7 +66,7 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
 		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
 		/***************************************************************/
-		existe = d.ScopeOriginal.Exist_actual(d.Id)
+		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
 		obj3dTemp = valor.Valor.(Ast.O3D)
 		valor = obj3dTemp.Valor
@@ -73,9 +74,16 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 		/*********************RETORNO SCOPE ANTERIOR********************/
 		codigo3d += "P = " + scopeAnterior + "; //Retornar al scope anterior \n"
 		/***************************************************************/
+		if obj3dTemp.EsReferencia != "" {
+			simboloArray = d.ScopeOriginal.GetSimbolo(obj3dTemp.EsReferencia)
+		} else {
+			simboloArray = scope.GetSimbolo(d.Id)
+		}
+
 		obj3dValor = obj3dTemp
 	} else {
 		existe = scope.Exist_actual(d.Id)
+		simboloArray = scope.GetSimbolo(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(scope)
 		obj3dValor = valor.Valor.(Ast.O3D)
 		valor = obj3dValor.Valor
@@ -230,7 +238,15 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 		Mutable:       d.Mutable,
 		Publico:       d.Publico,
 		Entorno:       scope,
+		Referencia:    true,
 	}
+
+	if simboloArray.Entorno == nil {
+		nSimbolo.Referencia = false
+	} else {
+		nSimbolo.Referencia_puntero = &simboloArray
+	}
+
 	//Actualizar la mutabilidad de la instancia
 	nArray := valor.Valor.(expresiones.Array)
 	nArray.Mutable = d.Mutable
@@ -241,20 +257,41 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 	nSimbolo.Valor = nValor
 
 	temp := Ast.GetTemp()
+	referenciaArray := Ast.GetTemp()
 	codigo3d += obj3dValor.Codigo
+
+	if simboloArray.Referencia && simboloArray.Entorno != nil {
+		scopeAnterior := Ast.GetTemp()
+		//posVectorRef := Ast.GetTemp()
+		codigo3d += scopeAnterior + " = P; //Guardar scope anterior \n"
+		//codigo3d += "P = " + strconv.Itoa(simboloArray.Entorno.Posicion) + "; //Cambio de entorno \n"
+		codigo3d += "P = " + GetReferenciaOriginal(simboloArray) + "; //Cambio de entorno \n"
+		//codigo3d += referenciaArray + " = P + " + strconv.Itoa(simboloArray.Direccion) + "; //Pos arr ref \n"
+		codigo3d += referenciaArray + " = P + " + GetReferenciaOriginalPos(simboloArray) + "; //Pos arr ref \n"
+		codigo3d += "P = " + scopeAnterior + "; //regresar al entorno anterior \n"
+		//codigo3d += referenciaVector + " = " + strconv.Itoa(simboloVector.Direccion) + "; //Dir referencia\n"
+	} else {
+		if obj3dValor.PosId != "" && simboloArray.Entorno != nil {
+			codigo3d += referenciaArray + " = " + obj3dValor.PosId + "; //Dir array\n"
+		} else {
+			codigo3d += referenciaArray + " = " + obj3dValor.Referencia + "; //Dir array\n"
+		}
+
+	}
+
 	codigo3d += "/**************************DECLARACION DE ARRAY*/\n"
 	if d.Stack {
 		codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"
 		nSimbolo.Direccion = scope.ContadorDeclaracion
 		nSimbolo.TipoDireccion = Ast.STACK
 		scope.ContadorDeclaracion++
-		codigo3d += "stack[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		codigo3d += "stack[(int)" + temp + "] = " + referenciaArray + ";\n"
 	} else {
 		codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"
 		nSimbolo.Direccion = scope.ContadorDeclaracion
 		nSimbolo.TipoDireccion = Ast.HEAP
 		scope.ContadorDeclaracion++
-		codigo3d += "heap[(int)" + temp + "] = " + obj3dValor.Referencia + ";\n"
+		codigo3d += "heap[(int)" + temp + "] = " + referenciaArray + ";\n"
 	}
 	codigo3d += "/***********************************************/\n"
 
@@ -399,4 +436,21 @@ func CompararArrays(array1 expresiones.Array, array2 expresiones.Array, scope *A
 			return false
 		}
 	}
+}
+
+func GetReferenciaOriginal(simbolo Ast.Simbolo) string {
+	simboloActual := simbolo
+	if simboloActual.Referencia {
+		simboloActual = *simboloActual.Referencia_puntero
+	}
+
+	return strconv.Itoa(simboloActual.Entorno.Posicion)
+}
+
+func GetReferenciaOriginalPos(simbolo Ast.Simbolo) string {
+	simboloActual := simbolo
+	if simboloActual.Referencia {
+		simboloActual = *simboloActual.Referencia_puntero
+	}
+	return strconv.Itoa(simboloActual.Direccion)
 }

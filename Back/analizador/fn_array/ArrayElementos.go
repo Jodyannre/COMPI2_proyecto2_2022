@@ -254,7 +254,7 @@ func (v ArrayElementos) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		} else {
 			referencia, preCodigo3d = GetCod3dElemento(referencia, primeraPos, false)
 		}
-		if tipoParticular == Ast.ARRAY {
+		if tipoParticular == Ast.ARRAY || tipoAnterior.Tipo == Ast.STRING || tipoAnterior.Tipo == Ast.STR {
 			arrays.Add(referencia)
 		}
 		codigo3d += preCodigo3d

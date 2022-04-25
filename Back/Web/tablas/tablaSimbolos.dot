@@ -15,101 +15,47 @@
 	
 <tr>
 <td cellpadding='4'>
-apilar
+Venta
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+5
+</td>
+<td cellpadding='4'>
+19
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+crear_tabla
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>Vec -Venta-
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+11
+</td>
+<td cellpadding='4'>
+12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+insertar_tabla
 </td>
 <td cellpadding='4'>FUNCION
 </td>
 <td cellpadding='4'>VOID
-</td>
-<td cellpadding='4'>Global
-</td>
-<td cellpadding='4'>
-2
-</td>
-<td cellpadding='4'>
-0
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-capacidad
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>USIZE
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-13
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-pila
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>VECTOR
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-14
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-cola
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>VECTOR
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-15
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-datos
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>ARRAY
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-17
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-i
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>I64
 </td>
 <td cellpadding='4'>Local
 </td>
@@ -117,25 +63,97 @@ i
 20
 </td>
 <td cellpadding='4'>
+12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+select_venta_por_id
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+36
+</td>
+<td cellpadding='4'>
+12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+eliminar_elemento
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+41
+</td>
+<td cellpadding='4'>
+12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+editar_elemento
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+53
+</td>
+<td cellpadding='4'>
+12
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+ventas
+</td>
+<td cellpadding='4'>MODULO
+</td>
+<td cellpadding='4'>
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+3
+</td>
+<td cellpadding='4'>
 4
 </td>
 </tr>
 
 <tr>
 <td cellpadding='4'>
-capacidad
+tienda
 </td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>USIZE
-</td>
-<td cellpadding='4'>Local
+<td cellpadding='4'>MODULO
 </td>
 <td cellpadding='4'>
-2
+</td>
+<td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-10
+1
+</td>
+<td cellpadding='4'>
+0
 </td>
 </tr>
 
@@ -150,28 +168,10 @@ vector
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-2
+67
 </td>
 <td cellpadding='4'>
-28
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-value
-</td>
-<td cellpadding='4'>VARIABLE
-</td>
-<td cellpadding='4'>I64
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-2
-</td>
-<td cellpadding='4'>
-51
+4
 </td>
 </tr>
 

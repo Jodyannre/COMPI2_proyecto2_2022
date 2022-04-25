@@ -68,7 +68,7 @@ func (p Identificador) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	/*Inicializar el obj3d*/
 	obj3D.Referencia = tempValor
-
+	obj3D.PosId = temp
 	obj3D.DireccionID = ""
 	obj3D.Valor = simbolo.Valor.(Ast.TipoRetornado)
 	obj3D.Codigo = codigo3d

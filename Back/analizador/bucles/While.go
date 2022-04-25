@@ -40,7 +40,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 	/***************************************************************************/
 
 	newScope := Ast.NewScope("Loop", scope)
-	newScope.Posicion = scope.Size
+	newScope.Posicion = scope.Size + scope.Posicion
 
 	var condicionResultado Ast.TipoRetornado
 	var instruccion, resultado interface{}

@@ -51,7 +51,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 		codigo3d += scopeAnterior + " = P; //Guardar el scope anterior \n"
 		codigo3d += "P = " + strconv.Itoa(d.ScopeOriginal.Posicion) + "; //Scope de donde proviene el valor\n"
 		/***************************************************************/
-		existe = d.ScopeOriginal.Exist_actual(d.Id)
+		existe = scope.Exist_actual(d.Id)
 		valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
 		obj3dTemp = valor.Valor.(Ast.O3D)
 		valor = obj3dTemp.Valor
@@ -172,7 +172,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 		/*Codigo 3d*/
 		/*Agregar el código de la creación del vector*/
-
+		codigo3d += obj3dValor.Codigo
 		if simboloVector.Referencia && simboloVector.Entorno != nil {
 			scopeAnterior := Ast.GetTemp()
 			//posVectorRef := Ast.GetTemp()
@@ -185,7 +185,6 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			codigo3d += referenciaVector + " = " + obj3dValor.Referencia + "; //Dir vector\n"
 		}
 
-		codigo3d += obj3dValor.Codigo
 		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"
@@ -227,7 +226,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 		} else {
 			nSimbolo.Referencia_puntero = &simboloVector
 		}
-
+		codigo3d += obj3dValor.Codigo
 		if nSimbolo.Referencia && simboloVector.Entorno != nil {
 			codigo3d += referenciaVector + " = " + strconv.Itoa(simboloVector.Direccion) + "; //Dir referencia\n"
 		} else {
@@ -236,7 +235,7 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 		/*Codigo 3d*/
 		/*Agregar el código de la creación del vector*/
-		codigo3d += obj3dValor.Codigo
+
 		codigo3d += "/*************************DECLARACION DE VECTOR*/\n"
 		if d.Stack {
 			codigo3d += temp + " = P + " + strconv.Itoa(scope.ContadorDeclaracion) + ";\n"

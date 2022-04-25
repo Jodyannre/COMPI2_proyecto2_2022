@@ -61,6 +61,7 @@ func (v VecFactorial) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "/*****************************CREACION DE ARRAY*/\n"
 	codigo3d += "/***********************************************/\n"
 	codigo3d += inicioVector + " = H; //Guardar inicio del array \n"
+	codigo3d += "H = H + 1;\n"
 	codigo3d += contadorArray + " = 0; //Inicio contador \n"
 
 	if cantidad.Tipo == Ast.ERROR {
@@ -120,7 +121,7 @@ func (v VecFactorial) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "heap[(int)" + inicioVector + "] = " + strconv.Itoa(vector.Size) + ";\n"
 	codigo3d += "/*************************GUARDAR LOS ELEMENTOS*/\n"
 	codigo3d += salto + ":\n"
-	codigo3d += "if (" + contadorArray + " <= " + strconv.Itoa(vector.Size) + ") goto " + lt + ";\n"
+	codigo3d += "if (" + contadorArray + " < " + strconv.Itoa(vector.Size) + ") goto " + lt + ";\n"
 	codigo3d += "goto " + lf + ";\n"
 	codigo3d += lt + ":\n"
 	codigo3d += "heap[(int)H] = " + obj3dValor.Referencia + "; //Copiar elemento\n"

@@ -127,13 +127,22 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 		//Contar los parametros
 		contadorDeclaraciones += funcion.Parametros.Len()
+		if l.ScopeOriginal != nil {
+			newScope.Posicion = l.ScopeOriginal.Size + l.ScopeOriginal.Posicion
+			//Primera posicion para el return
+			newScope.Size = contadorDeclaraciones
+			newScope.Size++
+			newScope.ContadorDeclaracion++
+			simbolo.Direccion = l.ScopeOriginal.Size + l.ScopeOriginal.Posicion
+		} else {
+			newScope.Posicion = scope.Size + scope.Posicion
+			//Primera posicion para el return
+			newScope.Size = contadorDeclaraciones
+			newScope.Size++
+			newScope.ContadorDeclaracion++
+			simbolo.Direccion = scope.Size + scope.Posicion
+		}
 
-		newScope.Posicion = scope.Size + scope.Posicion
-		//Primera posicion para el return
-		newScope.Size = contadorDeclaraciones
-		newScope.Size++
-		newScope.ContadorDeclaracion++
-		simbolo.Direccion = scope.Size + scope.Posicion
 	}
 
 	//Verificar que la función reciba o no parámetros y se estén enviando parámetros
@@ -179,7 +188,12 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigo3d += "/*******************************LLAMADA FUNCION*/\n"
 	codigo3d += "/*********************DECLARACION DE PARAMETROS*/\n"
 	/********************************CAMBIO DE AMBITO PARA DECLARAR PARAMENTROS********************/
-	codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Set direccion ambito simulado \n"
+	if l.ScopeOriginal != nil {
+		codigo3d += "P = P + " + strconv.Itoa(l.ScopeOriginal.Size) + "; //Set direccion ambito simulado \n"
+	} else {
+		codigo3d += "P = P + " + strconv.Itoa(scope.Size) + "; //Set direccion ambito simulado \n"
+	}
+
 	/**********************************************************************************************/
 	//Crear los parámetros de las funciones
 	parametrosCreados = funcion.RunParametros(&newScope, l.ScopeOriginal, l.Parametros)
@@ -200,7 +214,13 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	codigoTemp += "/***********************************************/\n"
 	codigo3d += codigoTemp
 	/********************************RETORNO AL AMBITO ANTERIOR************************************/
-	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Retorno al ambito anterior \n"
+
+	if l.ScopeOriginal != nil {
+		codigo3d += "P = P - " + strconv.Itoa(l.ScopeOriginal.Size) + "; //Retorno al ambito anterior \n"
+	} else {
+		codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Retorno al ambito anterior \n"
+	}
+
 	/**********************************************************************************************/
 	codigo3d += "/***********************************************/\n"
 	codigo3d += "/***********************************************/\n"

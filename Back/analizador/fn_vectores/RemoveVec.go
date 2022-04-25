@@ -5,8 +5,6 @@ import (
 	"Back/analizador/errores"
 	"Back/analizador/expresiones"
 	"strconv"
-
-	"github.com/colegno/arraylist"
 )
 
 type RemoveVec struct {
@@ -147,56 +145,10 @@ func (p RemoveVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			Valor: nError,
 		}
 	}
-	//Verificar que la posición exista en el vector
-	if posicion.Valor.(int) > vector.Size {
-		//Error, fuera de rango
-		fila := p.Posicion.(Ast.Abstracto).GetFila()
-		columna := p.Posicion.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion.Valor.(int)) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
-	}
 
 	//Paso todas las pruebas, entonces guardar el elemento
 	//Crear la nueva lista que contendrá los valores después de la eliminación
-	nLista := arraylist.New()
 
-	for i := 0; i <= vector.Valor.Len(); i++ {
-		if i == posicion.Valor.(int) {
-			removido = vector.Valor.GetValue(i).(Ast.TipoRetornado)
-			continue
-		}
-		if i < vector.Valor.Len() {
-			nLista.Add(vector.Valor.GetValue(i))
-		}
-	}
-	//Limpiar la lista
-	vector.Valor.Clear()
-
-	//Regresar los valores a la lista
-	for i := 0; i <= nLista.Len(); i++ {
-		vector.Valor.Add(nLista.GetValue(i))
-	}
-
-	//Agregar la nueva lista
-	vector.Valor = nil
-	vector.Valor = nLista
-	//Disminuir el tamaño
-	vector.Size--
-	//vector.Capacity = vector.CalcularCapacity(vector.Size, vector.Capacity)
-	//Cambiar el estado de vacio
-	if vector.Size == 0 {
-		vector.Vacio = true
-	}
 	simbolo.Valor = Ast.TipoRetornado{Tipo: Ast.VECTOR, Valor: vector}
 
 	/*CODIGO 3D PARA AGREGAR EL ELEMENTO AL VECTOR*/

@@ -43,7 +43,7 @@ func (i IF) Run(scope *Ast.Scope) interface{} {
 	/****************************************************************/
 	//Crear el nuevo scope
 	newScope := Ast.NewScope("IF_I", scope)
-	newScope.Posicion = scope.Size
+	newScope.Posicion = scope.Size + scope.Posicion
 	//Aumento el size para apartar un espacio para el posible valor retornado
 	newScope.Size++
 	//Inicializar la lista de respuestas

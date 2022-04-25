@@ -48,7 +48,7 @@ func (c Clone) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		codigo3d += obj3dClone.Codigo
 		referencia = obj3dClone.Referencia
 	default:
-		nValor = valor.Valor
+		nValor = valor
 		referencia = Primitivo_To_String(valor.Valor, valor.Tipo)
 	}
 
