@@ -9,6 +9,8 @@ var P, H = 0, 0
 var Label, Temporal int = 1, 1
 var Temporales string = ""
 var FuncionesC3D string = ""
+var FuncionEnStack string = ""
+var ResultadoFuncionStack TipoRetornado
 
 type TipoDato int
 
@@ -237,6 +239,7 @@ type O3D struct {
 	EsContains           string
 	PosId                string
 	TipoEstructura       TipoRetornado
+	EsRelacionalSimple   string
 }
 
 func (t TipoRetornado) GetTipo() (TipoDato, TipoDato) {
@@ -342,4 +345,20 @@ func Primitivo_To_String(valor interface{}, tipo TipoDato) string {
 		}
 	}
 	return salida
+}
+
+func CompararFuncionStack(actual string) bool {
+	return actual == FuncionEnStack
+}
+
+func SetFuncionStack(actual string) {
+	FuncionEnStack = actual
+}
+
+func SetResultadoFuncionStack(resultado TipoRetornado) {
+	ResultadoFuncionStack = resultado
+}
+
+func GetResultadoFuncionStack() TipoRetornado {
+	return ResultadoFuncionStack
 }

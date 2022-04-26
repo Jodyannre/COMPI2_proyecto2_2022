@@ -614,7 +614,8 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			//Actualizar el código y conseguir el obj O3D
 			obj := Ast.ActualizarCodigoRelacional(tipo_izq, tipo_der, op.operador, false)
 			obj.Valor = valor
-
+			obj.RelacionalExp = ""
+			obj.EsRelacionalSimple = "si"
 			return Ast.TipoRetornado{
 				Tipo:  Ast.RELACIONAL,
 				Valor: obj,
@@ -676,7 +677,8 @@ func (op Operacion) GetValue(entorno *Ast.Scope) Ast.TipoRetornado {
 			//Actualizar el código y conseguir el obj O3D
 			obj := Ast.ActualizarCodigoRelacional(tipo_izq, tipo_der, op.operador, false)
 			obj.Valor = valor
-
+			obj.RelacionalExp = ""
+			obj.EsRelacionalSimple = "si"
 			return Ast.TipoRetornado{
 				Tipo:  Ast.RELACIONAL,
 				Valor: obj,

@@ -207,7 +207,20 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 
 	//Ejecutar la función
+	//Verificar la recursividad
+	/*
+		if !Ast.CompararFuncionStack(funcion.Nombre) {
+			resultadoFuncion = funcion.Run(&newScope).(Ast.TipoRetornado)
+			Ast.SetFuncionStack(funcion.Nombre)
+			Ast.SetResultadoFuncionStack(resultadoFuncion)
+		} else {
+			Ast.SetFuncionStack("")
+			resultadoFuncion = Ast.GetResultadoFuncionStack()
+		}
+	*/
 	resultadoFuncion = funcion.Run(&newScope).(Ast.TipoRetornado)
+	//Agregar funcion a stack por tema de recursividad
+
 	obj3dTemp = resultadoFuncion.Valor.(Ast.O3D)
 	codigoTemp += "/**************************EJECUCION DE FUNCION*/\n"
 	codigoTemp += obj3dTemp.Codigo
