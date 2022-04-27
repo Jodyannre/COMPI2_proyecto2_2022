@@ -25,8 +25,9 @@ type StructInstancia struct {
 func NewStructInstancia(plantilla Ast.TipoRetornado, atributos *arraylist.List, mutable bool, fila, columna int) StructInstancia {
 	//Variables para la validación de tipos
 	nS := StructInstancia{
-		Plantilla:   plantilla,
-		Tipo:        Ast.STRUCT,
+		Plantilla: plantilla,
+		Tipo:      Ast.STRUCT,
+		//VOY A PROBAR PONIENDO A TODOS COMO TRUE
 		Mutable:     mutable,
 		AtributosIn: atributos,
 		Fila:        fila,

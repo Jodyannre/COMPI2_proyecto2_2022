@@ -86,14 +86,19 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 
 		if obj3dValor.SaltoReturn != "" {
 			if !obj3dValor.TranferenciaAgregada {
-				codigo3d += "goto " + obj3dValor.Salto + ";\n"
+				saltoTemp := strings.Replace(obj3dValor.SaltoReturn, ",", "", -1)
+				codigo3d += "goto " + saltoTemp + ";\n"
 			}
 			if !obj3dValor.TranferenciaAgregada {
-				saltoReturn += obj3dValor.SaltoReturn + ","
+				if obj3dValor.SaltoReturn[len(obj3dValor.SaltoReturn)-1] != ',' {
+					saltoReturn += obj3dValor.SaltoReturn + ","
+				} else {
+					saltoReturn += obj3dValor.SaltoReturn
+				}
 			} else {
 				saltoReturn += obj3dValor.SaltoReturn
 			}
-			saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
+			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 			saltoReturnExp += obj3dValor.SaltoReturnExp
 			algunValorParaRetornar = respuesta
 			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
@@ -230,13 +235,22 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		}
 	*/
 
-	if saltoReturn != "" {
+	if saltoReturn != "" && saltoReturnExp == "" {
+		if saltoReturn[len(saltoReturn)-1] != ',' {
+			saltoReturn += ","
+		}
+		saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 		codigo3d += saltoReturn
 	}
 
-	if saltoReturnExp != "" {
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
 		posicionReturn = Ast.GetTemp()
 		valorReturn = Ast.GetTemp()
+		if saltoReturnExp[len(saltoReturnExp)-1] != ',' {
+			saltoReturnExp += ","
+		}
+		saltoReturnExp = strings.Replace(saltoReturnExp, ",", ":\n", -1)
+		codigo3d += saltoReturnExp
 		//Recuperar el valor de la variable que se va a retornar
 		codigo3d += "/*****************RECUPERAR EL VALOR DEL RETURN*/\n"
 		codigo3d += posicionReturn + " = P + 0; //Posicion return \n"
@@ -260,7 +274,7 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		Valor: true,
 	}
 	obj3d.Codigo = codigo3d
-	if saltoReturnExp != "" {
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
 		obj3d.Valor = Ast.TipoRetornado{
 			Tipo:  f.Retorno.Tipo,
 			Valor: algunValorParaRetornar.(Ast.TipoRetornado).Valor,

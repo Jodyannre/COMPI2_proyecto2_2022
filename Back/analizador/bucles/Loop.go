@@ -35,6 +35,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 	var obj3d, obj3dresultadoInstruccion Ast.O3D
 	var codigo3d string
 	var saltoBreak, saltoContinue, saltoReturn, saltoLoop, saltoReturnExp string
+	var valorReturn Ast.TipoRetornado
 	//var reemplazoContinue string
 	/*******************************************************************************/
 
@@ -69,6 +70,12 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 			obj3dresultadoInstruccion = resultado.(Ast.TipoRetornado).Valor.(Ast.O3D)
 			codigo3d += obj3dresultadoInstruccion.Codigo
 			resultado = obj3dresultadoInstruccion.Valor
+
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN ||
+				resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultado.(Ast.TipoRetornado)
+			}
+
 			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return resultado
 			}
@@ -77,6 +84,12 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 			obj3dresultadoInstruccion = resultado.(Ast.TipoRetornado).Valor.(Ast.O3D)
 			codigo3d += obj3dresultadoInstruccion.Codigo
 			resultado = obj3dresultadoInstruccion.Valor
+
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN ||
+				resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultado.(Ast.TipoRetornado)
+			}
+
 			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return resultado
 			}
@@ -210,18 +223,42 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", "", -1)
 	}
 
+	if saltoReturnExp != "" {
+		saltoReturnExp = strings.Replace(saltoReturnExp, ",", ":\n", -1)
+		if saltoReturnExp[len(saltoReturnExp)-1] != '\n' {
+			saltoReturnExp += ","
+		}
+		codigo3d += saltoReturnExp
+	}
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
 	codigo3d += "/***********************************************/\n"
 	obj3d.Valor = Ast.TipoRetornado{
 		Valor: true,
 		Tipo:  Ast.EJECUTADO,
 	}
+
 	obj3d.Codigo = codigo3d
+
+	if saltoReturnExp != "" {
+		saltoNuevo := Ast.GetLabel()
+		codigo3d += "goto " + saltoNuevo + ";\n"
+		obj3d.Codigo = codigo3d
+		obj3d.SaltoReturn = saltoReturn + ","
+		obj3d.SaltoReturnExp = saltoNuevo + ","
+		obj3d.Valor.Tipo = Ast.RETURN
+		obj3d.Valor = valorReturn
+		obj3d.TranferenciaAgregada = true
+		return Ast.TipoRetornado{
+			Tipo:  Ast.RETURN,
+			Valor: obj3d,
+		}
+	}
 
 	if saltoReturn != "" {
 		obj3d.SaltoReturn = saltoReturn
 		obj3d.SaltoReturnExp = saltoReturnExp
 		obj3d.Valor.Tipo = Ast.RETURN
+		obj3d.Valor = valorReturn
 		return Ast.TipoRetornado{
 			Tipo:  Ast.RETURN,
 			Valor: obj3d,

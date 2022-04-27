@@ -98,7 +98,7 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		structInstancia := resultadoAtributo.Valor.(StructInstancia)
 
 		//Verificar que exista el atributo
-		if !structInstancia.Entorno.Exist_actual(idAtributo) {
+		if !structInstancia.Entorno.Exist(idAtributo) {
 			fila := a.Valor.(Ast.Abstracto).GetFila()
 			columna := a.Valor.(Ast.Abstracto).GetColumna()
 			msg := "Semantic error, the element " + idAtributo + " doesn't exist." +
@@ -235,7 +235,7 @@ func (a AsignacionAccesoStruct) Run(scope *Ast.Scope) interface{} {
 		idStruct = nombreStruct.(expresiones.Identificador).Valor
 		idAtributo = nombreAtributo.(expresiones.Identificador).Valor
 
-		if !scope.Exist_actual(idStruct) {
+		if !scope.Exist(idStruct) {
 			fila := a.Valor.(Ast.Abstracto).GetFila()
 			columna := a.Valor.(Ast.Abstracto).GetColumna()
 			msg := "Semantic error, the element " + idStruct + " doesn't exist." +

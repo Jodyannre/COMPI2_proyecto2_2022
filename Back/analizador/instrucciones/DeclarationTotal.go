@@ -136,6 +136,14 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 
 	//Todo bien crear y agregar el símbolo
 
+	if d.Tipo.Tipo == Ast.STRUCT {
+		//Agregar la mutabilidad al struct
+		var abstracto interface{}
+		abstracto = valor.Valor
+		abstracto = abstracto.(Ast.Structs).SetMutabilidad(d.Mutable)
+		valor.Valor = abstracto
+	}
+
 	nSimbolo := Ast.Simbolo{
 		Identificador: d.Id,
 		Valor:         valor,

@@ -36,7 +36,8 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 	/******************************VARIABLES 3D*********************************/
 	var obj3d, obj3dcondicion, obj3dresultadoInstruccion Ast.O3D
 	var codigo3d, lt, lf, saltoWhile string
-	var saltoContinue, saltoBreak, saltoReturn string
+	var saltoContinue, saltoBreak, saltoReturn, saltoReturnExp string
+	var valorReturn Ast.TipoRetornado
 	/***************************************************************************/
 
 	newScope := Ast.NewScope("Loop", scope)
@@ -99,6 +100,11 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return resultado
 			}
+
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN ||
+				resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultado.(Ast.TipoRetornado)
+			}
 		} else if tipoGeneral == Ast.EXPRESION {
 			resultado = instruccion.(Ast.Expresion).GetValue(&newScope)
 			obj3dresultadoInstruccion = resultado.(Ast.TipoRetornado).Valor.(Ast.O3D)
@@ -106,6 +112,11 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			resultado = obj3dresultadoInstruccion.Valor
 			if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR {
 				return resultado
+			}
+
+			if resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN ||
+				resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultado.(Ast.TipoRetornado)
 			}
 		}
 		/*
@@ -137,6 +148,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			saltoBreak = strings.Replace(saltoBreak, ",", ":\n", -1)
 
 			saltoReturn += obj3dresultadoInstruccion.SaltoReturn
+			saltoReturnExp += obj3dresultadoInstruccion.SaltoReturnExp
 			//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 			continue
 		}
@@ -184,6 +196,14 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", "", -1)
 	}
 
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
+		saltoReturnExp = strings.Replace(saltoReturnExp, ",", ":\n", -1)
+		if saltoReturnExp[len(saltoReturnExp)-1] != '\n' {
+			saltoReturnExp += ","
+		}
+		codigo3d += saltoReturnExp
+	}
+
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
 	codigo3d += "/***********************************************/\n"
 
@@ -191,6 +211,21 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
+		saltoNuevo := Ast.GetLabel()
+		codigo3d += "goto " + saltoNuevo + ";\n"
+		obj3d.Codigo = codigo3d
+		obj3d.SaltoReturn = saltoReturn + ","
+		obj3d.SaltoReturnExp = saltoNuevo + ","
+		obj3d.Valor.Tipo = Ast.RETURN
+		obj3d.Valor = valorReturn
+		obj3d.TranferenciaAgregada = true
+		return Ast.TipoRetornado{
+			Tipo:  Ast.RETURN,
+			Valor: obj3d,
+		}
 	}
 
 	if saltoReturn != "" {

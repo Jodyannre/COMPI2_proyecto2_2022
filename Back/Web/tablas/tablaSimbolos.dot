@@ -15,142 +15,70 @@
 	
 <tr>
 <td cellpadding='4'>
-Venta
+Points
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
 <td cellpadding='4'>STRUCT
 </td>
-<td cellpadding='4'>Local
+<td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-5
+2
 </td>
 <td cellpadding='4'>
-19
+7
 </td>
 </tr>
 
 <tr>
 <td cellpadding='4'>
-crear_tabla
+Node
 </td>
-<td cellpadding='4'>FUNCION
+<td cellpadding='4'>VARIABLE
 </td>
-<td cellpadding='4'>Vec -Venta-
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-11
-</td>
-<td cellpadding='4'>
-12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-insertar_tabla
-</td>
-<td cellpadding='4'>FUNCION
-</td>
-<td cellpadding='4'>VOID
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-20
-</td>
-<td cellpadding='4'>
-12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-select_venta_por_id
-</td>
-<td cellpadding='4'>FUNCION
-</td>
-<td cellpadding='4'>VOID
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-36
-</td>
-<td cellpadding='4'>
-12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-eliminar_elemento
-</td>
-<td cellpadding='4'>FUNCION
-</td>
-<td cellpadding='4'>VOID
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-41
-</td>
-<td cellpadding='4'>
-12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-editar_elemento
-</td>
-<td cellpadding='4'>FUNCION
-</td>
-<td cellpadding='4'>VOID
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-53
-</td>
-<td cellpadding='4'>
-12
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-ventas
-</td>
-<td cellpadding='4'>MODULO
-</td>
-<td cellpadding='4'>
-</td>
-<td cellpadding='4'>Local
-</td>
-<td cellpadding='4'>
-3
-</td>
-<td cellpadding='4'>
-4
-</td>
-</tr>
-
-<tr>
-<td cellpadding='4'>
-tienda
-</td>
-<td cellpadding='4'>MODULO
-</td>
-<td cellpadding='4'>
+<td cellpadding='4'>STRUCT
 </td>
 <td cellpadding='4'>Global
 </td>
 <td cellpadding='4'>
-1
+7
+</td>
+<td cellpadding='4'>
+7
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+ValoresPiv
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+13
+</td>
+<td cellpadding='4'>
+7
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+insertFirst
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+20
 </td>
 <td cellpadding='4'>
 0
@@ -159,7 +87,79 @@ tienda
 
 <tr>
 <td cellpadding='4'>
-vector
+insertLast
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+insertInto
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+printListNormal
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+156
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+printListBack
+</td>
+<td cellpadding='4'>FUNCION
+</td>
+<td cellpadding='4'>VOID
+</td>
+<td cellpadding='4'>Global
+</td>
+<td cellpadding='4'>
+177
+</td>
+<td cellpadding='4'>
+0
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -168,10 +168,2206 @@ vector
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-67
+203
 </td>
 <td cellpadding='4'>
 4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+first
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+204
+</td>
+<td cellpadding='4'>
+42
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+count
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+204
+</td>
+<td cellpadding='4'>
+51
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+last
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+204
+</td>
+<td cellpadding='4'>
+59
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+refs
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+204
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+206
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+206
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+206
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+206
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+206
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+207
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+207
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+207
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+207
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+207
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+208
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+208
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+208
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+208
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+208
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+209
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+209
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+209
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+209
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+209
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+210
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+210
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+210
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+210
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+210
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+211
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+211
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+211
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+211
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+211
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+212
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+212
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+212
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+212
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+212
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+213
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+213
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+213
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+213
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+213
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+214
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+214
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+214
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+214
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+214
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+idx
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+215
+</td>
+<td cellpadding='4'>
+23
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+215
+</td>
+<td cellpadding='4'>
+30
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+left
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+215
+</td>
+<td cellpadding='4'>
+50
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+right
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+215
+</td>
+<td cellpadding='4'>
+57
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+point
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+215
+</td>
+<td cellpadding='4'>
+37
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+52
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+64
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+pos
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+34
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+61
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+108
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+109
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+auxIndice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+110
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+rootIndice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+111
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+otro
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+112
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+posicionNueva
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+113
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+52
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+64
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+52
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+64
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+pos
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+34
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+105
+</td>
+<td cellpadding='4'>
+61
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+108
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+109
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+auxIndice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+110
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+rootIndice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+111
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+otro
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+112
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+posicionNueva
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+113
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+15
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+26
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+20
+</td>
+<td cellpadding='4'>
+53
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+22
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+val
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+14
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+25
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+62
+</td>
+<td cellpadding='4'>
+52
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+indice
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+64
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+156
+</td>
+<td cellpadding='4'>
+19
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+156
+</td>
+<td cellpadding='4'>
+46
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+157
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actual
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+158
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actualDL
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>VECTOR
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+177
+</td>
+<td cellpadding='4'>
+17
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+valores
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRUCT
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+177
+</td>
+<td cellpadding='4'>
+44
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+178
+</td>
+<td cellpadding='4'>
+1
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+actual
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+179
+</td>
+<td cellpadding='4'>
+1
 </td>
 </tr>
 

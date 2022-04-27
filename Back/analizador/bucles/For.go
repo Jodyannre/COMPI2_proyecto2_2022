@@ -42,6 +42,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	var limiteSuperior, limiteInferior string
 	var iteracionPara3D bool = true
 	var saltoBreak, saltoContinue, saltoReturn, saltoReturnExp string
+	var valorReturn Ast.TipoRetornado
 	/**************************************************************************************/
 
 	var variable expresiones.Identificador
@@ -244,6 +245,11 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				//saltoReturn = strings.Replace(saltoReturn, ",", ":\n", -1)
 			}
 
+			if resultadoInstruccion.Tipo == Ast.RETURN ||
+				resultadoInstruccion.Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultadoInstruccion
+			}
+
 		}
 		iteracionPara3D = false
 		//primeraIteracion = false
@@ -286,6 +292,12 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				resultadoInstruccion = obj3dResultado.Valor
 				codigo3dFor += obj3dResultado.Codigo
 			}
+
+			if resultadoInstruccion.Tipo == Ast.RETURN ||
+				resultadoInstruccion.Tipo == Ast.RETURN_EXPRESION {
+				valorReturn = resultadoInstruccion
+			}
+
 			//Verificar las instrucciones de transferencia
 			if Ast.EsTransferencia(resultadoInstruccion.Tipo) {
 
@@ -341,6 +353,14 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 		codigo3d = strings.Replace(codigo3d, "//#aquiVaElSaltoContinue", "", -1)
 	}
 
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
+		saltoReturnExp = strings.Replace(saltoReturnExp, ",", ":\n", -1)
+		if saltoReturnExp[len(saltoReturnExp)-1] != '\n' {
+			saltoReturnExp += ","
+		}
+		codigo3d += saltoReturnExp
+	}
+
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
 	codigo3d += "/***********************************************/\n"
 
@@ -351,6 +371,21 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 		Valor: true,
 	}
 	obj3d.Codigo = codigo3d
+
+	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
+		saltoNuevo := Ast.GetLabel()
+		codigo3d += "goto " + saltoNuevo + ";\n"
+		obj3d.Codigo = codigo3d
+		obj3d.SaltoReturn = saltoReturn + ","
+		obj3d.SaltoReturnExp = saltoNuevo + ","
+		obj3d.Valor.Tipo = Ast.RETURN
+		obj3d.Valor = valorReturn
+		obj3d.TranferenciaAgregada = true
+		return Ast.TipoRetornado{
+			Tipo:  Ast.RETURN,
+			Valor: obj3d,
+		}
+	}
 
 	if saltoReturn != "" {
 		obj3d.SaltoReturn = saltoReturn

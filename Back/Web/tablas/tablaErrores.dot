@@ -17,17 +17,17 @@
 <td cellpadding='4'>
 1
 </td>
-<td cellpadding='4'>Semantic error, MAIN method not found. -- Line: 0 Column: 0
+<td cellpadding='4'>no viable alternative at input 'if(valores.first==-1)||(pos==0){InsertFirst('
 </td>
 <td cellpadding='4'>Global
 </td>
-<td cellpadding='4'>0
+<td cellpadding='4'>116
 </td>
 <td cellpadding='4'>
-0
+19
 </td>
 <td cellpadding='4'>
-04-25-2022 21:25:11
+04-26-2022 22:17:40
 </td>
 </tr>
 
