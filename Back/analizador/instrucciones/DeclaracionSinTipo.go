@@ -83,6 +83,11 @@ func (d DeclaracionSinTipo) Run(scope *Ast.Scope) interface{} {
 	} else if valor.Tipo == Ast.STRUCT {
 		nValor := valor.Valor.(Ast.Structs).SetMutabilidad(d.Mutable)
 		valor.Valor = nValor
+	} else if valor.Tipo == Ast.DIMENSION_ARRAY {
+		elemento := valor.Valor.(expresiones.Array)
+		elemento.Mutable = d.Mutable
+		valor.Tipo = Ast.ARRAY
+		valor.Valor = elemento
 	}
 	//Crear símbolo y agregarlo a la tabla del entorno actual
 	nSimbolo = Ast.Simbolo{

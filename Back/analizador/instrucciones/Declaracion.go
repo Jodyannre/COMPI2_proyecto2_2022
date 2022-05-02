@@ -4,7 +4,6 @@ import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
 	"Back/analizador/expresiones"
-	"strconv"
 )
 
 type Declaracion struct {
@@ -48,17 +47,12 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 
 	//Verificar si es un struct y si el tipo de la variable es indefinido o error
 	if d.Tipo != Ast.INDEFINIDO && tipoIn == Ast.STRUCT {
-		msg := "Semantic error, can't initialize a" + Ast.ValorTipoDato[d.Tipo] + "with " + Ast.ValorTipoDato[tipoIn] + " value." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(13, d, d, "",
+			Ast.ValorTipoDato[d.Tipo],
+			Ast.ValorTipoDato[tipoIn],
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Verificar que sea un primitivo i64 y la declaración sea usize
@@ -91,17 +85,12 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 	if d.Tipo == Ast.VECTOR && valor.Tipo != Ast.VECTOR ||
 		d.Tipo == Ast.ARRAY && valor.Tipo != Ast.ARRAY {
 		//Error, no se puede inicializar un vector con un valor
-		msg := "Semantic error, can't initialize a" + Ast.ValorTipoDato[d.Tipo] + "with " + Ast.ValorTipoDato[valor.Tipo] + " value." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(13, d, d, "",
+			Ast.ValorTipoDato[d.Tipo],
+			Ast.ValorTipoDato[valor.Tipo],
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	if valor.Tipo == d.Tipo && !existe {
@@ -125,31 +114,21 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 			if vectorCorrecto.Tipo == Ast.ERROR {
 				if vectorCorrecto.Valor == 1 {
 					//No tiene ningún tipo
-					msg := "Semantic error, can't initialize a Vector with " + Ast.ValorTipoDato[nValor.Tipo] + " type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(37, d, d, "",
+						Ast.ValorTipoDato[nValor.Tipo],
+						"",
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 				if vectorCorrecto.Valor == 2 {
 					//Tipos diferentes de declaración y creación
-					msg := "Semantic error, can't initialize a Vector<" + Ast.ValorTipoDato[d.TipoRetorno] + "> with Vector<" + Ast.ValorTipoDato[nValor.Tipo] + "> type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(38, d, d, "",
+						Ast.ValorTipoDato[d.TipoRetorno],
+						Ast.ValorTipoDato[nValor.Tipo],
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 			}
 
@@ -168,31 +147,22 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 			if vectorCorrecto.Tipo == Ast.ERROR {
 				if vectorCorrecto.Valor == 1 {
 					//No tiene ningún tipo
-					msg := "Semantic error, can't initialize an ARRAY with " + Ast.ValorTipoDato[nValor.TipoDelArray.Tipo] + " value." +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(39, d, d, "",
+						Ast.ValorTipoDato[nValor.TipoDelArray.Tipo],
+						"",
+						scope)
+					//////////////////////////////////////////////////////////////////
+
 				}
 				if vectorCorrecto.Valor == 2 {
 					//Tipos diferentes de declaración y creación
-					msg := "Semantic error, can't initialize an ARRAY[" + Ast.ValorTipoDato[d.TipoRetorno] + "] with ARRAY[" + Ast.ValorTipoDato[nValor.TipoDelArray.Tipo] + "> type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(40, d, d, "",
+						Ast.ValorTipoDato[d.TipoRetorno],
+						Ast.ValorTipoDato[nValor.TipoDelArray.Tipo],
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 			}
 
@@ -225,31 +195,21 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 			if vectorCorrecto.Tipo == Ast.ERROR {
 				if vectorCorrecto.Valor == 1 {
 					//No tiene ningún tipo
-					msg := "Semantic error, can't initialize a Vector with " + Ast.ValorTipoDato[nValor.Tipo] + " type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(37, d, d, "",
+						Ast.ValorTipoDato[nValor.Tipo],
+						"",
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 				if vectorCorrecto.Valor == 2 {
 					//Tipos diferentes de declaración y creación
-					msg := "Semantic error, can't initialize a Vector<" + Ast.ValorTipoDato[d.TipoRetorno] + "> with Vector<" + Ast.ValorTipoDato[nValor.Tipo] + "> type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(38, d, d, "",
+						Ast.ValorTipoDato[d.TipoRetorno],
+						Ast.ValorTipoDato[nValor.Tipo],
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 			}
 
@@ -265,31 +225,21 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 			if arrayCorrecto.Tipo == Ast.ERROR {
 				if arrayCorrecto.Valor == 1 {
 					//No tiene ningún tipo
-					msg := "Semantic error, can't initialize an ARRAY with " + Ast.ValorTipoDato[nValor.TipoArray] + " type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(39, d, d, "",
+						Ast.ValorTipoDato[nValor.TipoArray],
+						"",
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 				if arrayCorrecto.Valor == 2 {
 					//Tipos diferentes de declaración y creación
-					msg := "Semantic error, can't initialize a ARRAY[" + Ast.ValorTipoDato[nValor.TipoDelArray.Tipo] + "] with ARRAY[" + Ast.ValorTipoDato[nValor.TipoArray] + "] type" +
-						" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-					nError := errores.NewError(d.Fila, d.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(40, d, d, "",
+						Ast.ValorTipoDato[nValor.TipoDelArray.Tipo],
+						Ast.ValorTipoDato[nValor.TipoArray],
+						scope)
+					//////////////////////////////////////////////////////////////////
 				}
 			}
 
@@ -312,34 +262,20 @@ func (d Declaracion) Run(scope *Ast.Scope) interface{} {
 		scope.Add(nSimbolo)
 	} else if existe {
 		//Ya existe y generar error semántico
-		//fmt.Println("Error, ese elemento ya existe en el ámbito local")
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(12, d, d, d.Id,
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	} else {
 		//Error de tipos, generar error semántico
-		//fmt.Println("Error, los tipos no coinciden en la declaración")
-		msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-			" type to " + Ast.ValorTipoDato[int(d.Tipo)] +
-			" type. -- Line: " + strconv.Itoa(d.Fila) +
-			" Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(24, d, d, "",
+			Ast.ValorTipoDato[int(valor.Tipo)],
+			Ast.ValorTipoDato[int(d.Tipo)],
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,

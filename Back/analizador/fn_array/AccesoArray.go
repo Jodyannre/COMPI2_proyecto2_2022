@@ -235,7 +235,7 @@ func GetElemento(array expresiones.Array, elementos *arraylist.List, posiciones 
 		posiciones.RemoveAtIndex(0)
 		posiciones3D.RemoveAtIndex(0)
 	}
-	salto := Ast.GetTemp()
+	salto := Ast.GetLabel()
 	codigo3d += "goto " + salto + ";\n"
 	falsos = strings.Replace(falsos, ",", ":\n", -1)
 	codigo3d += BoundsError(falsos)

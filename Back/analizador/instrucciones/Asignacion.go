@@ -40,19 +40,12 @@ func (a Asignacion) Run(scope *Ast.Scope) interface{} {
 	//Verificar que sea un identificador
 	if tipoParticular != Ast.IDENTIFICADOR && tipoParticular != Ast.VEC_ACCESO &&
 		tipoParticular != Ast.ACCESO_ARRAY && tipoParticular != Ast.ACCESO_STRUCT {
-		//Error, se espera un identificador. un acceso a vector o un acceso a un array
-		msg := "Semantic error, expected IDENTIFICADOR, found " + Ast.ValorTipoDato[tipoParticular] +
-			". -- Line: " + strconv.Itoa(a.Id.(Ast.Abstracto).GetFila()) +
-			" Column: " + strconv.Itoa(a.Id.(Ast.Abstracto).GetColumna())
-		nError := errores.NewError(a.Id.(Ast.Abstracto).GetFila(), a.Id.(Ast.Abstracto).GetColumna(), msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		/////////////////////////////ERROR/////////////////////////////////////
+		return errores.GenerarError(36, a.Id, a.Id, "",
+			Ast.ValorTipoDato[tipoParticular],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////////
 	}
 
 	if tipoParticular == Ast.IDENTIFICADOR {
@@ -80,18 +73,12 @@ func (a Asignacion) Run(scope *Ast.Scope) interface{} {
 	} else if tipoParticular == Ast.ACCESO_ARRAY {
 		_, tipoParticular := a.Id.(fn_array.AccesoArray).Identificador.(Ast.Abstracto).GetTipo()
 		if tipoParticular != Ast.IDENTIFICADOR {
-			msg := "Semantic error, expected IDENTIFICADOR, found " + Ast.ValorTipoDato[tipoParticular] +
-				". -- Line: " + strconv.Itoa(a.Id.(Ast.Abstracto).GetFila()) +
-				" Column: " + strconv.Itoa(a.Id.(Ast.Abstracto).GetColumna())
-			nError := errores.NewError(a.Id.(Ast.Abstracto).GetFila(), a.Id.(Ast.Abstracto).GetColumna(), msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////ERROR/////////////////////////////////////
+			return errores.GenerarError(36, a.Id, a.Id, "",
+				Ast.ValorTipoDato[tipoParticular],
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////////
 		}
 		id := a.Id.(fn_array.AccesoArray).Identificador.(expresiones.Identificador).Valor
 		resultado = a.AsignarAccesoArray(id, scope)
@@ -125,17 +112,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 	//Verificar que el id  exista
 	existe := scope.Exist(id)
 	if !existe {
-		msg := "Semantic error, the element \"" + id + "\" doesn't exist in any scope." +
-			" -- Line:" + strconv.Itoa(a.Fila) + " Column: " + strconv.Itoa(a.Columna)
-		nError := errores.NewError(a.Fila, a.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(15, a, a, id, "", "", scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Obtener el valor del id
 	simbolo_id := scope.GetSimbolo(id)
@@ -176,18 +155,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 		//Primero verificar si es mutable
 		if !simbolo_id.Mutable {
 			//No es mutable, error semántico
-			msg := "Semantic error, can't modify a non-mutable " + Ast.ValorTipoDato[int(simbolo_id.Tipo)] +
-				" type. -- Line: " + strconv.Itoa(a.Fila) +
-				" Column: " + strconv.Itoa(a.Columna)
-			nError := errores.NewError(a.Fila, a.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(16, a, a, "", Ast.ValorTipoDato[int(simbolo_id.Tipo)], "", scope)
+			//////////////////////////////////////////////////////////////////
 		}
 		//Primero verificar
 		//Existe, ahora verificar los tipos.
@@ -196,19 +166,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				//Comparar los tipos de vectores
 				if !expresiones.CompararTipos(array.(expresiones.Array).TipoDelArray,
 					valor.Valor.(expresiones.Array).TipoDelArray) {
-					msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-						" type to ARRAY[" + Ast.ValorTipoDato[array.(expresiones.Array).TipoDelArray.Tipo] + "]" +
-						" type. -- Line: " + strconv.Itoa(a.Fila) +
-						" Column: " + strconv.Itoa(a.Columna)
-					nError := errores.NewError(a.Fila, a.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(17, a, a, "", Ast.ValorTipoDato[int(valor.Tipo)], Ast.ValorTipoDato[array.(expresiones.Array).TipoDelArray.Tipo], scope)
+					//////////////////////////////////////////////////////////////////
 
 				}
 			}
@@ -225,19 +185,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 						//Y la otra es que si traiga un tipo diferente
 						if vectorEntrante.Tipo != Ast.INDEFINIDO {
 							//Generar el Error, de lo contrario todo bien
-							msg := "Semantic error, can't assign Vector<" + Ast.ValorTipoDato[vectorEntrante.Tipo] + ">" +
-								" to Vector<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-								" type. -- Line: " + strconv.Itoa(a.Fila) +
-								" Column: " + strconv.Itoa(a.Columna)
-							nError := errores.NewError(a.Fila, a.Columna, msg)
-							nError.Tipo = Ast.ERROR_SEMANTICO
-							nError.Ambito = scope.GetTipoScope()
-							scope.Errores.Add(nError)
-							scope.Consola += msg + "\n"
-							return Ast.TipoRetornado{
-								Tipo:  Ast.ERROR,
-								Valor: nError,
-							}
+							////////////////////////////ERROR//////////////////////////////////
+							return errores.GenerarError(18, a, a, "", Ast.ValorTipoDato[vectorEntrante.Tipo], Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
+							//////////////////////////////////////////////////////////////////
 						} else {
 							//Copiar los valores del vector guardado al nuevo vector entrante
 							CopiarVector(&vectorGuardado, &vectorEntrante, simbolo_id)
@@ -262,21 +212,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 
 					if tipoSimbolo != tipoValor {
 						//Error, los structs no son iguales
-						fila := valor.Valor.(Ast.Abstracto).GetFila()
-						columna := valor.Valor.(Ast.Abstracto).GetColumna()
-						msg := "Semantic error, can't store " + tipoValor +
-							" to an ARRAY[" + tipoSimbolo + "]" +
-							". -- Line: " + strconv.Itoa(fila) +
-							" Column: " + strconv.Itoa(columna)
-						nError := errores.NewError(fila, columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						////////////////////////////ERROR//////////////////////////////////
+						return errores.GenerarError(19, valor.Valor, valor.Valor, "", tipoValor, tipoSimbolo, scope)
+						//////////////////////////////////////////////////////////////////
 
 					}
 
@@ -323,20 +261,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 					return valor
 				}
 				//Error de tipos, generar un error semántico
-				//fmt.Println("Erro de tipos")
-				msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-					" type to ARRAY[" + Ast.ValorTipoDato[array.(expresiones.Array).TipoDelArray.Tipo] + "]" +
-					" type. -- Line: " + strconv.Itoa(a.Fila) +
-					" Column: " + strconv.Itoa(a.Columna)
-				nError := errores.NewError(a.Fila, a.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				////////////////////////////ERROR//////////////////////////////////
+				return errores.GenerarError(17, a, a, "", Ast.ValorTipoDato[int(valor.Tipo)], Ast.ValorTipoDato[array.(expresiones.Array).TipoDelArray.Tipo], scope)
+				//////////////////////////////////////////////////////////////////
 			}
 		} else {
 			if valor.Tipo == Ast.VECTOR {
@@ -344,19 +271,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				if !expresiones.CompararTipos(array.(expresiones.Vector).TipoVector,
 					valor.Valor.(expresiones.Vector).TipoVector) {
 					//Erro de tipos
-					msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-						" type to Vector<" + Ast.ValorTipoDato[array.(expresiones.Vector).TipoVector.Tipo] + ">" +
-						" type. -- Line: " + strconv.Itoa(a.Fila) +
-						" Column: " + strconv.Itoa(a.Columna)
-					nError := errores.NewError(a.Fila, a.Columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					////////////////////////////ERROR//////////////////////////////////
+					return errores.GenerarError(32, a, a, "", Ast.ValorTipoDato[int(valor.Tipo)], Ast.ValorTipoDato[array.(expresiones.Vector).TipoVector.Tipo], scope)
+					//////////////////////////////////////////////////////////////////
 				}
 			}
 
@@ -372,19 +289,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 						//Y la otra es que si traiga un tipo diferente
 						if vectorEntrante.Tipo != Ast.INDEFINIDO {
 							//Generar el Error, de lo contrario todo bien
-							msg := "Semantic error, can't assign Vector<" + Ast.ValorTipoDato[vectorEntrante.Tipo] + ">" +
-								" to Vector<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-								" type. -- Line: " + strconv.Itoa(a.Fila) +
-								" Column: " + strconv.Itoa(a.Columna)
-							nError := errores.NewError(a.Fila, a.Columna, msg)
-							nError.Tipo = Ast.ERROR_SEMANTICO
-							nError.Ambito = scope.GetTipoScope()
-							scope.Errores.Add(nError)
-							scope.Consola += msg + "\n"
-							return Ast.TipoRetornado{
-								Tipo:  Ast.ERROR,
-								Valor: nError,
-							}
+							////////////////////////////ERROR//////////////////////////////////
+							return errores.GenerarError(18, a, a, "", Ast.ValorTipoDato[vectorEntrante.Tipo], Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
+							//////////////////////////////////////////////////////////////////
 						} else {
 							//Copiar los valores del vector guardado al nuevo vector entrante
 							CopiarVector(&vectorGuardado, &vectorEntrante, simbolo_id)
@@ -409,22 +316,9 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 
 					if tipoSimbolo != tipoValor {
 						//Error, los structs no son iguales
-						fila := valor.Valor.(Ast.Abstracto).GetFila()
-						columna := valor.Valor.(Ast.Abstracto).GetColumna()
-						msg := "Semantic error, can't store " + tipoValor +
-							" to an ARRAY[" + tipoSimbolo + "]" +
-							". -- Line: " + strconv.Itoa(fila) +
-							" Column: " + strconv.Itoa(columna)
-						nError := errores.NewError(fila, columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
-
+						////////////////////////////ERROR//////////////////////////////////
+						return errores.GenerarError(19, valor.Valor, valor.Valor, "", tipoValor, tipoSimbolo, scope)
+						//////////////////////////////////////////////////////////////////
 					}
 
 				}
@@ -472,36 +366,18 @@ func (a Asignacion) AsignarAccesoArray(id string, scope *Ast.Scope) Ast.TipoReto
 				}
 				//Error de tipos, generar un error semántico
 				//fmt.Println("Erro de tipos")
-				msg := "Semantic error, can't assign " + Ast.ValorTipoDato[int(valor.Tipo)] +
-					" type to VECTOR<" + Ast.ValorTipoDato[array.(expresiones.Vector).TipoVector.Tipo] + ">" +
-					" type. -- Line: " + strconv.Itoa(a.Fila) +
-					" Column: " + strconv.Itoa(a.Columna)
-				nError := errores.NewError(a.Fila, a.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				////////////////////////////ERROR//////////////////////////////////
+				return errores.GenerarError(32, a, a, "", Ast.ValorTipoDato[int(valor.Tipo)], Ast.ValorTipoDato[array.(expresiones.Vector).TipoVector.Tipo], scope)
+				//////////////////////////////////////////////////////////////////
 			}
 
 		}
 
 	} else {
 		//No existe, generar un error semántico
-		msg := "Semantic error, the element \"" + id + "\" doesn't exist in any scope." +
-			" -- Line:" + strconv.Itoa(a.Fila) + " Column: " + strconv.Itoa(a.Columna)
-		nError := errores.NewError(a.Fila, a.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(15, a, a, id, "", "", scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	obj3d.Codigo = codigo3d
@@ -548,6 +424,7 @@ func (a Asignacion) AsignarVariable(id string, scope *Ast.Scope) Ast.TipoRetorna
 			//No es mutable, error semántico
 			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(21, a, a, Ast.ValorTipoDato[int(simbolo_id.Tipo)], "", "", scope)
+			//////////////////////////////////////////////////////////////////////
 		}
 		//Primero verificar
 		//Existe, ahora verificar los tipos
@@ -725,20 +602,9 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 	if posicion.Tipo != Ast.USIZE && posicion.Tipo != Ast.I64 { //||
 		//tipoParticular == Ast.IDENTIFICADOR && posicion.Tipo == Ast.I64 {
 		//Error, se espera un usize
-		fila := a.Valor.(Ast.Abstracto).GetFila()
-		columna := a.Valor.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, expected USIZE, found. " + Ast.ValorTipoDato[posicion.Tipo] +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		/////////////////////////////ERROR/////////////////////////////////////
+		return errores.GenerarError(33, a.Valor, a.Valor, "", Ast.ValorTipoDato[posicion.Tipo], "", scope)
+		//////////////////////////////////////////////////////////////////////
 	}
 	//Conseguir el int de la posicion
 	posicionNum := posicion.Valor.(int)
@@ -758,18 +624,9 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 	//Verificar que el simbolo sea un vector
 	if simbolo_id.Tipo != Ast.VECTOR {
 		//Error, se espera un identificador. un acceso a vector o un acceso a un array
-		msg := "Semantic error, expected VECTOR, found " + Ast.ValorTipoDato[simbolo_id.Tipo] +
-			". -- Line: " + strconv.Itoa(a.Valor.(Ast.Abstracto).GetFila()) +
-			" Column: " + strconv.Itoa(a.Valor.(Ast.Abstracto).GetColumna())
-		nError := errores.NewError(a.Valor.(Ast.Abstracto).GetFila(), a.Valor.(Ast.Abstracto).GetColumna(), msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		/////////////////////////////ERROR/////////////////////////////////////
+		return errores.GenerarError(34, a.Valor, a.Valor, "", Ast.ValorTipoDato[simbolo_id.Tipo], "", scope)
+		//////////////////////////////////////////////////////////////////////
 	}
 	//Conseguir el vector
 	vector := simbolo_id.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
@@ -792,18 +649,9 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 		//Primero verificar si es mutable
 		if !simbolo_id.Mutable {
 			//No es mutable, error semántico
-			msg := "Semantic error, can't modify a non-mutable " + Ast.ValorTipoDato[int(simbolo_id.Tipo)] +
-				" type. -- Line: " + strconv.Itoa(a.Fila) +
-				" Column: " + strconv.Itoa(a.Columna)
-			nError := errores.NewError(a.Fila, a.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////ERROR/////////////////////////////////////
+			return errores.GenerarError(16, a, a, "", Ast.ValorTipoDato[int(simbolo_id.Tipo)], "", scope)
+			//////////////////////////////////////////////////////////////////////
 		}
 		//Primero verificar
 		//Existe, ahora verificar los tipos
@@ -812,21 +660,10 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 			if valor.Tipo == Ast.STRUCT {
 				tipoStruct := valor.Valor.(Ast.Structs).GetPlantilla(scope)
 				if tipoStruct != expresiones.GetTipoFinal(vector.TipoVector).Valor {
-					fila := valor.Valor.(Ast.Abstracto).GetFila()
-					columna := valor.Valor.(Ast.Abstracto).GetColumna()
-					msg := "Semantic error, can't store \"" + tipoStruct +
-						"\" to a VECTOR<" + expresiones.Tipo_String(vector.TipoVector) + ">" +
-						". -- Line: " + strconv.Itoa(fila) +
-						" Column: " + strconv.Itoa(columna)
-					nError := errores.NewError(fila, columna, msg)
-					nError.Tipo = Ast.ERROR_SEMANTICO
-					nError.Ambito = scope.GetTipoScope()
-					scope.Errores.Add(nError)
-					scope.Consola += msg + "\n"
-					return Ast.TipoRetornado{
-						Tipo:  Ast.ERROR,
-						Valor: nError,
-					}
+					/////////////////////////////ERROR/////////////////////////////////////
+					return errores.GenerarError(35, valor.Valor, valor.Valor, "", tipoStruct,
+						expresiones.Tipo_String(vector.TipoVector), scope)
+					//////////////////////////////////////////////////////////////////////
 				} else {
 					agregarElemento = true
 				}
@@ -841,19 +678,10 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 					//Y la otra es que si trae un tipo diferente
 					if vectorEntrante.Tipo != Ast.INDEFINIDO {
 						//Generar el Error, de lo contrario todo bien
-						msg := "Semantic error, can't assign Vector<" + Ast.ValorTipoDato[vectorEntrante.Tipo] + ">" +
-							" to Vector<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-							" type. -- Line: " + strconv.Itoa(a.Fila) +
-							" Column: " + strconv.Itoa(a.Columna)
-						nError := errores.NewError(a.Fila, a.Columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(18, a, a, "", Ast.ValorTipoDato[vectorEntrante.Tipo],
+							Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
+						//////////////////////////////////////////////////////////////////////
 					} else {
 						//Copiar los valores del vector guardado al nuevo vector entrante
 						agregarElemento = true
@@ -863,21 +691,11 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 					if vectorGuardado.Tipo != fn_vectores.GetTipoVector(vectorEntrante) ||
 						!fn_vectores.GetNivelesVector(vectorGuardado, vectorEntrante) {
 						//Error no se pueden guardar 2 tipos de vectores diferentes
-						fila := vectorEntrante.GetFila()
-						columna := vectorEntrante.GetColumna()
-						msg := "Semantic error, can't store VECTOR<" + Ast.ValorTipoDato[fn_vectores.GetTipoVector(vectorEntrante)] +
-							"> to a VECTOR<" + Ast.ValorTipoDato[vectorGuardado.Tipo] + ">" +
-							". -- Line: " + strconv.Itoa(fila) +
-							" Column: " + strconv.Itoa(columna)
-						nError := errores.NewError(fila, columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						/////////////////////////////ERROR/////////////////////////////////////
+						return errores.GenerarError(27, vectorEntrante, vectorEntrante, "",
+							Ast.ValorTipoDato[fn_vectores.GetTipoVector(vectorEntrante)],
+							Ast.ValorTipoDato[vectorGuardado.Tipo], scope)
+						//////////////////////////////////////////////////////////////////////
 					} else {
 						agregarElemento = true
 					}
@@ -904,21 +722,12 @@ func (a Asignacion) AsignarAccesoVector(id string, scope *Ast.Scope) Ast.TipoRet
 			}
 		} else {
 			//No existe, generar un error semántico
-			fila := a.Valor.(Ast.Abstracto).GetFila()
-			columna := a.Valor.(Ast.Abstracto).GetColumna()
-			msg := "Semantic error, can't store " + Ast.ValorTipoDato[valor.Tipo] +
-				" to a VECTOR<" + Ast.ValorTipoDato[vector.Tipo] + ">" +
-				". -- Line: " + strconv.Itoa(fila) +
-				" Column: " + strconv.Itoa(columna)
-			nError := errores.NewError(fila, columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			/////////////////////////////ERROR/////////////////////////////////////
+			return errores.GenerarError(35, a.Valor, a.Valor, "",
+				Ast.ValorTipoDato[valor.Tipo],
+				Ast.ValorTipoDato[vector.Tipo],
+				scope)
+			//////////////////////////////////////////////////////////////////////
 		}
 		return Ast.TipoRetornado{
 			Tipo:  Ast.EJECUTADO,

@@ -37,12 +37,36 @@ func (res *Respuesta) getConsola(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, res.Respuesta)
 }
 
+func (res *Respuesta3D) GetEntrada(w http.ResponseWriter, r *http.Request) {
+	var respuesta Respuesta
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("Error en algo")
+	}
+	json.Unmarshal(reqBody, &respuesta)
+	//Aqui ya tengo la cadena de entrada
+	fmt.Println(respuesta.Contenido)
+	res.Contenido = respuesta.Contenido
+}
+
+func (res *Respuesta3D) getConsola(w http.ResponseWriter, r *http.Request) {
+	res.Respuesta = principal.OptimizarCodigo(res.Contenido)
+	fmt.Println("Entro al get consola")
+	fmt.Fprintf(w, res.Respuesta)
+}
+
 type Respuesta struct {
 	Contenido string
 	Respuesta string
 }
 
+type Respuesta3D struct {
+	Contenido string
+	Respuesta string
+}
+
 var respuesta Respuesta
+var respuesta3D Respuesta3D
 
 func main() {
 	/*
@@ -55,6 +79,8 @@ func main() {
 	r.HandleFunc("/api/users", PostUsers).Methods("POST")
 	r.HandleFunc("/parse", respuesta.GetEntrada).Methods("POST")
 	r.HandleFunc("/getConsola", respuesta.getConsola).Methods("GET")
+	r.HandleFunc("/optimizar", respuesta3D.GetEntrada).Methods("POST")
+	r.HandleFunc("/getOptimizacion", respuesta3D.getConsola).Methods("GET")
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./Web/")))
 	server := &http.Server{
 		Addr:           ":8080",

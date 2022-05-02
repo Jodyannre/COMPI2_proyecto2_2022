@@ -75,6 +75,8 @@ func ResetAll() {
 	P = 0
 	H = 0
 	FuncionesC3D = ""
+	ResultadoFuncionStack = TipoRetornado{}
+	FuncionEnStack = ""
 }
 
 func GetEncabezado() string {

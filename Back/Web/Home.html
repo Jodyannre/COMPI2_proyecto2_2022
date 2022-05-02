@@ -13,6 +13,7 @@
     <!-- Menú superior -->
     <div class="topnav">
         <a href="#" id="aCompile">Compilar</a>
+        <a href="#" id="aOptimizar">Optimizar</a>
         <a href="#" id="aEditor">Editor</a>
         <a href="#" id="aReporteErrores">ReporteErrores</a>
         <a href="#" id="aReporteTablaSimbolos">Tabla de símbolos</a>
@@ -160,6 +161,10 @@
             getConsola(); //muestra la cadena en la consola
         });
 
+        $("#aOptimizar").click(function (e) {
+            optimizar();
+            getOptimizacion();
+        });
 
         $("#importFile").css('opacity', '0');
 
@@ -393,6 +398,54 @@
             });
         }
 
+
+        //compila el código en el editor de texto.
+        function optimizar() {
+
+            var selectedTab = $("#tabs").tabs('option', 'active');
+
+            var tabUniqueId = $(this).parent().attr('data-tab-id');
+            var resultArray = $.grep(editors, function (n, i) {
+                return n.id === tabUniqueId;
+            }, true);
+
+            var editor = resultArray[selectedTab].instance;
+            var formData = editor.getValue();
+
+            //Crear Json con contenido de la consola
+            var jsonOb = {
+                contenido : formData
+            };
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'optimizar', true);
+            xhr.onload = function (e) { console.log('Optimizacion realizada...') };
+            //Indicar que se envia un Json
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            //Enviar json convertido en texto
+            xhr.send(JSON.stringify(jsonOb));
+        }
+
+
+        function getOptimizacion() {
+            var tabla;
+          
+            var getCconsola = $.ajax({
+                url: 'http://localhost:8080/getOptimizacion',
+                type: 'GET',
+                contentType: "application/json;charset=utf-8",
+                success: function (data, textStatus, xhr) {
+                    tabla = data;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error al obtener datos en consola... ');
+                }
+            });
+
+            getCconsola.done(function () {
+                document.getElementById("txtConsola").value = tabla;
+            });
+        }
 
     </script>
 </body>

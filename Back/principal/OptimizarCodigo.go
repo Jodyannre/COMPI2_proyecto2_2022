@@ -3,14 +3,14 @@ package principal
 import (
 	"Back/analizador/Ast"
 	"Back/analizador/errores"
-	"Back/analizador/visitantes"
-	"Back/parser"
+	parser "Back/optimizador/parser3D"
+	"Back/optimizador/visitante3D"
 	"strconv"
 
 	"github.com/antlr/antlr4/runtime/Go/antlr"
 )
 
-func EjecutarPrograma(codigo string) string {
+func OptimizarCodigo(codigo string) string {
 	var input string = `Ejecutando....
 	`
 
@@ -24,7 +24,7 @@ func EjecutarPrograma(codigo string) string {
 	errores_lexicos := &errores.CustomErrorListener{}
 
 	//Creando el lexer
-	lexer := parser.NewNlexer(cadena_entrada)
+	lexer := parser.NewN3lexer(cadena_entrada)
 
 	//Modificando el listener de los errores
 	lexer.RemoveErrorListeners()
@@ -34,7 +34,7 @@ func EjecutarPrograma(codigo string) string {
 	streamTokens := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
 
 	//Creando el parser
-	nparser := parser.NewNparser(streamTokens)
+	nparser := parser.NewN3parser(streamTokens)
 
 	//Modificando el listener de los errores
 	nparser.RemoveErrorListeners()
@@ -49,7 +49,7 @@ func EjecutarPrograma(codigo string) string {
 	//fmt.Printf("\n%v", errores_sintacticos.errores)
 
 	//Visitador para recorrer el árbol
-	var nvisitor = visitantes.NewVisitor()
+	var nvisitor = visitante3D.NewVisitor()
 
 	//Agregar errores léxicos y sintácticos al array de errores en el nVisitor
 
@@ -82,5 +82,5 @@ func EjecutarPrograma(codigo string) string {
 			return nvisitor.GetConsola()
 		}
 	*/
-	return nvisitor.GetCodigo3D()
+	return nvisitor.GetConsola()
 }

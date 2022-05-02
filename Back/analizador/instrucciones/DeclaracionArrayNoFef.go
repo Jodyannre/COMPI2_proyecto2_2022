@@ -58,7 +58,7 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	/*************************************/
 	_, tipoIn := d.Valor.(Ast.Abstracto).GetTipo()
 	if tipoIn == Ast.VALOR {
-		existe = d.ScopeOriginal.Exist_actual(d.Id)
+		existe = scope.Exist_actual(d.Id)
 		//valor = d.Valor.(Ast.Expresion).GetValue(d.ScopeOriginal)
 		scopeAnterior = Ast.GetTemp()
 		/*********************SCOPE SIMULADO****************************/

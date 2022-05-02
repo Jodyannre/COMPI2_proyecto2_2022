@@ -157,7 +157,32 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 	case 14:
 		msg = "Semantic error, type error." +
 			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+
+		/*Errores en asignaciones*/
+
+	case 15:
+		msg = "Semantic error, the element \"" + operador + "\" doesn't exist in any scope." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
 		/*Error en identificadores*/
+	case 16:
+		msg = "Semantic error, can't modify a non-mutable " + tipoIString +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 17:
+		msg = "Semantic error, can't assign " + tipoIString +
+			" type to ARRAY[" + tipoDString + "]" +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 18:
+		msg = "Semantic error, can't assign Vector<" + tipoIString + ">" +
+			" to Vector<" + tipoDString + ">" +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 19:
+		msg = "Semantic error, can't store " + tipoIString +
+			" to an ARRAY[" + tipoDString + "]" +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
 	case 20:
 		msg = "Semantic error, \"" + operador + "\" variable doesn't not exist." +
 			" -- Line: " + strconv.Itoa(fila) +
@@ -200,6 +225,49 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
 	case 31:
 		msg = "Semantic error, MAIN method cannot return a value." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+		/*Continuacion de errores en asignaciones*/
+	case 32:
+		msg = "Semantic error, can't assign " + tipoIString +
+			" type to Vector<" + tipoDString + ">" +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 33:
+		msg = "Semantic error, expected USIZE, found. " + tipoIString +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 34:
+		msg = "Semantic error, expected VECTOR, found " + tipoIString +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 35:
+		msg = "Semantic error, can't store \"" + tipoIString +
+			"\" to a VECTOR<" + tipoDString + ">" +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 36:
+		msg = "Semantic error, expected IDENTIFICADOR, found " + tipoIString +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+		/*Errores en declaraciones simples*/
+	case 37:
+		msg = "Semantic error, can't initialize a Vector with " + tipoIString + " type" +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 38:
+		msg = "Semantic error, can't initialize a Vector<" + tipoIString + "> with Vector<" +
+			tipoDString + "> type" +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 39:
+		msg = "Semantic error, can't initialize an ARRAY with " +
+			tipoIString + " value." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 40:
+		msg = "Semantic error, can't initialize an ARRAY[" + tipoIString + "] with ARRAY[" +
+			tipoDString + "> type" +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 41:
+		msg = "Semantic error, expected  ARRAY[" + tipoIString + "] " +
+			" found ARRAY[" + tipoDString + "]." +
 			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
 	}
 

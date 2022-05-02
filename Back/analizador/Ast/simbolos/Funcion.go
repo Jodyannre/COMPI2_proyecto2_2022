@@ -48,7 +48,8 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 	var valorReturn string
 	var posicionReturn string
 	var algunValorParaRetornar interface{}
-
+	//Set la funcion actual en stack
+	Ast.SetFuncionStack(f.Nombre)
 	/*******************************************************/
 
 	var actual interface{}
@@ -243,7 +244,7 @@ func (f Funcion) Run(scope *Ast.Scope) interface{} {
 		codigo3d += saltoReturn
 	}
 
-	if saltoReturnExp != "" && len(saltoReturnExp) > 2 {
+	if saltoReturnExp != "" && len(saltoReturnExp) >= 2 {
 		posicionReturn = Ast.GetTemp()
 		valorReturn = Ast.GetTemp()
 		if saltoReturnExp[len(saltoReturnExp)-1] != ',' {
@@ -657,4 +658,29 @@ func GetValorPredeterminado(tipo Ast.TipoDato) interface{} {
 		return true
 	}
 
+}
+
+func GetValorPredeterminadoTipoRet(tipo Ast.TipoDato) Ast.TipoRetornado {
+	var retorno Ast.TipoRetornado
+	switch tipo {
+	case Ast.I64:
+		retorno.Valor = 0
+		retorno.Tipo = Ast.I64
+	case Ast.F64:
+		retorno.Valor = 1.1
+		retorno.Tipo = Ast.F64
+	case Ast.BOOLEAN:
+		retorno.Valor = true
+		retorno.Tipo = Ast.BOOLEAN
+	case Ast.CHAR:
+		retorno.Valor = "a"
+		retorno.Tipo = Ast.CHAR
+	case Ast.STRING, Ast.STR:
+		retorno.Valor = "cadena"
+		retorno.Tipo = tipo
+	default:
+		retorno.Valor = true
+		retorno.Tipo = Ast.EJECUTADO
+	}
+	return retorno
 }

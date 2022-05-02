@@ -362,3 +362,7 @@ func SetResultadoFuncionStack(resultado TipoRetornado) {
 func GetResultadoFuncionStack() TipoRetornado {
 	return ResultadoFuncionStack
 }
+
+func GetFuncionEnStack() string {
+	return FuncionEnStack
+}
