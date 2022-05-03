@@ -17,6 +17,9 @@ type N3parserListener interface {
 	// EnterFuncion is called when entering the funcion production.
 	EnterFuncion(c *FuncionContext)
 
+	// EnterLlamada is called when entering the llamada production.
+	EnterLlamada(c *LlamadaContext)
+
 	// EnterBloques is called when entering the bloques production.
 	EnterBloques(c *BloquesContext)
 
@@ -85,6 +88,9 @@ type N3parserListener interface {
 
 	// ExitFuncion is called when exiting the funcion production.
 	ExitFuncion(c *FuncionContext)
+
+	// ExitLlamada is called when exiting the llamada production.
+	ExitLlamada(c *LlamadaContext)
 
 	// ExitBloques is called when exiting the bloques production.
 	ExitBloques(c *BloquesContext)

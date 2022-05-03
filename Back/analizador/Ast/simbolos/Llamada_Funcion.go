@@ -66,7 +66,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			newScope.Errores.Add(nError)
 			newScope.Consola += msg + "\n"
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,
@@ -85,7 +85,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			newScope.Errores.Add(nError)
 			newScope.Consola += msg + "\n"
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,
@@ -103,7 +103,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			newScope.Errores.Add(nError)
 			newScope.Consola += msg + "\n"
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,
@@ -157,7 +157,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		nError.Ambito = scope.GetTipoScope()
 		newScope.Errores.Add(nError)
 		newScope.Consola += msg + "\n"
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Tipo:  Ast.ERROR,
 			Valor: nError,
@@ -174,7 +174,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		nError.Ambito = scope.GetTipoScope()
 		newScope.Errores.Add(nError)
 		newScope.Consola += msg + "\n"
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Tipo:  Ast.ERROR,
 			Valor: nError,
@@ -198,13 +198,12 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Crear los parámetros de las funciones
 	parametrosCreados = funcion.RunParametros(&newScope, l.ScopeOriginal, l.Parametros)
 	obj3dValor = parametrosCreados.Valor.(Ast.O3D)
-	parametrosCreados = obj3dValor.Valor
-	codigo3d += obj3dValor.Codigo
-
 	if parametrosCreados.Tipo == Ast.ERROR {
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return parametrosCreados
 	}
+	parametrosCreados = obj3dValor.Valor
+	codigo3d += obj3dValor.Codigo
 
 	//Ejecutar la función
 	//Verificar la recursividad
@@ -252,7 +251,7 @@ func (l LlamadaFuncion) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/**************************************************************************************************/
 
 	//newScope.Codigo += codigo3d
-	newScope.UpdateScopeGlobal()
+	//newScope.UpdateScopeGlobal()
 	/*
 		if newScope.Errores.Len() > 0 {
 			msg := "Semantic error, " + l.Identificador.(expresiones.Identificador).Valor + " function expects parameters." +

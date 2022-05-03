@@ -75,6 +75,7 @@ func (op CustomSyntaxError) GetFecha() string {
 
 func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador string,
 	tipoIString, tipoDString string, scope *Ast.Scope) Ast.TipoRetornado {
+	var entornoGlobal *Ast.Scope
 	var obj3d Ast.O3D
 	_, tipoI := elemento1.(Ast.Abstracto).GetTipo()
 	_, tipoD := elemento2.(Ast.Abstracto).GetTipo()
@@ -269,13 +270,59 @@ func GenerarError(tipoError int, elemento1, elemento2 interface{}, operador stri
 		msg = "Semantic error, expected  ARRAY[" + tipoIString + "] " +
 			" found ARRAY[" + tipoDString + "]." +
 			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+		/*Errores en print*/
+	case 42:
+		msg = "Semantic error, a literal was expected, " + tipoIString +
+			" type was found." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 43:
+		msg = "Semantic error, the number of expressions expected (" + tipoIString + ")" +
+			" is different within the print statement (" + tipoDString + ")." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 44:
+		msg = "Semantic error, can't print a NULL value" +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 45:
+		msg = "Semantic error, can't format " + tipoIString +
+			" type with " + tipoDString + "." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 46:
+		msg = "Semantic error, expected (VECTOR|ARRAY), found " + tipoIString + "." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 47:
+		msg = "Semantic error, index (" + tipoIString + ") out of bounds." +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 48:
+		msg = "Semantic error, expected " + tipoIString + ", found " + tipoDString + "." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 49:
+		msg = "Semantic error, expected ARRAY, found " + tipoIString + "." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 50:
+		msg = "Semantic error, index (" + tipoIString + "). Can't access to that position." +
+			". -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 51:
+		msg = "Semantic error, can't store " + tipoIString + " value" +
+			" in a not mutable Vec<" + tipoDString + ">." +
+			" -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
+	case 52:
+		msg = "Semantic error, the condition of the expression is not a boolean expression." +
+			" -- Line:" + strconv.Itoa(fila) + " Column: " + strconv.Itoa(columna)
+	case 53:
+		msg = "Semantic error, wrong number of parameters in function." +
+			" type. -- Line: " + strconv.Itoa(fila) +
+			" Column: " + strconv.Itoa(columna)
 	}
 
+	entornoGlobal = Ast.GetEntornoGlobal(scope)
 	nError := NewError(fila, columna, msg)
 	nError.Tipo = Ast.ERROR_SEMANTICO
 	nError.Ambito = scope.GetTipoScope()
-	scope.Errores.Add(nError)
-	scope.Consola += msg + "\n"
+	entornoGlobal.Errores.Add(nError)
+	entornoGlobal.Consola += msg + "\n"
 
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.ERROR,

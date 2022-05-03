@@ -89,7 +89,11 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 	//Revisar si el retorno es un error
 	if valor.Tipo == Ast.ERROR {
 		/////////////////////////////ERROR/////////////////////////////////////
-		return valor
+		return Ast.TipoRetornado{
+			Valor: obj3DValor,
+			Tipo:  valor.Tipo,
+		}
+		///////////////////////////////////////////////////////////////////////
 	}
 
 	//comparar los tipos
@@ -100,6 +104,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(13, d, d, d.Id, expresiones.Tipo_String(d.Tipo),
 				Ast.ValorTipoDato[valor.Tipo], scope)
+			///////////////////////////////////////////////////////////////////////
 		}
 
 	} else {
@@ -113,6 +118,7 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 				/*Generar el error*/
 				/////////////////////////////ERROR/////////////////////////////////////
 				return errores.GenerarError(14, d, d, "", "", "", scope)
+				///////////////////////////////////////////////////////////////////////
 			}
 			//De lo contrario actualizar el tipo de la declaracion
 			d.Tipo = nTipo
@@ -124,12 +130,14 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 			//Erro de tipos
 			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(14, d, d, "", "", "", scope)
+			///////////////////////////////////////////////////////////////////////
 		}
 
 		if !expresiones.CompararTipos(d.Tipo, tipoEspecial) {
 			//Error, los tipos no son correctos
 			/////////////////////////////ERROR/////////////////////////////////////
 			return errores.GenerarError(14, d, d, "", "", "", scope)
+			///////////////////////////////////////////////////////////////////////
 		}
 		esEspecial = true
 	}
@@ -200,7 +208,6 @@ func (d DeclaracionTotal) Run(scope *Ast.Scope) interface{} {
 		//Actualizar el obj3d
 		obj3D.Codigo = codigo3d
 		obj3D.Valor = valor
-
 	} else {
 		//Agregar el código anterior
 		if tipoIn != Ast.VALOR {

@@ -299,18 +299,12 @@ func (f Funcion) RunParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, paramet
 	// Primero revisar que la cantidad de parámetros sea la misma
 	if parametrosIN.Len() != f.Parametros.Len() {
 		//Error, la cantidad de parámetros no es la esperada
-		msg := "Semantic error, wrong number of parameters in function." +
-			" type. -- Line: " + strconv.Itoa(f.Fila) +
-			" Column: " + strconv.Itoa(f.Columna)
-		nError := errores.NewError(f.Fila, f.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(53, f, f, "",
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	// Revisar que los tipos sean correctos
@@ -557,6 +551,12 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 
 			}
 			obj3dValor = resultadoDeclaracion.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			if obj3dValor.Valor.Tipo == Ast.ERROR {
+				return Ast.TipoRetornado{
+					Tipo:  obj3dValor.Valor.Tipo,
+					Valor: obj3dValor,
+				}
+			}
 			resultadoDeclaracion = obj3dValor.Valor
 			codigo3d += obj3dValor.Codigo
 
@@ -587,6 +587,12 @@ func CrearParametros(scope *Ast.Scope, scopeOrigen *Ast.Scope, parametros, param
 				resultadoDeclaracion = nuevaDeclaracion.Run(scope)
 			}
 			obj3dValor = resultadoDeclaracion.(Ast.TipoRetornado).Valor.(Ast.O3D)
+			if obj3dValor.Valor.Tipo == Ast.ERROR {
+				return Ast.TipoRetornado{
+					Tipo:  obj3dValor.Valor.Tipo,
+					Valor: obj3dValor,
+				}
+			}
 			resultadoDeclaracion = obj3dValor.Valor
 			codigo3d += obj3dValor.Codigo
 		}

@@ -111,7 +111,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 				nError.Ambito = scope.GetTipoScope()
 				newScope.Errores.Add(nError)
 				newScope.Consola += msg + "\n"
-				newScope.UpdateScopeGlobal()
+				//newScope.UpdateScopeGlobal()
 				return Ast.TipoRetornado{
 					Valor: nError,
 					Tipo:  Ast.ERROR,
@@ -125,7 +125,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 
 		if retornarBreak {
 			//Terminar loop y retornar el valor del break
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			return resultado.(Ast.TipoRetornado)
 		}
 
@@ -142,7 +142,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 				nError.Ambito = scope.GetTipoScope()
 				newScope.Errores.Add(nError)
 				newScope.Consola += msg + "\n"
-				newScope.UpdateScopeGlobal()
+				//newScope.UpdateScopeGlobal()
 				return Ast.TipoRetornado{
 					Valor: nError,
 					Tipo:  Ast.ERROR,
@@ -157,7 +157,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 		if resultado.(Ast.TipoRetornado).Tipo == Ast.ERROR ||
 			resultado.(Ast.TipoRetornado).Tipo == Ast.EJECUTADO {
 			//Siguiente instrucción
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			newScope.Errores.Clear()
 			newScope.Consola = ""
 			continue
@@ -167,7 +167,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 			resultado.(Ast.TipoRetornado).Tipo == Ast.BREAK ||
 			resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN {
 			//Siguiente iteración
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			newScope.Errores.Clear()
 			newScope.Consola = ""
 
@@ -206,7 +206,7 @@ func (l Loop) Run(scope *Ast.Scope) interface{} {
 		if resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN ||
 			resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN_EXPRESION ||
 			resultado.(Ast.TipoRetornado).Tipo == Ast.BREAK_EXPRESION {
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			//Terminar loop y retornar el return
 			return resultado
 		}

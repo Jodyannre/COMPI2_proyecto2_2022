@@ -41,18 +41,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	_, tipoParticular := p.Identificador.(Ast.Abstracto).GetTipo()
 	if tipoParticular != Ast.IDENTIFICADOR {
 		//Error se espera un identificador
-		msg := "Semantic error, expected IDENTIFICADOR, found. " + Ast.ValorTipoDato[tipoParticular] +
-			". -- Line: " + strconv.Itoa(p.Fila) +
-			" Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(36, p, p, "",
+			Ast.ValorTipoDato[tipoParticular],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Recuperar el id del identificador
 	id = p.Identificador.(expresiones.Identificador).Valor
@@ -60,17 +54,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	//Verificar que el id exista
 	if !scope.Exist(id) {
 		//Error la variable no existe
-		msg := "Semantic error, the element \"" + id + "\" doesn't exist in any scope." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(15, p, p, id,
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Conseguir el simbolo y el vector
 	simbolo = scope.GetSimbolo(id)
@@ -85,17 +74,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 
 	//Verificar que sea un vector
 	if simbolo.Tipo != Ast.VECTOR && simbolo.Tipo != Ast.ARRAY {
-		msg := "Semantic error, expected (VECTOR|ARRAY), found " + Ast.ValorTipoDato[simbolo.Tipo] + "." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(46, p, p, "",
+			Ast.ValorTipoDato[simbolo.Tipo],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	if simbolo.Tipo == Ast.VECTOR {
 		vector = simbolo.Valor.(Ast.TipoRetornado).Valor.(expresiones.Vector)
@@ -113,20 +97,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	if (posicion.Tipo != Ast.USIZE && posicion.Tipo != Ast.I64) ||
 		tipoParticular == Ast.IDENTIFICADOR && posicion.Tipo == Ast.I64 {
 		//Error, se espera un usize
-		fila := p.Posicion.(Ast.Abstracto).GetFila()
-		columna := p.Posicion.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, expected USIZE, found. " + Ast.ValorTipoDato[posicion.Tipo] +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(33, p, p, "",
+			Ast.ValorTipoDato[posicion.Tipo],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Verificar que la posición exista en el vector
 	if simbolo.Tipo == Ast.VECTOR {
@@ -139,20 +115,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 		salto := ""
 		if posicion.Valor.(int) >= vector.(expresiones.Vector).Size {
 			//Error, fuera de rango
-			fila := p.Posicion.(Ast.Abstracto).GetFila()
-			columna := p.Posicion.(Ast.Abstracto).GetColumna()
-			msg := "Semantic error, index (" + strconv.Itoa(posicion.Valor.(int)) + ") out of bounds." +
-				". -- Line: " + strconv.Itoa(fila) +
-				" Column: " + strconv.Itoa(columna)
-			nError := errores.NewError(fila, columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(47, p.Posicion, p.Posicion, "",
+				strconv.Itoa(posicion.Valor.(int)),
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 
 		//Acceder al elemento
@@ -190,20 +158,12 @@ func (p AccesoVec) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	if simbolo.Tipo == Ast.ARRAY {
 		if posicion.Valor.(int) >= vector.(expresiones.Array).Size {
 			//Error, fuera de rango
-			fila := p.Posicion.(Ast.Abstracto).GetFila()
-			columna := p.Posicion.(Ast.Abstracto).GetColumna()
-			msg := "Semantic error, index (" + strconv.Itoa(posicion.Valor.(int)) + ") out of bounds." +
-				". -- Line: " + strconv.Itoa(fila) +
-				" Column: " + strconv.Itoa(columna)
-			nError := errores.NewError(fila, columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(47, p.Posicion, p.Posicion, "",
+				strconv.Itoa(posicion.Valor.(int)),
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 
 		//Acceder al elemento
@@ -238,20 +198,12 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 	posiciones3D.RemoveAtIndex(0)
 	if posicion >= array.Size || posicion < 0 {
 		//Error, out of bounds
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(47, elemento, elemento, "",
+			strconv.Itoa(posicion),
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	if posiciones.Len() == 0 {
 
@@ -263,20 +215,12 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 		/*********************************************************/
 		if next.Tipo == Ast.VECTOR {
 			//No se puede guardar en esa posición porque es posición de array
-			fila := elemento.(Ast.Abstracto).GetFila()
-			columna := elemento.(Ast.Abstracto).GetColumna()
-			msg := "Semantic error, index (" + strconv.Itoa(posicion) + "). Can't access to that position." +
-				". -- Line: " + strconv.Itoa(fila) +
-				" Column: " + strconv.Itoa(columna)
-			nError := errores.NewError(fila, columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(47, elemento, elemento, "",
+				strconv.Itoa(posicion),
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 		nuevaLista := *arraylist.New()
 		for i := 0; i < array.Valor.Len(); i++ {
@@ -318,20 +262,12 @@ func UpdateElemento(array expresiones.Vector, elementos *arraylist.List, posicio
 	}
 	if posiciones.Len() > 0 && array.TipoVector.Tipo != Ast.VECTOR {
 		//Error, no hay más dimensiones
-		fila := elemento.(Ast.Abstracto).GetFila()
-		columna := elemento.(Ast.Abstracto).GetColumna()
-		msg := "Semantic error, index (" + strconv.Itoa(posicion) + ") out of bounds." +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(47, elemento, elemento, "",
+			strconv.Itoa(posicion),
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	next := array.Valor.GetValue(posicion).(Ast.TipoRetornado)
 	valorNext := next.Valor.(expresiones.Vector)

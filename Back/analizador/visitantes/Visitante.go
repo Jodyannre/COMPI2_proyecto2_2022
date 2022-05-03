@@ -115,6 +115,7 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 			resultado = actual.(Ast.Instruccion).Run(&EntornoGlobal).(Ast.TipoRetornado)
 			obj3d = resultado.Valor.(Ast.O3D)
 			resultado = obj3d.Valor
+			EntornoGlobal.Codigo += obj3d.Codigo
 		}
 	}
 
@@ -151,10 +152,13 @@ func (v *Visitador) ExitInicio(ctx *parser.InicioContext) {
 		metodoMain = instrucciones.GetValue(posicionMain)
 
 		//Ejetuar el método main
-		metodoMain.(Ast.Expresion).GetValue(&EntornoGlobal)
+		resultado = metodoMain.(Ast.Expresion).GetValue(&EntornoGlobal)
+		obj3d = resultado.Valor.(Ast.O3D)
+		resultado = obj3d.Valor
+		EntornoGlobal.Codigo += obj3d.Codigo
 	}
 	//EntornoGlobal.Codigo += Ast.Indentar(EntornoGlobal.GetNivel(), codigo3d)
-	EntornoGlobal.UpdateScopeGlobal()
+	//EntornoGlobal.UpdateScopeGlobal()
 	v.Consola += EntornoGlobal.Consola
 	//Agregar código y encabezado en C
 	v.Codigo += Ast.GetEncabezado()

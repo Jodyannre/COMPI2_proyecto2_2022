@@ -81,7 +81,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 		nError.Ambito = scope.GetTipoScope()
 		scope.Errores.Add(nError)
 		scope.Consola += msg + "\n"
-		scope.UpdateScopeGlobal()
+		//scope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Tipo:  Ast.ERROR,
 			Valor: nError,
@@ -226,7 +226,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 				resultadoInstruccion.Tipo == Ast.BREAK ||
 				resultadoInstruccion.Tipo == Ast.RETURN {
 				//Siguiente iteración
-				newScope.UpdateScopeGlobal()
+				//newScope.UpdateScopeGlobal()
 				newScope.Errores.Clear()
 				newScope.Consola = ""
 
@@ -364,7 +364,7 @@ func (f For) Run(scope *Ast.Scope) interface{} {
 	codigo3d += "P = P - " + strconv.Itoa(scope.Size) + "; //Regresar al entorno anterior \n"
 	codigo3d += "/***********************************************/\n"
 
-	newScope.UpdateScopeGlobal()
+	//newScope.UpdateScopeGlobal()
 
 	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,

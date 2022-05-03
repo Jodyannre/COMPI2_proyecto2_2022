@@ -84,7 +84,7 @@ func (i IF) Run(scope *Ast.Scope) interface{} {
 	}
 
 	//actualizar el scope global con los resultados
-	newScope.UpdateScopeGlobal()
+	//newScope.UpdateScopeGlobal()
 	return resultado
 }
 
@@ -239,17 +239,12 @@ func GetResultado(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRetor
 	} else {
 		//No es booleano, entonces generar un error semántico
 		//fmt.Println("Error semántico, la expresión no es un booleano")
-		msg := "Semantic error, the condition of the expression is not a boolean expression." +
-			" -- Line:" + strconv.Itoa(i.Fila) + " Column: " + strconv.Itoa(i.Columna)
-		nError := errores.NewError(i.Fila, i.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(52, i, i, "",
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Se acabo todo y retornar un true de finalizado
 	return Ast.TipoRetornado{
@@ -372,7 +367,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				nError.Ambito = scope.GetTipoScope()
 				scope.Errores.Add(nError)
 				scope.Consola += msg + "\n"
-				scope.UpdateScopeGlobal()
+				//scope.UpdateScopeGlobal()
 				return Ast.TipoRetornado{
 					Valor: nError,
 					Tipo:  Ast.ERROR,
@@ -424,7 +419,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 				//return resultado
 			} else if resultado.Tipo != Ast.EJECUTADO && (i.Tipo == Ast.IF_EXPRESION ||
 				i.Tipo == Ast.ELSE_EXPRESION || i.Tipo == Ast.ELSEIF_EXPRESION) {
-				scope.UpdateScopeGlobal()
+				//scope.UpdateScopeGlobal()
 				guardarScope = Ast.GetTemp()
 				posicionGuardar = Ast.GetTemp()
 				scopeOrigen = scope.GetEntornoPadreIF()
@@ -489,7 +484,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			if resultado.Tipo == Ast.ERROR {
 				//newScope.Errores.Add(resultado.Valor)
 				//newScope.Consola += resultado.Valor.(errores.CustomSyntaxError).Msg + "\n"
-				newScope.UpdateScopeGlobal()
+				//newScope.UpdateScopeGlobal()
 				return Ast.TipoRetornado{
 					Valor: resultado.Valor,
 					Tipo:  Ast.ERROR,
@@ -497,7 +492,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			}
 
 			if Ast.EsTransferencia(resultado.Tipo) {
-				newScope.UpdateScopeGlobal()
+				//newScope.UpdateScopeGlobal()
 				//resultadoTranferencia = resultado
 				if !posCorrectaNoElse && objResultadoIfs.IfCorrecto {
 					resultadoTranferencia = resultado
@@ -542,7 +537,7 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 			faltaActual = objResultadoIfs.Lf
 			ultimoFalso = faltaActual
 			saltosFin += objResultadoIfs.Salto
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 		}
 		///////////////////////////////FALSAS//////////////////////////////////////
 		if i.Tipo == Ast.IF || i.Tipo == Ast.IF_EXPRESION {
@@ -597,17 +592,12 @@ func GetResultado3D(i IF, scope *Ast.Scope, pos int, expresion bool) Ast.TipoRet
 	} else {
 		//No es booleano, entonces generar un error semántico
 		//fmt.Println("Error semántico, la expresión no es un booleano")
-		msg := "Semantic error, the condition of the expression is not a boolean expression." +
-			" -- Line:" + strconv.Itoa(i.Fila) + " Column: " + strconv.Itoa(i.Columna)
-		nError := errores.NewError(i.Fila, i.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(52, i, i, "",
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Se acabo todo y retornar un true de finalizado
 	/*

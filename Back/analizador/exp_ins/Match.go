@@ -234,7 +234,7 @@ func (m Match) Run(scope *Ast.Scope) interface{} {
 			nError.Ambito = scope.GetTipoScope()
 			scope.Errores.Add(nError)
 			scope.Consola += msg + "\n"
-			scope.UpdateScopeGlobal()
+			//scope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Valor: nError,
 				Tipo:  Ast.ERROR,
@@ -400,7 +400,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 			nError.Ambito = scope.GetTipoScope()
 			newScope.Errores.Add(nError)
 			newScope.Consola += msg + "\n"
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Valor: nError,
 				Tipo:  Ast.ERROR,
@@ -409,7 +409,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 
 		if Ast.EsTransferencia(resultado.Tipo) {
 			//Retornar la transferencia
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			resultadoTranferencia = resultado
 			switch resultado.Tipo {
 			case Ast.BREAK:
@@ -424,7 +424,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 			hayTranferencia = true
 			//return resultado
 		} else if resultado.Tipo != Ast.EJECUTADO && c.Tipo == Ast.CASE_EXPRESION {
-			scope.UpdateScopeGlobal()
+			//scope.UpdateScopeGlobal()
 			guardarScope := Ast.GetTemp()
 			posicionGuardar := Ast.GetTemp()
 			//scopeOrigen := scope.GetEntornoPadreBreak()
@@ -451,7 +451,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 		nError.Ambito = scope.GetTipoScope()
 		scope.Errores.Add(nError)
 		scope.Consola += msg + "\n"
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Valor: nError,
 			Tipo:  Ast.ERROR,
@@ -481,7 +481,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 		obj3d.Valor.Tipo = resultadoTranferencia.Tipo
 		obj3d.SaltoReturnExp = saltoReturnExp
 		obj3d.Valor = resultadoTranferencia
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Valor: obj3d,
 			Tipo:  resultadoTranferencia.Tipo,
@@ -496,7 +496,7 @@ func (c Case) Run(scope *Ast.Scope) interface{} {
 		}
 	}
 
-	newScope.UpdateScopeGlobal()
+	//newScope.UpdateScopeGlobal()
 	return Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: obj3d,

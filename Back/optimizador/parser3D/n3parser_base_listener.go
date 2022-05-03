@@ -39,6 +39,12 @@ func (s *BaseN3parserListener) EnterFuncion(ctx *FuncionContext) {}
 // ExitFuncion is called when production funcion is exited.
 func (s *BaseN3parserListener) ExitFuncion(ctx *FuncionContext) {}
 
+// EnterLlamada is called when production llamada is entered.
+func (s *BaseN3parserListener) EnterLlamada(ctx *LlamadaContext) {}
+
+// ExitLlamada is called when production llamada is exited.
+func (s *BaseN3parserListener) ExitLlamada(ctx *LlamadaContext) {}
+
 // EnterBloques is called when production bloques is entered.
 func (s *BaseN3parserListener) EnterBloques(ctx *BloquesContext) {}
 

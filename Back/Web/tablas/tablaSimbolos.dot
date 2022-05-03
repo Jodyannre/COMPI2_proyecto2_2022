@@ -33,7 +33,7 @@ a
 
 <tr>
 <td cellpadding='4'>
-b
+aux
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -42,7 +42,7 @@ b
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
-3
+20
 </td>
 <td cellpadding='4'>
 4
@@ -51,7 +51,7 @@ b
 
 <tr>
 <td cellpadding='4'>
-c
+index
 </td>
 <td cellpadding='4'>VARIABLE
 </td>
@@ -60,7 +60,133 @@ c
 <td cellpadding='4'>Local
 </td>
 <td cellpadding='4'>
+55
+</td>
+<td cellpadding='4'>
 4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+output
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>STRING
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+121
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+122
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+j
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+125
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+k
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+129
+</td>
+<td cellpadding='4'>
+8
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+arr
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>ARRAY
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+141
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+i
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+142
+</td>
+<td cellpadding='4'>
+4
+</td>
+</tr>
+
+<tr>
+<td cellpadding='4'>
+e
+</td>
+<td cellpadding='4'>VARIABLE
+</td>
+<td cellpadding='4'>I64
+</td>
+<td cellpadding='4'>Local
+</td>
+<td cellpadding='4'>
+150
 </td>
 <td cellpadding='4'>
 4

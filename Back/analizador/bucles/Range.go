@@ -82,7 +82,7 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			scope.Errores.Add(nError)
 			scope.Consola += msg + "\n"
-			scope.UpdateScopeGlobal()
+			//scope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,
@@ -127,7 +127,7 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			scope.Errores.Add(nError)
 			scope.Consola += msg + "\n"
-			scope.UpdateScopeGlobal()
+			//scope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,
@@ -145,7 +145,7 @@ func (r Range) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 			nError.Ambito = scope.GetTipoScope()
 			scope.Errores.Add(nError)
 			scope.Consola += msg + "\n"
-			scope.UpdateScopeGlobal()
+			//scope.UpdateScopeGlobal()
 			return Ast.TipoRetornado{
 				Tipo:  Ast.ERROR,
 				Valor: nError,

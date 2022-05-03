@@ -26,7 +26,7 @@ func NewFuncionMain(instrucciones *arraylist.List, fila, columna int) FuncionMai
 
 func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	/************************************VARIABLES 3D ***************************************/
-	var obj3dRespuestaInstruccion Ast.O3D
+	var obj3dRespuestaInstruccion, obj3d Ast.O3D
 	var saltoReturn string
 	var codigo3d string
 	var contadorDeclaraciones int
@@ -110,10 +110,15 @@ func (f FuncionMain) GetValue(scope *Ast.Scope) Ast.TipoRetornado {
 	}
 
 	newScope.Codigo = codigo3d
-	newScope.UpdateScopeGlobal()
-	return Ast.TipoRetornado{
+	obj3d.Codigo = codigo3d
+	obj3d.Valor = Ast.TipoRetornado{
 		Tipo:  Ast.EJECUTADO,
 		Valor: true,
+	}
+	//newScope.UpdateScopeGlobal()
+	return Ast.TipoRetornado{
+		Tipo:  Ast.EJECUTADO,
+		Valor: obj3d,
 	}
 }
 

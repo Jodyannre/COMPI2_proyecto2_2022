@@ -60,7 +60,7 @@ func (scope *Scope) Add(simbolo Simbolo) {
 	scope.tablaSimbolos[id] = simbolo
 
 	//Recuperar el scope global
-	for scope_actual := scope; scope_actual.prev != nil; scope_actual = scope_actual.prev {
+	for scope_actual := scope; scope_actual != nil; scope_actual = scope_actual.prev {
 		global = scope_actual
 	}
 	//Crear el símbolo para la tabla de reporte de símbolos
@@ -408,6 +408,14 @@ func (scope *Scope) UpdateValor(ident string, valorNuevo interface{}) {
 		}
 	}
 
+}
+
+func GetEntornoGlobal(scope *Scope) *Scope {
+	var global *Scope = scope
+	for scope_actual := scope; scope_actual != nil; scope_actual = scope_actual.prev {
+		global = scope_actual
+	}
+	return global
 }
 
 func (scope *Scope) GetSimbolo(ident string) Simbolo {

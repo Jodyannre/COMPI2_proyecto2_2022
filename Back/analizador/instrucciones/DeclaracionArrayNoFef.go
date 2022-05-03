@@ -85,17 +85,12 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	dimension := d.Dimension.(Ast.Expresion).GetValue(scope)
 
 	if existe {
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(12, d, d, d.Id,
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Verificar que no venga ningún error
 	if valor.Tipo == Ast.ERROR {
@@ -128,18 +123,12 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 		if valor.Valor.(expresiones.Array).TipoArray == Ast.INDEFINIDO {
 			//Es uno vacio y no hay error, modificar el tipo
 		} else {
-			msg := "Semantic error, can't initialize a Vec<" + expresiones.Tipo_String(d.TipoArray) +
-				"> with Vec<" + expresiones.Tipo_String(valor.Valor.(expresiones.Vector).TipoVector) + "> value." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(38, d, d, "",
+				expresiones.Tipo_String(d.TipoArray),
+				expresiones.Tipo_String(valor.Valor.(expresiones.Vector).TipoVector),
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 	}
 
@@ -149,17 +138,12 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	//Primero que vengan arrays
 	if !EsArray(tipoIn) {
 		//Error, no se estan asignado arrays al array
-		msg := "Semantic error, can't initialize an ARRAY with " + Ast.ValorTipoDato[tipoIn] + " type" +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(39, d, d, "",
+			Ast.ValorTipoDato[tipoIn],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Verificar que las dimensiones concuerda con la lista de arrays
@@ -182,43 +166,28 @@ func (d DeclaracionArrayNoRef) Run(scope *Ast.Scope) interface{} {
 	}
 
 	if !fn_array.CompararListas(listaDimensiones, arrayDimension) {
-		msg := "Semantic error, ARRAY dimension does not match" +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(25, d, d, "",
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//expresiones.GetTipoFinal(valor.Valor.(expresiones.Array).TipoDelArray.Tipo)
 	//Validar el tipo del array
 	if d.TipoArray.Tipo != expresiones.GetTipoFinal(valor.Valor.(expresiones.Array).TipoDelArray).Tipo {
-		fila := valor.Valor.(expresiones.Array).GetFila()
-		columna := valor.Valor.(expresiones.Array).GetColumna()
 		var tipoDelArray string
 		if valor.Valor.(expresiones.Array).TipoDelArray.Tipo == Ast.INDEFINIDO {
 			tipoDelArray = Ast.ValorTipoDato[d.TipoArray.Tipo]
 		} else {
 			tipoDelArray = expresiones.Tipo_String(expresiones.GetTipoFinal(d.TipoArray))
 		}
-		msg := "Semantic error, can't initialize ARRAY[" + tipoDelArray +
-			"] with a ARRAY[" +
-			Ast.ValorTipoDato[expresiones.GetTipoFinal(valor.Valor.(expresiones.Array).TipoDelArray).Tipo] + "]" +
-			". -- Line: " + strconv.Itoa(fila) +
-			" Column: " + strconv.Itoa(columna)
-		nError := errores.NewError(fila, columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(40, d, d, "",
+			tipoDelArray,
+			Ast.ValorTipoDato[expresiones.GetTipoFinal(valor.Valor.(expresiones.Array).TipoDelArray).Tipo],
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Crear el símbolo

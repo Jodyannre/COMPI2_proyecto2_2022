@@ -73,18 +73,12 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 
 	if tipoParticular == Ast.IDENTIFICADOR {
 		//Error, con este tipo de print solo se puedfen imprimir literales
-		msg := "Semantic error, a literal was expected, " + Ast.ValorTipoDato[resultado_expresion.Tipo] +
-			" type was found." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(42, p, p, "",
+			Ast.ValorTipoDato[resultado_expresion.Tipo],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Si resultado es error, que lo retorne
@@ -97,22 +91,16 @@ func (p Print) Run(scope *Ast.Scope) interface{} {
 		//Error, no es un tipo que se pueda imprimir
 		//O es una operación que dio como resultado null
 		//No existe, generar un error semántico
-		msg := "Semantic error, a literal was expected, " + Ast.ValorTipoDato[resultado_expresion.Tipo] +
-			" type was found." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(42, p, p, "",
+			Ast.ValorTipoDato[resultado_expresion.Tipo],
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Actualizar consola del scope global directamente
 	//scope.Consola += valor + "\n"
-	scope.AgregarPrint(valor + "\n")
+	//scope.AgregarPrint(valor + "\n")
 
 	/*Trabajar todo el código 3d aquí */
 	/************************************************/
@@ -162,33 +150,21 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 	retorno.Tipo = Ast.STRING
 	if !encontrados {
 		//No se encontraron, error
-		msg := "Semantic error, the number of expressions expected (" + strconv.Itoa(len(elementos_string)-1) + ")" +
-			" is different within the print statement (" + strconv.Itoa(p.Expresiones.Len()) + ")." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(43, p, p, "",
+			strconv.Itoa(len(elementos_string)-1),
+			strconv.Itoa(p.Expresiones.Len()),
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	if len(elementos_string)-1 != p.Expresiones.Len() {
 		//Error, la cantidad de expresiones es diferente de la que se esperaba
-		msg := "Semantic error, the number of expressions expected (" + strconv.Itoa(len(elementos_string)-1) + ")" +
-			"is different within the print statement (" + strconv.Itoa(p.Expresiones.Len()) + ")." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(43, p, p, "",
+			strconv.Itoa(len(elementos_string)-1),
+			strconv.Itoa(p.Expresiones.Len()),
+			scope)
+		//////////////////////////////////////////////////////////////////
 
 	}
 	var cadena = ""
@@ -256,18 +232,12 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 					//valor = p.Expresiones.GetValue(i).(Ast.Expresion).GetValue(scope)
 					if preCadena.Tipo == Ast.ERROR {
 						//Crear el error y retornarlo
-						msg := "Semantic error, a literal was expected," +
-							Ast.ValorTipoDato[valor.(Ast.TipoRetornado).Tipo] + " was found" +
-							" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-						nError := errores.NewError(p.Fila, p.Columna, msg)
-						nError.Tipo = Ast.ERROR_SEMANTICO
-						nError.Ambito = scope.GetTipoScope()
-						scope.Errores.Add(nError)
-						scope.Consola += msg + "\n"
-						return Ast.TipoRetornado{
-							Tipo:  Ast.ERROR,
-							Valor: nError,
-						}
+						////////////////////////////ERROR//////////////////////////////////
+						return errores.GenerarError(42, p, p, "",
+							Ast.ValorTipoDato[valor.(Ast.TipoRetornado).Tipo],
+							"",
+							scope)
+						//////////////////////////////////////////////////////////////////
 					} else {
 						cadena = preCadena.Valor.(string)
 					}
@@ -309,7 +279,7 @@ func (p PrintF) Run(scope *Ast.Scope) interface{} {
 		}
 	}
 	//scope.Consola += salida + "\n"
-	scope.AgregarPrint(salida + "\n")
+	//scope.AgregarPrint(salida + "\n")
 	//codigo3d += "printf (\"\\n\");\n"
 	codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + nuevaLinea + "); //Imprimir nueva linea\n"
 	//codigo3d += "printf(\"" + porcentaje + c + "\",(int)" + retornoImpresion + "); //Imprimir retorno carro\n"
@@ -427,34 +397,26 @@ func (p PrintF) GetCompareValues(scope *Ast.Scope, i int, posiciones []int) Ast.
 	} else {
 		//Error, no se puede imprimir eso
 		if valor.Tipo == Ast.NULL {
-			msg := "Semantic error, can't print a NULL value" +
-				" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-			nError := errores.NewError(p.Fila, p.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(44, p, p, "",
+				"",
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 		//Verificar que no es un error
 		if valor.Tipo == Ast.ERROR {
-			return valor
+			return Ast.TipoRetornado{
+				Valor: obj3d,
+				Tipo:  valor.Tipo,
+			}
 		}
-		msg := "Semantic error, can't format " + Ast.ValorTipoDato[valor.Tipo] +
-			" type with " + subString + "." +
-			" -- Line:" + strconv.Itoa(p.Fila) + " Column: " + strconv.Itoa(p.Columna)
-		nError := errores.NewError(p.Fila, p.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(45, p, p, "",
+			Ast.ValorTipoDato[valor.Tipo],
+			subString,
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	/*
 		obj3d.Valor = Ast.TipoRetornado{

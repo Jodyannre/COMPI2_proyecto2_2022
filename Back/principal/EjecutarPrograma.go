@@ -77,10 +77,10 @@ func EjecutarPrograma(codigo string) string {
 
 	println(nvisitor.GetConsola())
 	antlr.ParseTreeWalkerDefault.Walk(nvisitor, tree)
-	/*
-		if nvisitor.GetConsola() != "" {
-			return nvisitor.GetConsola()
-		}
-	*/
+
+	if nvisitor.GetConsola() != "" && len(nvisitor.GetConsola()) > 2 {
+		return nvisitor.GetConsola()
+	}
+
 	return nvisitor.GetCodigo3D()
 }

@@ -63,7 +63,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 	codigo3d += obj3dcondicion.Codigo
 
 	if condicionResultado.Tipo == Ast.ERROR {
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return condicionResultado
 	}
 	if condicionResultado.Tipo != Ast.BOOLEAN {
@@ -76,7 +76,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 		nError.Ambito = scope.GetTipoScope()
 		newScope.Errores.Add(nError)
 		newScope.Consola += msg + "\n"
-		newScope.UpdateScopeGlobal()
+		//newScope.UpdateScopeGlobal()
 		return Ast.TipoRetornado{
 			Tipo:  Ast.ERROR,
 			Valor: nError,
@@ -133,7 +133,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 			resultado.(Ast.TipoRetornado).Tipo == Ast.BREAK ||
 			resultado.(Ast.TipoRetornado).Tipo == Ast.RETURN {
 			//Siguiente iteración
-			newScope.UpdateScopeGlobal()
+			//newScope.UpdateScopeGlobal()
 			newScope.Errores.Clear()
 			newScope.Consola = ""
 
@@ -156,7 +156,7 @@ func (w While) Run(scope *Ast.Scope) interface{} {
 	}
 	codigo3d += "goto " + saltoWhile + "; \n"
 	codigo3d += lf + ":\n"
-	newScope.UpdateScopeGlobal()
+	//newScope.UpdateScopeGlobal()
 	newScope.Errores.Clear()
 	newScope.Consola = ""
 	/*

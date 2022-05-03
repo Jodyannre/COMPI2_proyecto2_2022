@@ -81,32 +81,22 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 
 	//Si es diferente de vector error
 	if tipoIn != Ast.VECTOR {
-		msg := "Semantic error, can't initialize a" + Ast.ValorTipoDato[d.Tipo] + "with " + Ast.ValorTipoDato[tipoIn] + " value." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(13, d, d, "",
+			Ast.ValorTipoDato[d.Tipo],
+			Ast.ValorTipoDato[tipoIn],
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Verificar si ya existe
 	if existe {
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(12, d, d, d.Id,
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 	//Verificar que el tipo del vector no sea un acceso a modulo
 
@@ -128,18 +118,12 @@ func (d DeclaracionVector) Run(scope *Ast.Scope) interface{} {
 			//Es uno vacio y no hay error, modificar el tipo
 			esIndefinido = true
 		} else {
-			msg := "Semantic error, can't initialize a Vec<" + expresiones.Tipo_String(d.TipoVector) +
-				"> with Vec<" + expresiones.Tipo_String(valor.Valor.(expresiones.Vector).TipoVector) + "> value." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(38, d, d, "",
+				expresiones.Tipo_String(d.TipoVector),
+				expresiones.Tipo_String(valor.Valor.(expresiones.Vector).TipoVector),
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 	}
 

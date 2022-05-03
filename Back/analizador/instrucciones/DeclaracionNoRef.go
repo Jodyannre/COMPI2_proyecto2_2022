@@ -47,17 +47,12 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 
 	if existe {
 		//Ya existe y generar error semántico
-		msg := "Semantic error, the element \"" + d.Id + "\" already exist in this scope." +
-			" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-		nError := errores.NewError(d.Fila, d.Columna, msg)
-		nError.Tipo = Ast.ERROR_SEMANTICO
-		nError.Ambito = scope.GetTipoScope()
-		scope.Errores.Add(nError)
-		scope.Consola += msg + "\n"
-		return Ast.TipoRetornado{
-			Tipo:  Ast.ERROR,
-			Valor: nError,
-		}
+		////////////////////////////ERROR//////////////////////////////////
+		return errores.GenerarError(12, d, d, d.Id,
+			"",
+			"",
+			scope)
+		//////////////////////////////////////////////////////////////////
 	}
 
 	//Verificar que no es un if expresion
@@ -103,18 +98,12 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 		//No es struct,vector,array, entonces comparar los tipos normalmente
 		if d.Tipo.Tipo != valor.Tipo {
 			//Error de tipos
-			msg := "Semantic error, can't initialize a " + expresiones.Tipo_String(d.Tipo) +
-				" with " + Ast.ValorTipoDato[valor.Tipo] + " value." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(13, d, d, d.Id,
+				expresiones.Tipo_String(d.Tipo),
+				Ast.ValorTipoDato[valor.Tipo],
+				scope)
+			//////////////////////////////////////////////////////////////////
 
 		}
 
@@ -126,17 +115,12 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 			nTipo := GetTipoEstructura(d.Tipo, scope)
 			errors := ErrorEnTipo(nTipo)
 			if errors.Tipo == Ast.ERROR {
-				msg := "Semantic error, type error." +
-					" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-				nError := errores.NewError(d.Fila, d.Columna, msg)
-				nError.Tipo = Ast.ERROR_SEMANTICO
-				nError.Ambito = scope.GetTipoScope()
-				scope.Errores.Add(nError)
-				scope.Consola += msg + "\n"
-				return Ast.TipoRetornado{
-					Tipo:  Ast.ERROR,
-					Valor: nError,
-				}
+				////////////////////////////ERROR//////////////////////////////////
+				return errores.GenerarError(14, d, d, "",
+					"",
+					"",
+					scope)
+				//////////////////////////////////////////////////////////////////
 			}
 			//De lo contrario actualizar el tipo de la declaracion
 			d.Tipo = nTipo
@@ -146,32 +130,22 @@ func (d DeclaracionNoRef) Run(scope *Ast.Scope) interface{} {
 		tipoEspecial := GetTipoEspecial(valor.Tipo, valor.Valor, scope)
 		if tipoEspecial.Tipo == Ast.ERROR {
 			//Erro de tipos
-			msg := "Semantic error, type error." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(14, d, d, "",
+				"",
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 
 		if !expresiones.CompararTipos(d.Tipo, tipoEspecial) {
 			//Error, los tipos no son correctos
-			msg := "Semantic error, type error." +
-				" -- Line:" + strconv.Itoa(d.Fila) + " Column: " + strconv.Itoa(d.Columna)
-			nError := errores.NewError(d.Fila, d.Columna, msg)
-			nError.Tipo = Ast.ERROR_SEMANTICO
-			nError.Ambito = scope.GetTipoScope()
-			scope.Errores.Add(nError)
-			scope.Consola += msg + "\n"
-			return Ast.TipoRetornado{
-				Tipo:  Ast.ERROR,
-				Valor: nError,
-			}
+			////////////////////////////ERROR//////////////////////////////////
+			return errores.GenerarError(14, d, d, "",
+				"",
+				"",
+				scope)
+			//////////////////////////////////////////////////////////////////
 		}
 		esEspecial = true
 	}

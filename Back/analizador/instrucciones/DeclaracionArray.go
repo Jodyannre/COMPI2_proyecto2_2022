@@ -147,7 +147,7 @@ func (d DeclaracionArray) Run(scope *Ast.Scope) interface{} {
 	if !EsArray(tipoIn) {
 		//Error, no se estan asignado arrays al array
 		////////////////////////////ERROR//////////////////////////////////
-		return errores.GenerarError(38, d, d, "",
+		return errores.GenerarError(39, d, d, "",
 			Ast.ValorTipoDato[tipoIn],
 			"",
 			scope)

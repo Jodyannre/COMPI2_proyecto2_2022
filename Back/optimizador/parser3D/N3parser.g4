@@ -56,6 +56,13 @@ funcion returns [funciones3d.Funcion3D ex]
 ;
 
 
+llamada returns [instrucciones3d.Llamada3D ex]
+    :   ID PAR_IZQ PAR_DER
+        {
+            $ex = instrucciones3d.NewLlamada3D($ID.text + "()")
+        }
+;
+
 
 bloques returns [*arraylist.List list]
 @init{ $list = arraylist.New()}
@@ -158,6 +165,10 @@ instruccion returns[interfaces3d.Expresion3D ex]
         {   
             $ex = $print3d.ex
         }
+    |   llamada PUNTOCOMA
+        {
+            $ex = $llamada.ex
+        }
 ;
 
 
@@ -187,10 +198,25 @@ print3d returns[instrucciones3d.Print3D ex]
             cad := $CADENA.text
             if strings.Contains(cad,"c"){
                 cad = "%%c"
-            }else{
+            }else if strings.Contains(cad,"d") {
                 cad = "%%d"
+            }else{
+                cad = "%%f"
             }
             valor := "printf(\""+cad+"\",(int)"+ $TEMPORAL.text +")"
+            $ex = instrucciones3d.NewPrint3D(valor)
+        }
+    |   PRINTF PAR_IZQ CADENA COMA TEMPORAL PAR_DER
+        {
+            cad := $CADENA.text
+            if strings.Contains(cad,"c"){
+                cad = "%%c"
+            }else if strings.Contains(cad,"d") {
+                cad = "%%d"
+            }else{
+                cad = "%%f"
+            }
+            valor := "printf(\""+cad+"\","+ $TEMPORAL.text +")"
             $ex = instrucciones3d.NewPrint3D(valor)
         }
     |   PRINTF PAR_IZQ CADENA COMA NUMERO PAR_DER
@@ -198,8 +224,10 @@ print3d returns[instrucciones3d.Print3D ex]
             cad := $CADENA.text
             if strings.Contains(cad,"c"){
                 cad = "%%c"
-            }else{
+            }else if strings.Contains(cad,"d") {
                 cad = "%%d"
+            }else{
+                cad = "%%f"
             }
             valor := "printf(\""+cad+"\",(int)"+ $NUMERO.text +")"
             $ex = instrucciones3d.NewPrint3D(valor)
@@ -209,8 +237,10 @@ print3d returns[instrucciones3d.Print3D ex]
             cad := $CADENA.text
             if strings.Contains(cad,"c"){
                 cad = "%%c"
-            }else{
+            }else if strings.Contains(cad,"d") {
                 cad = "%%d"
+            }else{
+                cad = "%%f"
             }
             valor := "printf(\""+cad+"\",(int)"+ $NUMERO.text +")"
             $ex = instrucciones3d.NewPrint3D(valor)
@@ -220,8 +250,10 @@ print3d returns[instrucciones3d.Print3D ex]
             cad := $CADENA.text
             if strings.Contains(cad,"c"){
                 cad = "%%c"
-            }else{
+            }else if strings.Contains(cad,"d") {
                 cad = "%%d"
+            }else{
+                cad = "%%f"
             }
             valor := "printf(\""+cad+"\",(int)"+ $DECIMAL.text +")"
             $ex = instrucciones3d.NewPrint3D(valor)
@@ -260,15 +292,24 @@ operacion returns[expresiones3d.Operacion3D ex]
         }
     |   PAR_IZQ INT PAR_DER opIzq=expresion operador PAR_IZQ INT PAR_DER opDer=expresion 
         {
-           $ex = expresiones3d.NewOperacion3D($opIzq.ex, $opDer.ex, $operador.ex, false) 
+            expDer := $opDer.ex
+            expDer.Valor = "(int)" + expDer.Valor
+
+            expIzq := $opIzq.ex
+            expIzq.Valor = "(int)" + expIzq.Valor
+           $ex = expresiones3d.NewOperacion3D(expIzq, expDer, $operador.ex, false) 
         }
     |   PAR_IZQ INT PAR_DER opIzq=expresion operador opDer=expresion 
         {
-           $ex = expresiones3d.NewOperacion3D($opIzq.ex, $opDer.ex, $operador.ex, false) 
+            expIzq := $opIzq.ex
+            expIzq.Valor = "(int)" + expIzq.Valor
+           $ex = expresiones3d.NewOperacion3D(expIzq, $opDer.ex, $operador.ex, false) 
         }
     |   opIzq=expresion operador PAR_IZQ INT PAR_DER opDer=expresion 
         {
-           $ex = expresiones3d.NewOperacion3D($opIzq.ex, $opDer.ex, $operador.ex, false) 
+            expDer := $opDer.ex
+            expDer.Valor = "(int)" + expDer.Valor
+           $ex = expresiones3d.NewOperacion3D($opIzq.ex, expDer, $operador.ex, false) 
         }
 ;
 
@@ -440,7 +481,7 @@ operador returns[string ex]
         }       
     |   MODULO 
         {
-            $ex = $MODULO.text
+            $ex = "%%"
         }          
     |   MULTIPLICACION 
         {
