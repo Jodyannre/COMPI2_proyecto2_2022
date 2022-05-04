@@ -44,7 +44,8 @@ func ComprobarReglas(bloque bloque3d.Bloque3d) string {
 			strings.Contains(operacionesActual, "stack") ||
 			strings.Contains(operacionesActual, "heap") ||
 			strings.Contains(temporalActual, "P") ||
-			strings.Contains(temporalActual, "H") {
+			strings.Contains(temporalActual, "H") ||
+			strings.Contains(temporalActual, "if") {
 			continue
 		}
 		for j := i + 1; j < instrucciones.Len(); j++ {
@@ -66,7 +67,8 @@ func ComprobarReglas(bloque bloque3d.Bloque3d) string {
 					strings.Contains(temporalActual2, "stack") ||
 					strings.Contains(temporalActual2, "heap") ||
 					strings.Contains(temporalActual2, "P") ||
-					strings.Contains(temporalActual2, "H") {
+					strings.Contains(temporalActual2, "H") ||
+					strings.Contains(temporalActual2, "if") {
 					continue
 				}
 				elementoAmodificar = mapStrings[j]
@@ -75,11 +77,19 @@ func ComprobarReglas(bloque bloque3d.Bloque3d) string {
 				/*VERIFICAR REGLA 2*/
 				for k := j + 1; k < instrucciones.Len(); k++ {
 					elemento3 := mapStrings[k]
+					if strings.Contains(elemento3, "if") ||
+						strings.Contains(elemento3, "print") {
+						continue
+					}
 					if !strings.Contains(elemento3, "=") {
 						continue
 					}
 					arr3 := strings.Split(elemento3, "=")
 					operacionesActual3 = arr3[1]
+					if strings.Contains(operacionesActual3, "if") ||
+						strings.Contains(operacionesActual3, "print") {
+						continue
+					}
 					if strings.Contains(operacionesActual3, temporalActual2) {
 						elementoAmodificar = mapStrings[k]
 						elementoAmodificar = strings.Replace(elementoAmodificar, temporalActual2, temporalActual, -1)
